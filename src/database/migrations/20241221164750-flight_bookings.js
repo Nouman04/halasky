@@ -26,7 +26,7 @@ module.exports = {
       },
       code_id : {
         type : Sequelize.DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model : 'promotions',
           key: 'id'
