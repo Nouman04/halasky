@@ -1,49 +1,59 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    return queryInterface.createTable('activity_actions' ,{
+  async up(queryInterface, Sequelize) {
+    return queryInterface.createTable("activity_actions", {
       id: {
         type: Sequelize.DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
-      user_id : {
-        type : Sequelize.DataTypes.INTEGER,
+      user_id: {
+        type: Sequelize.DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model : 'users',
-          key: 'id'
+          model: "users",
+          key: "id",
         },
-        onUpdate : 'CASCADE',
-        onDelete: 'CASCADE'
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
-      activity_id : {
-        type : Sequelize.DataTypes.INTEGER,
+      activity_id: {
+        type: Sequelize.DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model : 'community_activities',
-          key: 'id'
+          model: "community_activities",
+          key: "id",
         },
-        onUpdate : 'CASCADE',
-        onDelete: 'CASCADE'
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       is_spam: {
-        type : Sequelize.DataTypes.BOOLEAN,
+        type: Sequelize.DataTypes.BOOLEAN,
         allowNull: true,
         defaultValue: 0,
       },
       is_saved: {
-        type : Sequelize.DataTypes.BOOLEAN,
+        type: Sequelize.DataTypes.BOOLEAN,
         allowNull: true,
         defaultValue: 0,
-      }
+      },
+      createdAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.fn("NOW"),
+      },
+      updatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
+        defaultValue: Sequelize.fn("NOW"),
+      },
     });
   },
 
-  async down (queryInterface, Sequelize) {
-    return queryInterface.dropTable('activity_actions');
-  }
+  async down(queryInterface, Sequelize) {
+    return queryInterface.dropTable("activity_actions");
+  },
 };
