@@ -5,20 +5,20 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert("authentication_factors", [
       {
-        type: "google",
-        is_applied: true,
-      },
-      {
-        type: "facebook",
+        type: "2FA",
         is_applied: false,
       },
       {
-        type: "email",
-        is_applied: true,
+        type: "2FA_SMS",
+        is_applied: false,
       },
       {
-        type: "phone",
-        is_applied: true,
+        type: "2FA_Email",
+        is_applied: false,
+      },
+      {
+        type: "2FA_Authenticator_App",
+        is_applied: false,
       },
     ]);
   },
