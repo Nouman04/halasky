@@ -1,0 +1,29 @@
+{
+  "name": "halasky",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "make:migration": "npx sequelize-cli migration:generate --migrations-path src/database/migrations --name",
+    "db:migrate": "npx sequelize-cli db:migrate --config src/database/config/config.json --migrations-path src/database/migrations ",
+    "migrate:one": "npx sequelize-cli db:migrate --config src/database/config/config.json  --migrations-path src/database/migrations  --name",
+    "migrate:rollback": "npx sequelize-cli db:migrate:undo:all --config src/database/config/config.json --migrations-path src/database/migrations ",
+    "migrate:rollback:one": "npx sequelize-cli db:migrate:undo --config src/database/config/config.json --migrations-path src/database/migrations  --name",
+    "make:seeder": "npx sequelize-cli seed:generate --seeders-path src/database/seeders --name",
+    "db:seed": "npx sequelize-cli db:seed:all --config src/database/config/config.json --seeders-path src/database/seeders ",
+    "seed:one": "npx sequelize-cli db:seed --config src/database/config/config.json --seeders-path src/database/seeders  --seed"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mysql2": "^3.11.5",
+    "sequelize": "^6.37.5"
+  },
+  "devDependencies": {
+    "sequelize-cli": "^6.6.2"
+  }
+}
