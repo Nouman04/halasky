@@ -1,14 +1,14 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  const CommunityActivity = sequelize.define('CommunityActivity', {
+  const Blog = sequelize.define('Blog', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
       allowNull: false,
     },
-    added_by: {
+    created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -40,24 +40,39 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT('long'),
       allowNull: false,
     },
-    is_approved: {
+    is_published: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: 0,
-    },
-    status : {
-      type : DataTypes.INTEGER,
-      allowNull : false,
-      defaultValue: 0
-    },
-    action_time : {
-      type : DataTypes.DATE,
-      allowNull : true
     }
   }, {
-    tableName: 'community_activities',
+    tableName: 'blogs',
     timestamps: false,
   });
 
-  return CommunityActivity;
+
+  Blog.associate = function(){
+   Blog.hasMany(Tag, {
+      foreignKey: 'tagable_id',
+      as: 'tags',  
+      scope: {
+        tagable_type: 'Blog' 
+      }
+    });
+
+    Blog.belongsTo(Category , {
+        foreignKey : 'category_id',
+        as : 'category'
+    })
+
+    Blog.hasMany(Comment , {
+        foreignKey : 'commentable_id',
+        as: 'comments',
+        scope : {
+            commentable_type : 'Blog'
+        }
+    })
+  }
+
+  return Blog;
 };

@@ -45,7 +45,16 @@ module.exports = {
       is_approved: {
         type : Sequelize.DataTypes.BOOLEAN,
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 1,
+      },
+      status : {
+        type : Sequelize.DataTypes.INTEGER,
+        allowNull : false,
+        defaultValue: 0
+      },
+      action_time : {
+        type : Sequelize.DataTypes.DATE,
+        allowNull : true
       }
     });
   },

@@ -3,7 +3,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    return queryInterface.createTable('log_activities' ,{
+    return queryInterface.createTable('blogs' , {
       id: {
         type: Sequelize.DataTypes.INTEGER,
         primaryKey: true,
@@ -17,14 +17,22 @@ module.exports = {
           model : 'users',
           key: 'id'
         },
+        onUpdate : 'CASCADE',
+        onDelete: 'CASCADE'
       },
       category_id : {
         type : Sequelize.DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model : 'categories',
           key: 'id'
         },
+        onUpdate : 'CASCADE',
+        onDelete: 'CASCADE'
+      },
+      title: {
+        type : Sequelize.DataTypes.STRING,
+        allowNull: false,
       },
       image: {
         type : Sequelize.DataTypes.TEXT('long'),
@@ -34,19 +42,15 @@ module.exports = {
         type : Sequelize.DataTypes.TEXT('long'),
         allowNull: false,
       },
-      status: {
-        type : Sequelize.DataTypes.INTEGER,
-        allowNull: false
+      is_published: {
+        type : Sequelize.DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: 0,
       }
-    })
+    });
   },
 
   async down (queryInterface, Sequelize) {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
+    return queryInterface.dropTable('blogs');
   }
 };

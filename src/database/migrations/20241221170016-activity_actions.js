@@ -20,15 +20,13 @@ module.exports = {
         onUpdate : 'CASCADE',
         onDelete: 'CASCADE'
       },
+      activity_type : {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: false
+      },
       activity_id : {
-        type : Sequelize.DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model : 'community_activities',
-          key: 'id'
-        },
-        onUpdate : 'CASCADE',
-        onDelete: 'CASCADE'
+        type: Sequelize.DataTypes.INTEGER,
+        allowNull: false
       },
       is_spam: {
         type : Sequelize.DataTypes.BOOLEAN,

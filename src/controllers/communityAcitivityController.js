@@ -1,20 +1,16 @@
 const fs = require('fs');
 const path = require('path')
-const Blog = require('../database/models/Blog');
+const CommunityActivity = require('../database/models/CommunityActivity');
 const Tag = require('../database/models/Tag');
-const Comment = require('../database/models/Comment');
-const mutateHtmlContent = require('../Helpers/mutateHtmlContent');
 const {dynamicUploader} = require('../Helpers/fileUploadHelper');
 
 module.exports = {
 
     add : async (request , response ) =>{
         try{
-            const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
-            const blogThumbnailPath = path.join(__dirname , '..' , 'public' , 'thumbnail' );
-            const upload = dynamicUploader(blogThumbnailPath);
+            const activityThumbnailPath = path.join(__dirname , '..' , 'public' , 'thumbnail' );
+            const upload = dynamicUploader(activityThumbnailPath);
             
-            let content = mutateHtmlContent(request.body.content , blogImagesPath);
             let thumbnailUpload = upload.single('thumbnail');
             await new Promise((resolve , reject) => {
                 thumbnailUpload(request , response , (err) => {
@@ -31,21 +27,20 @@ module.exports = {
             let categoryId = request.body.categoryId;
             let title = request.body.title;
             let userId =request.body.userId;
-            let isPublished = request.body.isPublished;
             let tags = request.body.tags;
-            let blog = await Blog.create({
+            let description = request.body.description;
+            let communityActivity = await CommunityActivity.create({
                 category_id :categoryId,
-                created_by : userId,
+                added_by : userId,
                 title : title,
                 image : thumbnailFileName,
-                is_published : isPublished,
-                description : content
+                description : description
             })
 
             let tagList = tags.map(tag => {
                 return {
-                    tagable_type : 'Blog',
-                    tagable_id :  blog.id,
+                    tagable_type : 'CommunityActivity',
+                    tagable_id :  communityActivity.id,
                     title : tag
                 }    
             })
@@ -54,7 +49,7 @@ module.exports = {
 
             return response.status(200).json({
                 status: true,
-                message: 'Blog added successfully',
+                message: 'Post added successfully',
             })
 
 
@@ -70,27 +65,26 @@ module.exports = {
 
     edit : async (request , response ) =>{
         try{
-            const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
-            const blogThumbnailPath = path.join(__dirname , '..' , 'public' , 'thumbnail' );
-            const upload = dynamicUploader(blogThumbnailPath);
-            let blogId = request.body.id;
+            const activityThumbnailPath = path.join(__dirname , '..' , 'public' , 'thumbnail' );
+            const upload = dynamicUploader(activityThumbnailPath);
+            let postId = request.body.id;
     
             await Tag.delete({
                 where : {
-                    tagable_type : 'Blog',
-                    tagable_id : blogId
+                    tagable_type : 'CommunityActivity',
+                    tagable_id : postId
                 }
             });
 
-            let blogDetail = await Blog.findOne({
+            let postDetail = await CommunityActivity.findOne({
                 where : {
-                    id : blogId
+                    id : postId
                 }
              });
 
             if(request.file && request.file.thumbnail){
-                if(fs.existsSync(`${blogImagesPath}/${blogDetail.image}`)){
-                    fs.unlinkSync(`${blogImagesPath}/${blogDetail.image}`);
+                if(fs.existsSync(`${activityThumbnailPath}/${postDetail.image}`)){
+                    fs.unlinkSync(`${activityThumbnailPath}/${postDetail.image}`);
 
                     let thumbnailUpload = upload.single('thumbnail');
                     await new Promise((resolve , reject) => {
@@ -106,13 +100,12 @@ module.exports = {
             }
 
             
-            let content = mutateHtmlContent(request.body.content , blogImagesPath);
+            let description = request.body.description;
             
             let dataToUpdate = {
                 category_id : request.body.categoryId,
                 title : request.body.title,
-                is_published : request.body.isPublished,
-                description : content
+                description : description
             }
 
             if(request.file && request.file.thumbnail){
@@ -122,15 +115,15 @@ module.exports = {
 
             let tags = request.body.tags;
 
-            let blog = await Blog.update(
-                dataToUpdate, 
-                { where :  {id : blogId }},
-            );
+            await CommunityActivity.update(
+                                        dataToUpdate,
+                                        { where :  {id : postId} },
+                                    );
 
             let tagList = tags.map(tag => {
                 return {
-                    tagable_type : 'Blog',
-                    tagable_id :  blogId,
+                    tagable_type : 'CommunityActivity',
+                    tagable_id :  postId,
                     title : tag
                 }    
             })
@@ -139,7 +132,7 @@ module.exports = {
 
             return response.status(200).json({
                 status: true,
-                message: 'Blog updated successfully',
+                message: 'Post updated successfully',
             })
 
 
@@ -156,32 +149,32 @@ module.exports = {
     delete : async (request , response ) => {
         try{
 
-            let blogId = request.body.id;
-            const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
+            let postId = request.body.id;
+            const activityThumbnailPath = path.join(__dirname,'..','public','uploads','blogs' );
 
             await Tag.delete({
                         where : {
-                            tagable_type : 'Blog',
-                            tagable_id : blogId
+                            tagable_type : 'CommunityActivity',
+                            tagable_id : postId
                         }
             });
 
-            let blogDetail = await Blog.findOne({
-                where : {
-                    id : blogId
-                }
-             });
+            let postDetail = await CommunityActivity.findOne({
+                                        where : {
+                                            id : postId
+                                        }
+                                    });
 
 
-             if(blogDetail.image){
-                if(fs.existsSync(`${blogImagesPath}/${blogDetail.image}`)){
-                    fs.unlinkSync(`${blogImagesPath}/${blogDetail.image}`);
+             if(postDetail.image){
+                if(fs.existsSync(`${activityThumbnailPath}/${postDetail.image}`)){
+                    fs.unlinkSync(`${activityThumbnailPath}/${postDetail.image}`);
                 }
             }
 
-            await Blog.delete({
+            await CommunityActivity.delete({
                 where : {
-                    id : blogId
+                    id : postId
                 }
             })
 
@@ -205,7 +198,7 @@ module.exports = {
                 whereCondition.status = status;
             }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
-            const blogs = await Blog.findAll({
+            const posts = await CommunityActivity.findAll({
                 include : [
                     {
                         model : Tag,
@@ -226,7 +219,7 @@ module.exports = {
 
             return response.status(200).json({
                 status : true,
-                data : blogs
+                data : posts
             })
 
         } catch (error){
@@ -241,22 +234,22 @@ module.exports = {
 
     changeStatus :  async (request , response) => {
         try{
-            let blogId = request.body.blogId;
+            let postId = request.body.postId;
             let status  = request.body.status;
-            await Blog.update(
+            await CommunityActivity.update(
                 { 
-                        is_published : status
+                        status : status
                 },
                 { 
                     where : {
-                        id : blogId
+                        id : postId
                     }
                 },
             )
 
             return response.status(200).json({
                 status: true,
-                message: 'Blog updated successfully',
+                message: 'Status updated successfully',
             })
 
 
@@ -269,21 +262,22 @@ module.exports = {
         }
     },
 
-    addComment : async (request , response) => {
+    changeApproval :   async (request , response) => {
         try{
-            let blogId = request.body.blogId;
-            let userId = request.body.userId;
-            let comment  = request.body.comment;
-            await Comment.create({
-                            commentable_id : blogId,
-                            commentable_type : 'Blog',
-                            comment: comment,
-                            added_by: userId 
-                        });
+            let postId = request.body.postId;
+            let approvalStatus  = request.body.approvalStatus;
+            await CommunityActivity.update(
+                { is_approved : approvalStatus },
+                { 
+                    where : {
+                        id : postId
+                    }
+                },
+            )
 
             return response.status(200).json({
                 status: true,
-                message: 'Comment added successfully',
+                message: 'Approval status updated successfully',
             })
 
 
@@ -294,6 +288,6 @@ module.exports = {
                 error: error.message
             });
         }
-    }
+    },
 
 }
