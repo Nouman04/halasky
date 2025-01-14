@@ -1,5 +1,7 @@
 'use strict';
 
+const Feedback = require("./Feedback");
+
 module.exports = (sequelize, DataTypes) => {
   const CustomerQuery = sequelize.define('CustomerQuery', {
     id: {
@@ -17,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
+    },
+    subject : {
+      type : DataTypes.TEXT('long'),
+      allowNull: false,
     },
     attended_by: {
       type: DataTypes.INTEGER,
@@ -56,6 +62,12 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'attended_by',
       as: 'attendedBy',
     });
+
+    CustomerQuery.hasOne( Feedback ,  {
+      foreignKey: 'query_id',
+      as: 'feedback',  
+    });
+
   };
 
   return CustomerQuery;

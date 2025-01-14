@@ -20,6 +20,10 @@ module.exports = {
         onUpdate : 'CASCADE',
         onDelete: 'CASCADE'
       },
+      subject : {
+        type : Sequelize.DataTypes.TEXT('long'),
+        allowNull: false,
+      },
       attended_by : {
         type : Sequelize.DataTypes.INTEGER,
         allowNull: false,

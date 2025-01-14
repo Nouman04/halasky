@@ -3,7 +3,8 @@ const path = require('path')
 const CommunityActivity = require('../database/models/CommunityActivity');
 const Tag = require('../database/models/Tag');
 const {dynamicUploader} = require('../Helpers/fileUploadHelper');
-
+const appConst = require('../appConst');
+let moment = require('moment');
 module.exports = {
 
     add : async (request , response ) =>{
@@ -83,20 +84,21 @@ module.exports = {
              });
 
             if(request.file && request.file.thumbnail){
-                if(fs.existsSync(`${activityThumbnailPath}/${postDetail.image}`)){
+
+                if(postDetail.image && fs.existsSync(`${activityThumbnailPath}/${postDetail.image}`)){
                     fs.unlinkSync(`${activityThumbnailPath}/${postDetail.image}`);
-
-                    let thumbnailUpload = upload.single('thumbnail');
-                    await new Promise((resolve , reject) => {
-                        thumbnailUpload(request , response , (err) => {
-                            if(err) {
-                                return reject(err);
-                            } 
-
-                            resolve();
-                        })
-                    });
                 }
+                let thumbnailUpload = upload.single('thumbnail');
+                await new Promise((resolve , reject) => {
+                    thumbnailUpload(request , response , (err) => {
+                        if(err) {
+                            return reject(err);
+                        } 
+
+                        resolve();
+                    })
+                });
+                
             }
 
             
@@ -289,5 +291,41 @@ module.exports = {
             });
         }
     },
+
+
+    updateRestriction : async ( request , response ) =>{
+        try{
+            let postId = request.body.postId;
+            let approvalStatus  = request.body.restrictionType;
+            let restrictionTime = request.body.restrictionTime;
+
+            let updateChanges = { status : approvalStatus };
+            if(restrictionTime){
+                updateChanges.action_time = moment().add( restrictionTime , 'hours' ).format('YYYY-MM-DD HH:mm:ss');
+            }
+
+            await CommunityActivity.update(
+                updateChanges,
+                { 
+                    where : {
+                        id : postId
+                    }
+                },
+            )
+
+            return response.status(200).json({
+                status: true,
+                message: 'Restriction updated successfully',
+            })
+
+
+        } catch (error){
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
+    }
 
 }
