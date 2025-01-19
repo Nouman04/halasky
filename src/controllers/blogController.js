@@ -5,6 +5,7 @@ const Tag = require('../database/models/Tag');
 const Comment = require('../database/models/Comment');
 const mutateHtmlContent = require('../Helpers/mutateHtmlContent');
 const {dynamicUploader} = require('../Helpers/fileUploadHelper');
+const LogActivityHandler = require('../Helpers/logActivityHandler');
 
 module.exports = {
 

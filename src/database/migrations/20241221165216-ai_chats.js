@@ -27,6 +27,16 @@ module.exports = {
       answer: {
         type: Sequelize.DataTypes.TEXT('long'),
         allowNull: false,
+      },
+      created_at : {
+        type : Sequelize.DATE,
+        allowNull : false,
+        defaultValue : Sequelize.fn('NOW')
+      },
+      updated_at : {
+        type : Sequelize.DATE,
+        allowNull : false,
+        defaultValue : Sequelize.fn('NOW')
       }
     });
   },

@@ -33,8 +33,21 @@ module.exports = {
         allowNull: false,
       },
       status: Sequelize.DataTypes.INTEGER,
+      created_at : {
+        type : Sequelize.DATE,
+        allowNull : false,
+        defaultValue : Sequelize.fn('NOW')
+      },
+      updated_at : {
+        type : Sequelize.DATE,
+        allowNull : false,
+        defaultValue : Sequelize.fn('NOW')
+      },
+
     });
   },
+
+
 
   async down(queryInterface, Sequelize) {
     return queryInterface.dropTable("users");

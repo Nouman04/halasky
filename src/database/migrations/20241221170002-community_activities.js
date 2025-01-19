@@ -55,6 +55,16 @@ module.exports = {
       action_time : {
         type : Sequelize.DataTypes.DATE,
         allowNull : true
+      },
+      created_at : {
+        type : Sequelize.DATE,
+        allowNull : false,
+        defaultValue : Sequelize.fn('NOW')
+      },
+      updated_at : {
+        type : Sequelize.DATE,
+        allowNull : false,
+        defaultValue : Sequelize.fn('NOW')
       }
     });
   },

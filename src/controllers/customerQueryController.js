@@ -3,6 +3,25 @@ const Feedback = require('../database/models/Feedback')
 const appConst = require('../appConst');
 module.exports = {
 
+    countContent : async (request , response) => {
+        try{
+            
+
+            return response.status(200).json({
+                status: true,
+                message: 'Query added successfully',
+            })
+
+
+        } catch (error){
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
+    },
+
     addQuery : async (request , response) => {
         try{
             let customerId = request.body.customerId;
@@ -291,6 +310,53 @@ module.exports = {
     },
 
 
+    feedbackList: async (request, response) => {
+        try {
+            let skip = (parseInt(request.body.pageNo) - 1) * 10;
+            let userId = request.body.userId;
+            let attendedBy = request.body.attendedBy;
+            let ratingCount = request.body.ratingCount;
+
+            let feedbackCondition = {};
+            let customerQueryCondition = {};
+
+            if(ratingCount){
+                feedbackCondition.rating = ratingCount;
+            }
+
+            if(userId){
+                customerQueryCondition.user_id = userId;
+            }
+
+            if(attendedBy){
+                customerQueryCondition.attended_by = attendedBy;
+            }
+
+            let feedbackList = await Feedback.findAll({
+                include : {
+                    model : CustomerQuery,
+                    as : 'customerQuery',
+                    where : customerQueryCondition,
+                    required : true
+                },
+                where : feedbackCondition,
+                offset : skip,
+                limit: 10,
+            });
+
+            return response.status(200).json({
+                status: true,
+                data: feedbackList,
+            });
+    
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message,
+            });
+        }
+    },
 
 
 

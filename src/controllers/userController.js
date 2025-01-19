@@ -4,7 +4,8 @@ const RecoveryRequest = require('../database/models/RecoveryRequest');
 const Op = require('sequelize');
 const bcrypt = require('bcrypt');
 const appConst = require('../appConst');
-       
+const LogActivityHandler = require('../Helpers/logActivityHandler');
+
 module.exports = {
 
     getRoleslist : async (request, response) => {
@@ -42,6 +43,8 @@ module.exports = {
                 limit: 10,
             });
 
+
+
             return response.status(200).json({
                 status: true,
                 activeUsers: activeUsers
@@ -74,6 +77,8 @@ module.exports = {
                 offset : skip,
                 limit: 10,
             });
+
+            
             return response.status(200).json({
                 status: true,
                 nonActiveUser: nonActiveUser
@@ -126,6 +131,13 @@ module.exports = {
             User.update( 
                 {password : hashedPassword}, 
                 { where : { id : userId } }
+            );
+
+            await LogActivityHandler(
+                    request.body.userId,
+                    'User Password', // title
+                    'Update', //action
+                    'change user password', //information
             );
         
             return response.status(200).json({
@@ -237,6 +249,13 @@ module.exports = {
                 { role_id : roleId },
                 { where : { user_id : userId} }
             );
+
+            await LogActivityHandler(
+                request.body.userId,
+                'User role', // title
+                'Update', //action
+                'change user role', //information
+            );
             
             return response.status(200).json({
                 status : false,
@@ -280,6 +299,13 @@ module.exports = {
                     role_id : roleId,
                     user_id : member.id
                 })
+
+                await LogActivityHandler(
+                    request.body.userId,
+                    'Member', // title
+                    'Add', //action
+                    'Add member and assign role', //information
+                );
 
                 return response.status(200).json({
                     status : true,
@@ -325,6 +351,13 @@ module.exports = {
                 user_id : user.id,
                 status : 0
             });
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Recovery Request', // title
+                'Add', //action
+                'Add recovery request', //information
+            );
 
             return response.status(200).json({
                 status : true,
@@ -413,7 +446,15 @@ module.exports = {
                         status : appConst.recoveryPending
                     }
                 }
-            )
+            );
+
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Recovery request', // title
+                'Update', //action
+                'change recovery request', //information
+            );
 
             return response.status(200).json({
                 status : true,

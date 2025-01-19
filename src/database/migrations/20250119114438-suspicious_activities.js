@@ -3,16 +3,16 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    return queryInterface.createTable('blogs' , {
+    return queryInterface.createTable('suspicious_activities' ,{
       id: {
         type: Sequelize.DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
-      created_by : {
+      user_id :{
         type : Sequelize.DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model : 'users',
           key: 'id'
@@ -20,32 +20,18 @@ module.exports = {
         onUpdate : 'CASCADE',
         onDelete: 'CASCADE'
       },
-      category_id : {
-        type : Sequelize.DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-          model : 'categories',
-          key: 'id'
-        },
-        onUpdate : 'CASCADE',
-        onDelete: 'CASCADE'
+      type : {
+        type: Sequelize.DataTypes.INTEGER,
+        allowNull: false
       },
-      title: {
-        type : Sequelize.DataTypes.STRING,
+      ip_address : {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: false
+      },
+      status : {
+        type: Sequelize.DataTypes.INTEGER,
         allowNull: false,
-      },
-      image: {
-        type : Sequelize.DataTypes.TEXT('long'),
-        allowNull: true,
-      },
-      description: {
-        type : Sequelize.DataTypes.TEXT('long'),
-        allowNull: false,
-      },
-      is_published: {
-        type : Sequelize.DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: 0,
+        defaultValue : 0
       },
       created_at : {
         type : Sequelize.DATE,
@@ -57,10 +43,11 @@ module.exports = {
         allowNull : false,
         defaultValue : Sequelize.fn('NOW')
       }
-    });
+
+    })
   },
 
   async down (queryInterface, Sequelize) {
-    return queryInterface.dropTable('blogs');
+    return queryInterface.dropTable('suspicious_activities');
   }
 };
