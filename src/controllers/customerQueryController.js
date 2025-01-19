@@ -1,6 +1,7 @@
 const CustomerQuery = require('../database/models/CustomerQuery');
 const Feedback = require('../database/models/Feedback')
 const appConst = require('../appConst');
+const LogActivity = require('../Helpers/logActivityHandler');
 module.exports = {
 
     countContent : async (request , response) => {
@@ -36,6 +37,12 @@ module.exports = {
                             status: status,
                             priority : priority 
                         });
+            await LogActivityHandler(
+                request.body.userId,
+                'Customer Query', // title
+                'Add', //action
+                `add customer query`, //information
+            );
 
             return response.status(200).json({
                 status: true,
@@ -65,6 +72,13 @@ module.exports = {
                             where : { id : queryId}
                         });
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Customer Query', // title
+                'Update', //action
+                `Update customer query`, //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Query updated successfully',
@@ -91,10 +105,18 @@ module.exports = {
                             where : { id : queryId}
                         });
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Customer Query', // title
+                'Update', //action
+                `Update customer query status`, //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Query status updated successfully',
             })
+            
 
 
         } catch (error){
@@ -116,11 +138,17 @@ module.exports = {
                             where : { id : queryId}
                         });
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Customer Query', // title
+                'Update', //action
+                `Update customer query priority `, //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Query status updated successfully',
             })
-
 
         } catch (error){
             return response.status(500).json({
@@ -140,6 +168,13 @@ module.exports = {
                     id: queryId,
                 },
             });
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Customer Query', // title
+                'Delete', //action
+                `Delete customer query`, //information
+            );
     
             return response.status(200).json({
                 status: true,
@@ -240,6 +275,13 @@ module.exports = {
                 rating : rating, 
                 feedback : feedback
             });
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Customer Query Feedback', // title
+                'Add', //action
+                `Add customer query feedback `, //information
+            );
     
             return response.status(200).json({
                 status: true,
@@ -268,6 +310,13 @@ module.exports = {
                 rating : rating, 
                 feedback : feedback
             } , { where : {id : feedbackId}} );
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Customer query feedback', // title
+                'Update', //action
+                `Update customer query feedback`, //information
+            );
     
             return response.status(200).json({
                 status: true,
@@ -294,6 +343,13 @@ module.exports = {
                     id: feedbackId,
                 },
             });
+
+            await LogActivityHandler(
+                request.body.userId,
+                'delete customer query feedback', // title
+                'Delete', //action
+                `Delete customer query feedback `, //information
+            );
     
             return response.status(200).json({
                 status: true,

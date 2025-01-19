@@ -53,6 +53,13 @@ module.exports = {
 
             await Tag.bulkInsert(tagList);
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Blog request', // title
+                'Add', //action
+                'Add blog and detail', //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Blog added successfully',
@@ -138,6 +145,13 @@ module.exports = {
 
             await Tag.bulkInsert(tagList);
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Update blog request', // title
+                'Update', //action
+                'change blog information', //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Blog updated successfully',
@@ -184,8 +198,19 @@ module.exports = {
                 where : {
                     id : blogId
                 }
-            })
+            });
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Delete blog', // title
+                'Delete', //action
+                'delete blog request', //information
+            );
+
+            return response.status(200).json({
+                status : true,
+                message : 'blog deleted successfully'
+            });
 
 
         } catch (error){
@@ -255,6 +280,13 @@ module.exports = {
                 },
             )
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Blog status', // title
+                'Update', //action
+                'change blog status', //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Blog updated successfully',
@@ -269,32 +301,5 @@ module.exports = {
             });
         }
     },
-
-    addComment : async (request , response) => {
-        try{
-            let blogId = request.body.blogId;
-            let userId = request.body.userId;
-            let comment  = request.body.comment;
-            await Comment.create({
-                            commentable_id : blogId,
-                            commentable_type : 'Blog',
-                            comment: comment,
-                            added_by: userId 
-                        });
-
-            return response.status(200).json({
-                status: true,
-                message: 'Comment added successfully',
-            })
-
-
-        } catch (error){
-            return response.status(500).json({
-                status: false,
-                message: 'Something Went Wrong',
-                error: error.message
-            });
-        }
-    }
 
 }

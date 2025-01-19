@@ -14,6 +14,13 @@ module.exports = {
                                 question : question,
                                 answer: answer,
                             });
+
+                await LogActivityHandler(
+                    request.body.userId,
+                    'Frequently ask question', // title
+                    'Add', //action
+                    `Add Frequently ask question `, //information
+                );
     
                 return response.status(200).json({
                     status: true,
@@ -46,6 +53,13 @@ module.exports = {
                             where : { id : id }
                         });
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Frequently ask question', // title
+                'Update', //action
+                `Update frequently ask question `, //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Question added successfully',
@@ -72,7 +86,7 @@ module.exports = {
                                     as: 'createdByUser', 
                                 },
                             ],
-           })
+           });
 
 
             return response.status(200).json({
@@ -101,6 +115,13 @@ module.exports = {
                     id: questionId,
                 },
             });
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Frequently ask question', // title
+                'Delete', //action
+                `Delete frequently ask question `, //information
+            );
     
             return response.status(200).json({
                 status: true,

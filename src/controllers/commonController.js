@@ -18,6 +18,14 @@ module.exports = {
                             added_by: userId 
                         });
 
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Comment', // title
+                'Add', //action
+                `Add ${commentType} comment`, //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Comment added successfully',
@@ -37,12 +45,23 @@ module.exports = {
     deleteComment: async (request, response) => {
         try {
             const commentId = request.body.commentId;
-    
+
+            const commentDetail = Comment.findOne({
+                where : {id : commentId}
+            });
+            const commentType = commentDetail.commentable_type;
             await Comment.destroy({
                 where: {
                     id: commentId,
                 },
             });
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Comment', // title
+                'Delete', //action
+                `delete ${commentType} comment`, //information
+            );
     
             return response.status(200).json({
                 status: true,
@@ -75,6 +94,12 @@ module.exports = {
                             added_by: addedBy,
                             user_id : userId
                         });
+            await LogActivityHandler(
+                request.body.userId,
+                'Violation', // title
+                'Add', //action
+                `add ${violationableType} violation`, //information
+            );
 
             return response.status(200).json({
                 status: true,
@@ -112,6 +137,13 @@ module.exports = {
                         } 
                         
                     );
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Violation', // title
+                'Update', //action
+                `Update ${violationableType} violation`, //information
+            );
 
             return response.status(200).json({
                 status: true,
@@ -186,12 +218,24 @@ module.exports = {
     deleteViolation: async (request, response) => {
         try {
             const violationId = request.body.violationId;
-    
+            
+            const violationDetail = Violation.findOne({
+                where : {id : violationId}
+            })
+
+            const violationableType = violationDetail.type
             await Violation.destroy({
                 where: {
                     id: violationId,
                 },
             });
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Delete Violation', // title
+                'delete', //action
+                `delete ${violationableType} violation`, //information
+            );
     
             return response.status(200).json({
                 status: true,

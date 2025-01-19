@@ -5,6 +5,7 @@ const Tag = require('../database/models/Tag');
 const {dynamicUploader} = require('../Helpers/fileUploadHelper');
 const appConst = require('../appConst');
 let moment = require('moment');
+const LogActivityHandler = require('../Helpers/logActivityHandler');
 module.exports = {
 
     add : async (request , response ) =>{
@@ -47,6 +48,13 @@ module.exports = {
             })
 
             await Tag.bulkInsert(tagList);
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Post created', // title
+                'Add', //action
+                `Post added with tags and details`, //information
+            );
 
             return response.status(200).json({
                 status: true,
@@ -132,6 +140,13 @@ module.exports = {
 
             await Tag.bulkInsert(tagList);
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Post updated', // title
+                'Update', //action
+                `Post updated with tags and details`, //information
+            );
+
             return response.status(200).json({
                 status: true,
                 message: 'Post updated successfully',
@@ -180,7 +195,17 @@ module.exports = {
                 }
             })
 
+            await LogActivityHandler(
+                request.body.userId,
+                'Post deleted', // title
+                'Delete', //action
+                `delete post`, //information
+            );
 
+            return response.status(200).json({
+                status : true, 
+                message : 'Post deleted successfully'
+            });
 
         } catch (error){
             return response.status(500).json({
