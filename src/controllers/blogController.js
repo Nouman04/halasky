@@ -99,18 +99,19 @@ module.exports = {
             if(request.file && request.file.thumbnail){
                 if(fs.existsSync(`${blogImagesPath}/${blogDetail.image}`)){
                     fs.unlinkSync(`${blogImagesPath}/${blogDetail.image}`);
-
-                    let thumbnailUpload = upload.single('thumbnail');
-                    await new Promise((resolve , reject) => {
-                        thumbnailUpload(request , response , (err) => {
-                            if(err) {
-                                return reject(err);
-                            } 
-
-                            resolve();
-                        })
-                    });
                 }
+                
+                let thumbnailUpload = upload.single('thumbnail');
+                await new Promise((resolve , reject) => {
+                    thumbnailUpload(request , response , (err) => {
+                        if(err) {
+                            return reject(err);
+                        } 
+
+                        resolve();
+                    })
+                });
+                
             }
 
             

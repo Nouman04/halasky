@@ -3,7 +3,7 @@ const LogActivity = require('../database/models/LogActivity');
 const Op = require('sequelize');
 
 module.exports = {
-    getActivities : async (request, response) => {
+    getMiliciousActivities : async (request, response) => {
         try{
 
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
@@ -92,6 +92,38 @@ module.exports = {
                                                 as : 'role',
                                                 required : true, 
                                                 where : { name : 'admin'}
+                                            },
+                                            offset : skip,
+                                            limit : 20
+                                        }
+                                    });
+
+            return response.status(200).json({
+                status : true,
+                data : logActivities
+            });
+        } catch (error){
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
+    },
+
+    getUserActivities : async (request , response ) =>{
+        try{
+            let skip = (parseInt(request.body.pageNo) - 1) * 10;
+            let logActivities = await LogActivity.findAll({
+                                        include : {
+                                            model : 'User',
+                                            as : 'user',
+                                            required : true, 
+                                            include : {
+                                                model : 'Role', 
+                                                as : 'role',
+                                                required : true, 
+                                                where : { name : 'user'}
                                             },
                                             offset : skip,
                                             limit : 20
