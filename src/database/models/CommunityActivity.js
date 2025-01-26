@@ -59,5 +59,32 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,
   });
 
+
+  CommunityActivity.associate = function(models){
+
+    CommunityActivity.hasMany(sequelize.define('Tag') , {
+          foreignKey: 'tagable_id',
+          as: 'tags',  
+          scope: {
+            tagable_type: 'CommunityActivity' 
+          }
+    })
+
+    CommunityActivity.hasMany( sequelize.define('Comment') , {
+        foreignKey : 'commentable_id',
+        as: 'comments',
+        scope : {
+            commentable_type : 'CommunityActivity'
+        }
+    })
+
+    CommunityActivity.belongsTo( models.Category , {
+        foreignKey : 'category_id',
+        as : 'category'
+    })
+
+    
+  }
+
   return CommunityActivity;
 };

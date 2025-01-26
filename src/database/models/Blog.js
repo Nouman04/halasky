@@ -51,29 +51,22 @@ module.exports = (sequelize, DataTypes) => {
 
 
   Blog.associate = function(models){
-  //  Blog.hasMany( models.Tag, {
-  //     foreignKey: 'tagable_id',
-  //     as: 'tags',  
-  //     scope: {
-  //       tagable_type: 'Blog' 
-  //     }
-  //   });
 
-  Blog.hasMany(sequelize.define('Tag') , {
-        foreignKey: 'tagable_id',
-        as: 'tags',  
-        scope: {
-          tagable_type: 'Blog' 
-        }
-  })
+    Blog.hasMany(sequelize.define('Tag') , {
+          foreignKey: 'tagable_id',
+          as: 'tags',  
+          scope: {
+            tagable_type: 'Blog' 
+          }
+    })
 
-  Blog.hasMany( sequelize.define('Comment') , {
-    foreignKey : 'commentable_id',
-    as: 'comments',
-    scope : {
-        commentable_type : 'Blog'
-    }
-  })
+    Blog.hasMany( sequelize.define('Comment') , {
+      foreignKey : 'commentable_id',
+      as: 'comments',
+      scope : {
+          commentable_type : 'Blog'
+      }
+    })
 
     Blog.belongsTo( models.Category , {
         foreignKey : 'category_id',

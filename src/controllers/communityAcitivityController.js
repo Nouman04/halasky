@@ -1,31 +1,16 @@
 const fs = require('fs');
-const path = require('path')
-const CommunityActivity = require('../database/models/CommunityActivity');
-const Tag = require('../database/models/Tag');
-const {dynamicUploader} = require('../Helpers/fileUploadHelper');
+const path = require('path');
+const { CommunityActivity , Tag , Comment , Category} = require('../database/models');
+const LogActivityHandler = require('../Helpers/logActivityHandler');
 const appConst = require('../appConst');
 let moment = require('moment');
-const LogActivityHandler = require('../Helpers/logActivityHandler');
 module.exports = {
 
     add : async (request , response ) =>{
         try{
-            const activityThumbnailPath = path.join(__dirname , '..' , 'public' , 'thumbnail' );
-            const upload = dynamicUploader(activityThumbnailPath);
-            
-            let thumbnailUpload = upload.single('thumbnail');
-            await new Promise((resolve , reject) => {
-                thumbnailUpload(request , response , (err) => {
-                    if(err) {
-                        return reject(err);
-                    } 
 
-                    resolve();
-                })
-            });
-
-            let thumbnailDetail = request.file.find( file => file.fieldname === 'thumbnail');
-            let thumbnailFileName = thumbnailDetail.fileName;
+            let thumbnailDetail = request.file;
+            let thumbnailFileName = thumbnailDetail.filename;
             let categoryId = request.body.categoryId;
             let title = request.body.title;
             let userId =request.body.userId;
@@ -47,7 +32,7 @@ module.exports = {
                 }    
             })
 
-            await Tag.bulkInsert(tagList);
+            await Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
                 request.body.userId,
@@ -74,11 +59,11 @@ module.exports = {
 
     edit : async (request , response ) =>{
         try{
-            const activityThumbnailPath = path.join(__dirname , '..' , 'public' , 'thumbnail' );
-            const upload = dynamicUploader(activityThumbnailPath);
+            const activityThumbnailPath = path.join(__dirname , '..' , 'public' , 'uploads' ,'thumbnail' );
+
             let postId = request.body.id;
-    
-            await Tag.delete({
+
+            await Tag.destroy({
                 where : {
                     tagable_type : 'CommunityActivity',
                     tagable_id : postId
@@ -91,22 +76,10 @@ module.exports = {
                 }
              });
 
-            if(request.file && request.file.thumbnail){
-
+            if(request.file){
                 if(postDetail.image && fs.existsSync(`${activityThumbnailPath}/${postDetail.image}`)){
                     fs.unlinkSync(`${activityThumbnailPath}/${postDetail.image}`);
                 }
-                let thumbnailUpload = upload.single('thumbnail');
-                await new Promise((resolve , reject) => {
-                    thumbnailUpload(request , response , (err) => {
-                        if(err) {
-                            return reject(err);
-                        } 
-
-                        resolve();
-                    })
-                });
-                
             }
 
             
@@ -118,9 +91,9 @@ module.exports = {
                 description : description
             }
 
-            if(request.file && request.file.thumbnail){
-                let thumbnailDetail = request.file.find( file => file.fieldname === 'thumbnail');
-                dataToUpdate.image = thumbnailDetail.fileName
+            if(request.file){
+                let thumbnailDetail = request.file;
+                dataToUpdate.image = thumbnailDetail.filename
             }
 
             let tags = request.body.tags;
@@ -138,7 +111,7 @@ module.exports = {
                 }    
             })
 
-            await Tag.bulkInsert(tagList);
+            await Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
                 request.body.userId,
@@ -167,9 +140,10 @@ module.exports = {
         try{
 
             let postId = request.body.id;
-            const activityThumbnailPath = path.join(__dirname,'..','public','uploads','blogs' );
+            console.log(postId);
+            const activityThumbnailPath = path.join(__dirname,'..','public','uploads','thumbnail' );
 
-            await Tag.delete({
+            await Tag.destroy({
                         where : {
                             tagable_type : 'CommunityActivity',
                             tagable_id : postId
@@ -189,7 +163,7 @@ module.exports = {
                 }
             }
 
-            await CommunityActivity.delete({
+            await CommunityActivity.destroy({
                 where : {
                     id : postId
                 }
@@ -229,14 +203,18 @@ module.exports = {
                 include : [
                     {
                         model : Tag,
-                        required : false
+                        required : false,
+                        as : 'tags'
                     },
                     {
                         model : Comment,
-                        required : false
+                        required : false,
+                        as : 'comments'
                     },
                     {
-                        model : Category
+                        model : Category,
+                        required : false,
+                        as : 'category'
                     },
                 ],
                 where : whereCondition,
@@ -274,9 +252,17 @@ module.exports = {
                 },
             )
 
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Status Update', // title
+                'Update', //action
+                `Post Status Updated`, //information
+            );
+
             return response.status(200).json({
                 status: true,
-                message: 'Status updated successfully',
+                message: 'Post Status updated successfully',
             })
 
 
@@ -300,7 +286,14 @@ module.exports = {
                         id : postId
                     }
                 },
-            )
+            );
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Approval Update', // title
+                'Update', //action
+                `Approval Status Updated`, //information
+            );
 
             return response.status(200).json({
                 status: true,
@@ -321,10 +314,10 @@ module.exports = {
     updateRestriction : async ( request , response ) =>{
         try{
             let postId = request.body.postId;
-            let approvalStatus  = request.body.restrictionType;
+            let restrictionType  = request.body.restrictionType;
             let restrictionTime = request.body.restrictionTime;
 
-            let updateChanges = { status : approvalStatus };
+            let updateChanges = { status : restrictionType };
             if(restrictionTime){
                 updateChanges.action_time = moment().add( restrictionTime , 'hours' ).format('YYYY-MM-DD HH:mm:ss');
             }

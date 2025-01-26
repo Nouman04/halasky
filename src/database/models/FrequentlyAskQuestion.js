@@ -33,9 +33,9 @@ module.exports = (sequelize, DataTypes) => {
 
   FrequentlyAskQuestion.associate = function (models) {
     FrequentlyAskQuestion.belongsTo(models.User, {
-      foreignKey: 'created_by',
-      as: 'createdByUser',
-    });
+                                      foreignKey: 'created_by',
+                                      as: 'createdBy',
+                                    });
   };
 
   return FrequentlyAskQuestion;

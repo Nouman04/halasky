@@ -26,7 +26,7 @@ module.exports = {
       },
       attended_by : {
         type : Sequelize.DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model : 'users',
           key: 'id'

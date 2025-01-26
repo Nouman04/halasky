@@ -1,35 +1,16 @@
-const CustomerQuery = require('../database/models/CustomerQuery');
-const Feedback = require('../database/models/Feedback')
+const { CustomerQuery , Feedback } = require('../database/models')
 const appConst = require('../appConst');
-const LogActivity = require('../Helpers/logActivityHandler');
+const LogActivityHandler = require('../Helpers/logActivityHandler');
 module.exports = {
-
-    countContent : async (request , response) => {
-        try{
-            
-
-            return response.status(200).json({
-                status: true,
-                message: 'Query added successfully',
-            })
-
-
-        } catch (error){
-            return response.status(500).json({
-                status: false,
-                message: 'Something Went Wrong',
-                error: error.message
-            });
-        }
-    },
 
     addQuery : async (request , response) => {
         try{
-            let customerId = request.body.customerId;
+            let customerId = request.body.userId;
             let subject = request.body.subject;
             let query  = request.body.query;
             let status = appConst.pendingQuery;
             let priority = appConst.pendingQuery;
+
             await CustomerQuery.create({
                             user_id : customerId,
                             subject : subject,
@@ -37,8 +18,9 @@ module.exports = {
                             status: status,
                             priority : priority 
                         });
+
             await LogActivityHandler(
-                request.body.userId,
+                customerId,
                 'Customer Query', // title
                 'Add', //action
                 `add customer query`, //information
@@ -65,7 +47,7 @@ module.exports = {
             let subject = request.body.subject;
             let query  = request.body.query;
             let queryId = request.body.queryId;
-            await CustomerQuery.create({
+            await CustomerQuery.update({
                             subject : subject,
                             query: query,
                         } , {
@@ -99,7 +81,7 @@ module.exports = {
         try{
             let status = request.body.status;
             let queryId = request.body.queryId;
-            await CustomerQuery.create({
+            await CustomerQuery.update({
                             status : status,
                         } , {
                             where : { id : queryId}
@@ -132,7 +114,7 @@ module.exports = {
         try{
             let priority = request.body.priority;
             let queryId = request.body.queryId;
-            await CustomerQuery.create({
+            await CustomerQuery.update({
                         priority : priority,
                         } , {
                             where : { id : queryId}
@@ -147,7 +129,7 @@ module.exports = {
 
             return response.status(200).json({
                 status: true,
-                message: 'Query status updated successfully',
+                message: 'Query priority status updated successfully',
             })
 
         } catch (error){
@@ -301,12 +283,11 @@ module.exports = {
     updateFeedback: async (request, response) => {
         try {
             const feedbackId = request.body.feedbackId;
-            const queryId = request.body.queryId;
+            // const queryId = request.body.queryId;
             const rating = request.body.rating;
             const feedback = request.body.feedback;
 
             await Feedback.update({
-                query_id : queryId, 
                 rating : rating, 
                 feedback : feedback
             } , { where : {id : feedbackId}} );

@@ -1,8 +1,7 @@
-const FrequentlyAskQuestion = require('../database/models/FrequentlyAskQuestion');
-const Comment = require('../database/models/FrequentlyAskQuestion');
+const { FrequentlyAskQuestion , User}= require('../database/models');
+const LogActivityHandler = require('../Helpers/logActivityHandler');
 
 module.exports = {
-
 
      add : async (request , response ) =>{
             try{
@@ -10,13 +9,13 @@ module.exports = {
                 let question= request.body.question;
                 let answer = request.body.answer;
                 await FrequentlyAskQuestion.create({
-                                user_id : userId,
                                 question : question,
                                 answer: answer,
+                                created_by : userId
                             });
 
                 await LogActivityHandler(
-                    request.body.userId,
+                    userId,
                     'Frequently ask question', // title
                     'Add', //action
                     `Add Frequently ask question `, //information
@@ -39,14 +38,13 @@ module.exports = {
     
 
 
-    update : async (request , response ) =>{
+    edit : async (request , response ) =>{
         try{
             let userId = request.body.userId;
             let question= request.body.question;
             let answer = request.body.answer;
             let id = request.body.id;
             await FrequentlyAskQuestion.update({
-                            user_id : userId,
                             question : question,
                             answer: answer,
                         } , {
@@ -54,7 +52,7 @@ module.exports = {
                         });
 
             await LogActivityHandler(
-                request.body.userId,
+                userId,
                 'Frequently ask question', // title
                 'Update', //action
                 `Update frequently ask question `, //information
@@ -62,7 +60,7 @@ module.exports = {
 
             return response.status(200).json({
                 status: true,
-                message: 'Question added successfully',
+                message: 'Question updated successfully',
             })
 
 
@@ -83,7 +81,8 @@ module.exports = {
                     include : [
                                 {
                                     model: User, 
-                                    as: 'createdByUser', 
+                                    as: 'createdBy', 
+                                    required : true
                                 },
                             ],
            });
@@ -125,7 +124,7 @@ module.exports = {
     
             return response.status(200).json({
                 status: true,
-                message: 'Violation deleted successfully',
+                message: 'Question deleted successfully',
             });
     
         } catch (error) {

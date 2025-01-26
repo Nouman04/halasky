@@ -3,7 +3,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const limiter = require('./src/middleware/limiter');
 const userRoutes = require('./src/routes/userRoutes');
-const blogRoutes =require('./src/routes/blogRoutes');
+const blogRoutes = require('./src/routes/blogRoutes');
+const faqRoutes = require('./src/routes/faqRoutes');
+const activityRoutes = require('./src/routes/communityActivityRoutes');
+const customerQueryRoutes = require('./src/routes/customerQueryRoutes');
+
 const cors = require('cors');
 const app = express();
 const PORT = process.env.NOD_PORT;
@@ -14,6 +18,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/user' , userRoutes);
 app.use('/blog' , blogRoutes);
+app.use('/faq' , faqRoutes);
+app.use('/activity' , activityRoutes);
+app.use('/query' , customerQueryRoutes);
 
 
 app.listen( PORT , () => {
