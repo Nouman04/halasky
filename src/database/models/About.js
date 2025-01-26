@@ -22,11 +22,11 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   About.associate = function (models) {
-    About.hasMany(models.AboutImage, {
+    About.hasMany(sequelize.define('AboutImage'), {
       foreignKey: 'content_id',
       as: 'images',
     });
   };
 
-  return AiChat;
+  return About;
 };

@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "make:migration": "npx sequelize-cli migration:generate --migrations-path src/database/migrations --name",
     "db:migrate": "npx sequelize-cli db:migrate --config src/database/config/config.json --migrations-path src/database/migrations ",

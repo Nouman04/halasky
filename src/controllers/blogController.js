@@ -1,34 +1,18 @@
 const fs = require('fs');
 const path = require('path')
-const Blog = require('../database/models/Blog');
-const Tag = require('../database/models/Tag');
-const Comment = require('../database/models/Comment');
+const { Blog , Tag , Comment , Category} = require('../database/models');
 const mutateHtmlContent = require('../Helpers/mutateHtmlContent');
-const {dynamicUploader} = require('../Helpers/fileUploadHelper');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
 
 module.exports = {
 
     add : async (request , response ) =>{
         try{
+           
             const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
-            const blogThumbnailPath = path.join(__dirname , '..' , 'public' , 'thumbnail' );
-            const upload = dynamicUploader(blogThumbnailPath);
-            
             let content = mutateHtmlContent(request.body.content , blogImagesPath);
-            let thumbnailUpload = upload.single('thumbnail');
-            await new Promise((resolve , reject) => {
-                thumbnailUpload(request , response , (err) => {
-                    if(err) {
-                        return reject(err);
-                    } 
-
-                    resolve();
-                })
-            });
-
-            let thumbnailDetail = request.file.find( file => file.fieldname === 'thumbnail');
-            let thumbnailFileName = thumbnailDetail.fileName;
+            
+            let thumbnailFileName = request.file.filename;
             let categoryId = request.body.categoryId;
             let title = request.body.title;
             let userId =request.body.userId;
@@ -51,7 +35,7 @@ module.exports = {
                 }    
             })
 
-            await Tag.bulkInsert(tagList);
+           Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
                 request.body.userId,
@@ -78,12 +62,11 @@ module.exports = {
 
     edit : async (request , response ) =>{
         try{
-            const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
-            const blogThumbnailPath = path.join(__dirname , '..' , 'public' , 'thumbnail' );
-            const upload = dynamicUploader(blogThumbnailPath);
+            const blogImagesPath = path.join(__dirname,'..','public','uploads','thumbnail' );
+
             let blogId = request.body.id;
     
-            await Tag.delete({
+            await Tag.destroy({
                 where : {
                     tagable_type : 'Blog',
                     tagable_id : blogId
@@ -96,22 +79,10 @@ module.exports = {
                 }
              });
 
-            if(request.file && request.file.thumbnail){
+            if(request.file){
                 if(fs.existsSync(`${blogImagesPath}/${blogDetail.image}`)){
                     fs.unlinkSync(`${blogImagesPath}/${blogDetail.image}`);
                 }
-                
-                let thumbnailUpload = upload.single('thumbnail');
-                await new Promise((resolve , reject) => {
-                    thumbnailUpload(request , response , (err) => {
-                        if(err) {
-                            return reject(err);
-                        } 
-
-                        resolve();
-                    })
-                });
-                
             }
 
             
@@ -124,14 +95,14 @@ module.exports = {
                 description : content
             }
 
-            if(request.file && request.file.thumbnail){
-                let thumbnailDetail = request.file.find( file => file.fieldname === 'thumbnail');
-                dataToUpdate.image = thumbnailDetail.fileName
+            if(request.file){
+                let thumbnailDetail = request.file.fieldname;
+                dataToUpdate.image = thumbnailDetail
             }
 
             let tags = request.body.tags;
 
-            let blog = await Blog.update(
+            await Blog.update(
                 dataToUpdate, 
                 { where :  {id : blogId }},
             );
@@ -144,7 +115,7 @@ module.exports = {
                 }    
             })
 
-            await Tag.bulkInsert(tagList);
+            await Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
                 request.body.userId,
@@ -173,9 +144,9 @@ module.exports = {
         try{
 
             let blogId = request.body.id;
-            const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
+            const blogImagesPath = path.join(__dirname,'..','public','uploads','thumbnail' );
 
-            await Tag.delete({
+            await Tag.destroy({
                         where : {
                             tagable_type : 'Blog',
                             tagable_id : blogId
@@ -195,7 +166,7 @@ module.exports = {
                 }
             }
 
-            await Blog.delete({
+            await Blog.destroy({
                 where : {
                     id : blogId
                 }
@@ -229,21 +200,25 @@ module.exports = {
 
             whereCondition = {}
             if(status){
-                whereCondition.status = status;
+                whereCondition.is_published = status;
             }
+            console.log(whereCondition);
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             const blogs = await Blog.findAll({
                 include : [
                     {
                         model : Tag,
-                        required : false
+                        required : false,
+                        as: 'tags',
                     },
                     {
                         model : Comment,
-                        required : false
+                        required : false,
+                        as : 'comments'
                     },
                     {
-                        model : Category
+                        model : Category,
+                        as : 'category'
                     },
                 ],
                 where : whereCondition,
@@ -290,7 +265,7 @@ module.exports = {
 
             return response.status(200).json({
                 status: true,
-                message: 'Blog updated successfully',
+                message: 'Blog status updated successfully',
             })
 
 

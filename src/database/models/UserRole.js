@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
-    permission_id: {
+    role_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
@@ -33,10 +33,10 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false,       
   });
 
-  UserRole.associate = function (models) {
-    UserRole.belongsTo(models.User, { foreignKey: 'role_id' });
-    UserRole.belongsTo(models.Permission, { foreignKey: 'permission_id' });
-  };
-
+  
   return UserRole;
 };
+// UserRole.associate = function (models) {
+//   UserRole.belongsTo(models.User, { foreignKey: 'role_id' });
+//   UserRole.belongsTo(models.Permission, { foreignKey: 'permission_id' });
+// };

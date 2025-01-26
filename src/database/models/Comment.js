@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const Tag = sequelize.define('Tag', {
+  const Comment = sequelize.define('Comment', {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -26,5 +26,5 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false, 
   });
 
-  return Tag;
+  return Comment;
 };

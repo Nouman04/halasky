@@ -63,7 +63,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'attendedBy',
     });
 
-    CustomerQuery.hasOne( Feedback ,  {
+    CustomerQuery.hasOne( sequelize.define('Feedback') ,  {
       foreignKey: 'query_id',
       as: 'feedback',  
     });

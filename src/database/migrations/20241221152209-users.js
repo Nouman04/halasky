@@ -30,9 +30,16 @@ module.exports = {
       },
       platform_image: {
         type: Sequelize.DataTypes.TEXT("long"),
-        allowNull: false,
+        allowNull: true,
       },
-      status: Sequelize.DataTypes.INTEGER,
+      status: {
+        type : Sequelize.DataTypes.INTEGER,
+        allowNull : false
+      },
+      password : {
+        type : Sequelize.DataTypes.TEXT('long'),
+        allowNull : false
+      },
       created_at : {
         type : Sequelize.DATE,
         allowNull : false,

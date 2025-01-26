@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const SuspiciousActivity = sequelize.define('suspicious_activities', {
+  const SuspiciousActivity = sequelize.define('SuspiciousActivity', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,

@@ -24,14 +24,13 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     tableName: 'recovery_requests',
-    timestamps: false,
+    timestamps: true, 
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   });
 
   RecoveryRequest.associate = function (models) {
-    RecoveryRequest.belongsTo(models.User, {
-      foreignKey: 'user_id',
-      as: 'user',
-    });
+    RecoveryRequest.belongsTo(models.User, { foreignKey: 'user_id' });
   };
 
   return RecoveryRequest;

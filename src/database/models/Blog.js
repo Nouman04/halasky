@@ -1,5 +1,4 @@
 'use strict';
-
 module.exports = (sequelize, DataTypes) => {
   const Blog = sequelize.define('Blog', {
     id: {
@@ -51,27 +50,37 @@ module.exports = (sequelize, DataTypes) => {
   });
 
 
-  Blog.associate = function(){
-   Blog.hasMany(Tag, {
-      foreignKey: 'tagable_id',
-      as: 'tags',  
-      scope: {
-        tagable_type: 'Blog' 
-      }
-    });
+  Blog.associate = function(models){
+  //  Blog.hasMany( models.Tag, {
+  //     foreignKey: 'tagable_id',
+  //     as: 'tags',  
+  //     scope: {
+  //       tagable_type: 'Blog' 
+  //     }
+  //   });
 
-    Blog.belongsTo(Category , {
+  Blog.hasMany(sequelize.define('Tag') , {
+        foreignKey: 'tagable_id',
+        as: 'tags',  
+        scope: {
+          tagable_type: 'Blog' 
+        }
+  })
+
+  Blog.hasMany( sequelize.define('Comment') , {
+    foreignKey : 'commentable_id',
+    as: 'comments',
+    scope : {
+        commentable_type : 'Blog'
+    }
+  })
+
+    Blog.belongsTo( models.Category , {
         foreignKey : 'category_id',
         as : 'category'
     })
 
-    Blog.hasMany(Comment , {
-        foreignKey : 'commentable_id',
-        as: 'comments',
-        scope : {
-            commentable_type : 'Blog'
-        }
-    })
+    
   }
 
   return Blog;

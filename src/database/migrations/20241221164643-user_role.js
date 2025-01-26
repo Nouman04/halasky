@@ -10,7 +10,7 @@ module.exports = {
         autoIncrement: true,
         allowNull: false,
       },
-      role_id : {
+      user_id : {
         type : Sequelize.DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -20,7 +20,7 @@ module.exports = {
         onUpdate : 'CASCADE',
         onDelete: 'CASCADE'
       },
-      permission_id : {
+      role_id : {
         type : Sequelize.DataTypes.INTEGER,
         allowNull: false,
         references: {

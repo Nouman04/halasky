@@ -27,7 +27,7 @@ module.exports = {
         allowNull: false,
       },
       information : {
-        type : Sequelize.DataTypes.JSON,
+        type : Sequelize.DataTypes.TEXT('long'),
         allowNull: true
       },
       created_at : {

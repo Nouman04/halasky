@@ -1,6 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const LogActivity = sequelize.define('log_activities', {
+  const LogActivity = sequelize.define('LogActivity', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -17,22 +17,23 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate : 'CASCADE',
         onDelete: 'CASCADE'
       },
-      type : {
+      title : {
         type: DataTypes.INTEGER,
         allowNull: false
       },
-      ip_address : {
-        type: DataTypes.STRING,
+      action : {
+        type: DataTypes.INTEGER,
         allowNull: false
       },
-      status : {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue : 0
+      information : {
+        type: DataTypes.TEXT('long'),
+        allowNull: false
       }
   }, {
-    tableName: 'suspicious_activities',
+    tableName: 'log_activities',
     timestamps: true, 
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   });
 
   LogActivity.associate = function(models) {
@@ -45,5 +46,5 @@ module.exports = (sequelize, DataTypes) => {
     });
   };
 
-  return SuspiciousActivity;
+  return LogActivity;
 };

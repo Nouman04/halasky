@@ -1,7 +1,7 @@
-const User = require('../database/models/User');
-const Role = require('../database/models/Role');
-const RecoveryRequest = require('../database/models/RecoveryRequest');
-const Op = require('sequelize');
+const { sequelize, DataTypes, Op } = require('sequelize');
+// const User = require('../database/models/User');
+// const Role = require('../database/models/Role');
+const { Role , User , UserRole , RecoveryRequest } = require('../database/models');
 const bcrypt = require('bcrypt');
 const appConst = require('../appConst');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
@@ -32,9 +32,10 @@ module.exports = {
                 include : {
                     model : Role,
                     where : {
-                        name : 'user'
+                        title : 'user'
                     },
-                    required : true
+                    // through: { attributes: [] },
+                    required : false
                 },
                 where : {
                     status : 1
@@ -67,9 +68,9 @@ module.exports = {
                 include : {
                     model : Role,
                     where : {
-                        name : 'user'
+                        title : 'user'
                     },
-                    required : true
+                    required : false
                 },
                 where : {
                     status : 0
@@ -94,8 +95,7 @@ module.exports = {
 
     searchUser : async (request , response) => {
         try{
-            const { searchQuery } = request.body.searchQuery;
-
+            const { searchQuery } = request.body;
 
             const searchedUsers = await User.findAll({
                 where : {
@@ -124,7 +124,7 @@ module.exports = {
     updateAccountPassword : async (request , response) =>{
         try {
             let userId = request.body.id;
-            let password = request.body.userId
+            let password = request.body.password
             let saltcount  = 10;
             let hashedPassword = await bcrypt.hash( password , saltcount);
 
@@ -159,7 +159,7 @@ module.exports = {
     userAccountDetail : async (request , response) =>{
         try{
             const userId = request.body.id;
-            const user = User.findOne({
+            const user = await User.findOne({
                 where : { id : userId}
             });
             return response.status(200).json({
@@ -178,15 +178,15 @@ module.exports = {
         try{
            let skip = (parseInt(request.body.pageNo) - 1) * 10;
            let status = request.body.status;
-           let activeMembers =  User.findAll({
+           let activeMembers = await  User.findAll({
                                             include : {
                                                 model : Role,
                                                 where : {
-                                                    name : {
+                                                    title : {
                                                         [Op.in] : ['admin' , 'support_staff']
                                                     },
-                                                    required : true
                                                 },
+                                                required : true
                                             },
                                             where : {
                                                 status : status
@@ -211,7 +211,7 @@ module.exports = {
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let roleId  = request.body.roleId;
             let status = request.body.status;
-            let members = User.findAll({
+            let members = await User.findAll({
                 where : {
                     status : status
                 },
@@ -227,7 +227,7 @@ module.exports = {
             });
 
             return response.status(200).json({
-                status : false,
+                status : true,
                 members : members
             })
 
@@ -242,14 +242,22 @@ module.exports = {
 
     updateUserRole : async (request , response) => {
         try {
+            let uId = request.body.uId;
+            let rId = request.body.rId;
             let userId = request.body.userId;
-            let roleId = request.body.roleId;
 
-            await Role.update(
-                { role_id : roleId },
-                { where : { user_id : userId} }
-            );
+            let userRole = await UserRole.findOne({ where : {user_id : uId}});
+            
+            if(userRole){
+                await UserRole.update(
+                    { role_id : rId },
+                    { where : { user_id : uId} }
+                );
+            } else {
+                await UserRole.create({ role_id : rId  , user_id : uId});
+            }
 
+          
             await LogActivityHandler(
                 request.body.userId,
                 'User role', // title
@@ -259,7 +267,7 @@ module.exports = {
             
             return response.status(200).json({
                 status : false,
-                members : members
+                message : 'User role updated successfully'
             })
 
         } catch (error){
@@ -276,7 +284,7 @@ module.exports = {
             let email = request.body.email;
             let roleId = request.body.roleId;
             
-            let userCount = await User.Count({
+            let userCount = await User.count({
                 where : {
                     email : email
                 }
@@ -295,7 +303,7 @@ module.exports = {
                     name : name
                 });
 
-                await Role.create({
+                await UserRole.create({
                     role_id : roleId,
                     user_id : member.id
                 })
@@ -309,7 +317,7 @@ module.exports = {
 
                 return response.status(200).json({
                     status : true,
-                    members : members
+                    message : "Member created successfully"
                 });
 
             }
@@ -353,7 +361,7 @@ module.exports = {
             });
 
             await LogActivityHandler(
-                request.body.userId,
+                user.id,
                 'Recovery Request', // title
                 'Add', //action
                 'Add recovery request', //information
@@ -382,21 +390,19 @@ module.exports = {
                 requestStatus = appConst.requestPending;
             }
 
-
-           let userRecoveryRequest =  await User.findAll({
+            let userRecoveryRequest = await RecoveryRequest.findAll({
+                    where : {status : requestStatus},
+                    include : {
+                        model : User,
                         where : {
                             status : 0
                         },
-                        include : {
-                            model : RecoveryRequest,
-                            where : {
-                                status : requestStatus
-                            },
-                            required : true
-                        },
-                        offset : skip,
-                        limit : 10
-                    });
+                        required : true
+                    },
+                    offset : skip,
+                    limit : 10
+            });
+
             return response.status(200).json({
                 status : true,
                 data : userRecoveryRequest
@@ -436,13 +442,13 @@ module.exports = {
 
     updateRecoveryRequest : async (request , response) => {
         try {   
-            let userId = request.body.id;
+            let userId = request.body.uId;
             let status  = request.body.status;
             RecoveryRequest.update(
                 { status : status},
                 { 
                     where : {
-                        userId : userId,
+                        user_id : userId,
                         status : appConst.recoveryPending
                     }
                 }

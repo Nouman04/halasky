@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     platform_image: {
       type: DataTypes.TEXT('long'),
-      allowNull: false,
+      allowNull: true,
     },
     status: {
       type: DataTypes.INTEGER,
@@ -46,6 +46,9 @@ module.exports = (sequelize, DataTypes) => {
     // User.hasMany(models.RolePermission, {
     //   foreignKey: 'role_id',
     // });
+    // User.belongsToMany( sequelize.define('Role'), { through: 'user_roles', foreignKey: 'user_id'  , otherKey : 'role_id' });
+       User.belongsToMany(models.Role , {through: 'UserRole', foreignKey: 'user_id'  , otherKey : 'role_id' });
+       User.hasMany(models.RecoveryRequest, { foreignKey: 'user_id' });
   };
 
   return User;
