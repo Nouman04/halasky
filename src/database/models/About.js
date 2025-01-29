@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (sequelize, DataTypes) => {
-  const About = sequelize.define('about_content', {
+  const About = sequelize.define('About', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   About.associate = function (models) {
-    About.hasMany(sequelize.define('AboutImage'), {
+    About.hasMany(models.AboutImage, {
       foreignKey: 'content_id',
       as: 'images',
     });

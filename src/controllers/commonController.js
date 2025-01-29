@@ -1,12 +1,11 @@
-const Comment = require('../database/models/Comment');
-const Violation = require('../database/models/Violation')
+const {Comment , Violation , User}= require('../database/models');
+const LogActivityHandler = require('../Helpers/logActivityHandler');
 
 module.exports = {
 
-    
-
     addComment : async (request , response) => {
         try{
+            console.log(request.body);
             let id = request.body.id;
             let userId = request.body.userId;
             let comment  = request.body.comment;
@@ -29,6 +28,42 @@ module.exports = {
             return response.status(200).json({
                 status: true,
                 message: 'Comment added successfully',
+            })
+
+
+        } catch (error){
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
+    },
+
+
+    updateComment : async (request , response) => {
+        try{
+            let id = request.body.id;
+            let comment  = request.body.comment;
+            let commentDetail = await Comment.findOne({where : {id : id}});
+            await Comment.update(
+                        {
+                            comment: comment,
+                        },
+                        { where : {id : id}}
+                    );
+
+
+            await LogActivityHandler(
+                request.body.userId,
+                'Comment', // title
+                'Update', //action
+                `Update ${commentDetail.commentable_type} comment`, //information
+            );
+
+            return response.status(200).json({
+                status: true,
+                message: 'Comment updated successfully',
             })
 
 
@@ -82,8 +117,8 @@ module.exports = {
 
     addViolation : async (request , response ) =>{
         try{
-            let userId = request.body.userId;
-            let addedBy = request.body.addedBy;
+            let personId = request.body.personId;
+            let addedBy = request.body.userId;
             let violationableType  = request.body.type;
             let  violationableId= request.body.id;
             let reason = request.body.reason;
@@ -92,7 +127,7 @@ module.exports = {
                             violationable_type : violationableType,
                             reason: reason,
                             added_by: addedBy,
-                            user_id : userId
+                            user_id : personId
                         });
             await LogActivityHandler(
                 request.body.userId,
@@ -120,34 +155,31 @@ module.exports = {
 
     updateViolation : async (request , response ) =>{
         try{
-            let userId = request.body.userId;
-            let violationableType  = request.body.type;
-            let  violationableId= request.body.id;
             let reason = request.body.reason;
-            let violationId = request.body.violation_id
+            let violationId = request.body.violationId;
+            let violationDetail = await Violation.findOne({
+                where : {id : violationId}
+            });
+
+
             await Violation.update({
-                            violationable_id : violationableId,
-                            violationable_type : violationableType,
                             reason: reason,
-                            added_by: addedBy,
-                            user_id : userId
                         },
                         {
                             where : {id : violationId}
                         } 
-                        
                     );
 
             await LogActivityHandler(
                 request.body.userId,
                 'Violation', // title
                 'Update', //action
-                `Update ${violationableType} violation`, //information
+                `Update ${violationDetail.violationable_type} violation`, //information
             );
 
             return response.status(200).json({
                 status: true,
-                message: 'Violation added successfully',
+                message: 'Violation updated successfully',
             })
 
 
@@ -161,10 +193,10 @@ module.exports = {
     },
 
 
-    list : async ( request , response ) => {
+    listViolation : async ( request , response ) => {
         try{
            let skip = (parseInt(request.body.pageNo) - 1) * 10;
-           let userId = request.body.userId;
+           let userId = request.body.personId;
            let addedBy = request.body.addedBy
            let violationType = request.body.type;
 
@@ -222,6 +254,8 @@ module.exports = {
             const violationDetail = Violation.findOne({
                 where : {id : violationId}
             })
+
+            console.log(violationDetail);
 
             const violationableType = violationDetail.type
             await Violation.destroy({

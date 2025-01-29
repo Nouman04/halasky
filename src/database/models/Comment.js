@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   const Comment = sequelize.define('Comment', {
     id: {
@@ -19,8 +20,16 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT('long'),
       allowNull: false, 
     },
-    
-    
+    added_by: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'users',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    }
   }, {
     tableName: 'comments',
     timestamps: false, 

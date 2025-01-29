@@ -38,7 +38,9 @@ module.exports = (sequelize, DataTypes) => {
       }
   }, {
     tableName: 'violations', 
-    timestamps: true,       
+    timestamps: true,   
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',    
   });
   
   Violation.associate = (models) => {

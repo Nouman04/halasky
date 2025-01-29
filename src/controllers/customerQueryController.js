@@ -1,4 +1,4 @@
-const { CustomerQuery , Feedback } = require('../database/models')
+const { CustomerQuery , Feedback , User } = require('../database/models')
 const appConst = require('../appConst');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
 module.exports = {
@@ -184,7 +184,8 @@ module.exports = {
            let attendedBy = request.body.attendedBy;
 
 
-           let whereCondition = feedbackCondition = {};
+           let whereCondition  = {};
+           let feedbackCondition  = {};
            if(priority){
                 whereCondition.priority = priority;
            }
@@ -197,9 +198,9 @@ module.exports = {
                 whereCondition.user_id = userId;
            }
 
-           if(status){
-                whereCondition.status = status;
-           }
+        //    if(status){
+        //         whereCondition.status = status;
+        //    }
 
            if(rating){
                 feedbackCondition.rating = rating;
@@ -220,6 +221,7 @@ module.exports = {
                                 {
                                     model: Feedback,
                                     where : feedbackCondition,
+                                    as: 'feedback',
                                     required : rating ? true : false
                                 }
                             ],
@@ -356,7 +358,7 @@ module.exports = {
 
             let feedbackCondition = {};
             let customerQueryCondition = {};
-
+            
             if(ratingCount){
                 feedbackCondition.rating = ratingCount;
             }
@@ -368,6 +370,7 @@ module.exports = {
             if(attendedBy){
                 customerQueryCondition.attended_by = attendedBy;
             }
+
 
             let feedbackList = await Feedback.findAll({
                 include : {

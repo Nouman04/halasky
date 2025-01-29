@@ -7,6 +7,8 @@ const blogRoutes = require('./src/routes/blogRoutes');
 const faqRoutes = require('./src/routes/faqRoutes');
 const activityRoutes = require('./src/routes/communityActivityRoutes');
 const customerQueryRoutes = require('./src/routes/customerQueryRoutes');
+const commonRoutes = require('./src/routes/commonRoutes');
+const settingsRoutes = require('./src/routes/settingRoutes');
 
 const cors = require('cors');
 const app = express();
@@ -21,6 +23,8 @@ app.use('/blog' , blogRoutes);
 app.use('/faq' , faqRoutes);
 app.use('/activity' , activityRoutes);
 app.use('/query' , customerQueryRoutes);
+app.use('/common' , commonRoutes);
+app.use('/settings' , settingsRoutes);
 
 
 app.listen( PORT , () => {
