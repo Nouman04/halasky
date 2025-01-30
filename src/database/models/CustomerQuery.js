@@ -1,5 +1,7 @@
 "use strict";
 
+const Feedback = require("./Feedback");
+
 module.exports = (sequelize, DataTypes) => {
   const CustomerQuery = sequelize.define(
     "CustomerQuery",
@@ -59,6 +61,11 @@ module.exports = (sequelize, DataTypes) => {
     CustomerQuery.belongsTo(models.User, {
       foreignKey: "attended_by",
       as: "attendedBy",
+    });
+
+    CustomerQuery.hasOne(Feedback, {
+      foreignKey: "query_id",
+      as: "feedback",
     });
   };
 

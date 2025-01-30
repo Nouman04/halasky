@@ -17,6 +17,8 @@ module.exports = {
           model: "users",
           key: "id",
         },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       category_id: {
         type: Sequelize.DataTypes.INTEGER,
@@ -25,6 +27,12 @@ module.exports = {
           model: "categories",
           key: "id",
         },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      title: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: false,
       },
       image: {
         type: Sequelize.DataTypes.TEXT("long"),
@@ -52,11 +60,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    /**
-     * Add reverting commands here.
-     *
-     * Example:
-     * await queryInterface.dropTable('users');
-     */
+    return queryInterface.dropTable("log_activities");
   },
 };

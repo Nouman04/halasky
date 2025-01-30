@@ -27,7 +27,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       tableName: "recovery_requests",
+<<<<<<< HEAD
       timestamps: true,
+=======
+      timestamps: false,
+>>>>>>> controllers/y-changes
     }
   );
 
