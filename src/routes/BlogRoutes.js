@@ -1,11 +1,19 @@
 const express = require('express');
-const app = express();
 const router = express.Router();
 const BlogController = require('../controllers/blogController');
 const { dynamicUploader } = require('../Helpers/fileUploadHelper');
 const upload = dynamicUploader('thumbnail');
 
+const passport = require('passport');
+const publicRoutes = [ '/list' ];
+router.use( (request ,response ,next)=>{
 
+    console.log(request.path);
+    if(publicRoutes.includes(request.path)){
+        next();
+    }
+    passport.authenticate('jwt' , {session: false})(request ,response ,next);
+})
 
 router.post('/add' , upload.single('thumbnail') ,  BlogController.add );
 router.put('/edit' , upload.single('thumbnail') ,  BlogController.edit );

@@ -1,6 +1,4 @@
-const { sequelize, DataTypes, Op } = require('sequelize');
-// const User = require('../database/models/User');
-// const Role = require('../database/models/Role');
+const { Op } = require('sequelize');
 const { Role , User , UserRole , RecoveryRequest } = require('../database/models');
 const bcrypt = require('bcrypt');
 const appConst = require('../appConst');

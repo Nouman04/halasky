@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const SettingsController = require('../controllers/settingsController');
 const { dynamicUploader } = require('../Helpers/fileUploadHelper');
+const passport = require('passport');
 const upload = dynamicUploader('about');
+
+router.use(passport.authenticate('jwt', { session: false }));
 
 router.put('/update-settings'  , SettingsController.updateSetting );
 router.put('/update-about-settings' , upload.array('images') ,SettingsController.updateAboutInformation );

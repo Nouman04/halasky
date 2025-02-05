@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const CommonController = require('../controllers/commonController');
+const passport = require('passport');
 
-
+router.use(passport.authenticate('jwt', { session: false }));
 
 router.post('/add-comment'  , CommonController.addComment );
 router.put('/update-comment' , CommonController.updateComment );

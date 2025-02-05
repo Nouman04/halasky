@@ -40,6 +40,19 @@ module.exports = {
         type : Sequelize.DataTypes.TEXT('long'),
         allowNull : false
       },
+      token : {
+        type : Sequelize.DataTypes.TEXT('long'),
+        allowNull : true
+      },
+      expires_at : {
+        type : Sequelize.DATE,
+        allowNull : true
+      },
+      is_email_verified : {
+        type : Sequelize.DataTypes.BOOLEAN,
+        defaultValue : 0,
+        allowNull :false
+      },
       created_at : {
         type : Sequelize.DATE,
         allowNull : false,

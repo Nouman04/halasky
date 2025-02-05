@@ -36,6 +36,23 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
+    token : {
+      type : DataTypes.TEXT('long'),
+      allowNull : true
+    },
+    expires_at : {
+      type : DataTypes.DATE,
+      allowNull : true
+    },
+    is_email_verified : {
+      type : DataTypes.BOOLEAN,
+      defaultValue : 0,
+      allowNull :false
+    },
+    password : {
+      type : DataTypes.TEXT('long'),
+      allowNull : false
+    },
   }, {
     tableName: 'users',
     timestamps: false, 

@@ -2,10 +2,12 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 const CommunityActivityController = require('../controllers/communityAcitivityController');
+const passport = require('passport');
 
 const { dynamicUploader } = require('../Helpers/fileUploadHelper');
 const upload = dynamicUploader('thumbnail');
 
+router.use(passport.authenticate('jwt', { session: false }));
 
 router.post('/add' , upload.single('thumbnail') ,  CommunityActivityController.add );
 router.put('/edit' , upload.single('thumbnail') ,  CommunityActivityController.edit );

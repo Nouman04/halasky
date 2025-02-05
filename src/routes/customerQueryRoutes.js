@@ -2,6 +2,9 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 const customerQueryController = require('../controllers/customerQueryController');
+const passport = require('passport');
+
+router.use(passport.authenticate('jwt', { session: false }));
 
 router.post('/add' ,   customerQueryController.addQuery );
 router.put('/edit' ,  customerQueryController.editQuery );
