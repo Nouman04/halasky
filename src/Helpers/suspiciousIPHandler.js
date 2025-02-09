@@ -1,25 +1,31 @@
-const { request } = require('express')
-const SuspiciousActivity = require('../database/models/SuspiciousAcitivity')
+const { SuspiciousActivity } = require('../database/models');
 
 const suspiciousIPHandler = (type) => {
-    // let userId = request.body.userId;
-    // async (request , response , next , option) => {
-    //     try {
-    //             await SuspiciousActivity.create({
-    //                 ip_address : request.body.ip,
-    //                 type : type,
-    //                 user_id : userId,
-    //             });
-    //             next();
+    return async (req, res, next) => { // Ensure function is returned
+        try {
+            console.log("inside suspicious activity");
 
-    //         } catch (error){
-    //             response.status(500).json({
-    //                 message: 'An error occurred while logging suspicious activity.',
-    //             });
-    //         }
-    //     }
+            let userId = req.body?.userId || null;
+            let ipAddress = req.ip;
 
+            await SuspiciousActivity.create({
+                ip_address: ipAddress,
+                type: type,
+                user_id: userId,
+            });
 
-}
+            res.status(429).json({
+                status: 429,
+                error: 'Too many requests, please try again later'
+            });
+
+        } catch (error) {
+            console.error( error );
+            res.status(500).json({
+                message: "Error logging suspicious activity"
+            });
+        }
+    };
+};
 
 module.exports = suspiciousIPHandler;

@@ -14,14 +14,16 @@ const customerQueryRoutes = require('./src/routes/customerQueryRoutes');
 const commonRoutes = require('./src/routes/commonRoutes');
 const settingsRoutes = require('./src/routes/settingRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+const suspiciousActivityRoutes = require('./src/routes/suspiciousActivityRoutes');
+
 
 const cors = require('cors');
 const app = express();
 const PORT = process.env.NOD_PORT;
-// app.use(limiter);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(limiter);
 app.use(passport.initialize());
 // app.use(passport.session());
 
@@ -32,8 +34,8 @@ app.use('/activity' , activityRoutes);
 app.use('/query' , customerQueryRoutes);
 app.use('/common' , commonRoutes);
 app.use('/settings' , settingsRoutes);
+app.use('/activity' , suspiciousActivityRoutes);
 app.use('/auth' , authRoutes);
-
 
 app.listen( PORT , () => {
     console.log(`App is listening at port: ${PORT}`)

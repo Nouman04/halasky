@@ -1,4 +1,5 @@
 'use strict';
+
 module.exports = (sequelize, DataTypes) => {
   const SuspiciousActivity = sequelize.define('SuspiciousActivity', {
     id: {
@@ -32,7 +33,9 @@ module.exports = (sequelize, DataTypes) => {
       }
   }, {
     tableName: 'suspicious_activities',
-    timestamps: true, 
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   });
 
   SuspiciousActivity.associate = function(models) {

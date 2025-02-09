@@ -1,9 +1,11 @@
 const rateLimiter = require('express-rate-limit');
 const suspiciousIPHandler =require('../Helpers/suspiciousIPHandler');
 
+console.log("inside limiter");
+
 const limiter = rateLimiter({
-    windowMS: 2 * 60 * 1000,
-    maxLimit: 50,
+    windowMs: 2 * 60 * 1000,
+    max: 50,
     message : {
         statue : 429,
         error : 'You have exceeded the request limit'
