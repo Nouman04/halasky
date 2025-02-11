@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
       platform_image: {
         type: DataTypes.TEXT("long"),
         allowNull: false,
+        defaultValue: "https://yourdomain.com/default-profile.png",
       },
       status: {
         type: DataTypes.INTEGER,
@@ -46,10 +47,11 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   User.associate = function (models) {
-    // Define associations if any, for example:
-    // User.hasMany(models.RolePermission, {
-    //   foreignKey: 'role_id',
-    // });
+    User.belongsToMany(models.Role, {
+      through: "user_roles",
+      foreignKey: "user_id",
+      otherKey: "role_id",
+    });
   };
 
   return User;

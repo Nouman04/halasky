@@ -29,5 +29,12 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
+  Tag.associate = (models) => {
+    Tag.belongsTo(models.CommunityActivity, {
+      foreignKey: "tagable_id",
+      constraints: false,
+    });
+  };
+
   return Tag;
 };

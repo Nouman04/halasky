@@ -1,7 +1,7 @@
-const User = require("../database/models/User");
-const Role = require("../database/models/Role");
-const RecoveryRequest = require("../database/models/RecoveryRequest");
-const Op = require("sequelize");
+const { User } = require("../database/models");
+const { Role } = require("../database/models");
+const { RecoveryRequest } = require("../database/models");
+const { Op } = require("sequelize");
 const bcrypt = require("bcrypt");
 const appConst = require("../appConst");
 const validator = require("validator");
@@ -69,7 +69,7 @@ module.exports = {
 
   searchUser: async (request, response) => {
     try {
-      const searchQuery = request.body.searchQuery;
+      const { searchQuery } = request.body;
 
       if (!validator.isLength(searchQuery || "", { min: 1 })) {
         return response.status(400).json({
@@ -87,6 +87,14 @@ module.exports = {
         },
         limit: 10,
       });
+
+      if (searchedUsers.length === 0) {
+        return response.status(200).json({
+          status: true,
+          data: [],
+          message: "No user found!",
+        });
+      }
 
       return response.status(200).json({
         status: true,
@@ -106,17 +114,17 @@ module.exports = {
       const userId = request.body.id;
       const password = request.body.password;
 
-      if (!validator.isUUID(userId)) {
+      if (!validator.isInt(userId)) {
         return response.status(400).json({
           status: false,
           message: "Invalid user ID",
         });
       }
 
-      if (!validator.isStrongPassword(password)) {
+      if (!password) {
         return response.status(400).json({
           status: false,
-          message: "Password must be strong",
+          message: "Password is required",
         });
       }
 
@@ -145,7 +153,7 @@ module.exports = {
     try {
       const userId = request.body.id;
 
-      if (!validator.isUUID(userId)) {
+      if (!validator.isInt(userId)) {
         return response.status(400).json({
           status: false,
           message: "Invalid user ID",
@@ -202,11 +210,11 @@ module.exports = {
             name: {
               [Op.in]: ["admin", "support_staff"],
             },
-            required: true,
           },
+          required: true,
         },
         where: {
-          status: status,
+          status: status, // This is now on the `User` model, not inside `Role` association.
         },
         offset: skip,
         limit: 10,
@@ -284,14 +292,14 @@ module.exports = {
       const userId = request.body.userId;
       const roleId = request.body.roleId;
 
-      if (!validator.isUUID(userId)) {
+      if (!validator.isInt(userId)) {
         return response.status(400).json({
           status: false,
           message: "Invalid user ID",
         });
       }
 
-      if (!validator.isUUID(roleId)) {
+      if (!validator.isInt(userId)) {
         return response.status(400).json({
           status: false,
           message: "Invalid role ID",
@@ -332,7 +340,7 @@ module.exports = {
         });
       }
 
-      if (!validator.isUUID(roleId)) {
+      if (!validator.isInt(roleId)) {
         return response.status(400).json({
           status: false,
           message: "Invalid role ID",
@@ -442,6 +450,7 @@ module.exports = {
             status: requestStatus,
           },
           required: true,
+          as: "user",
         },
         offset: skip,
         limit: 10,

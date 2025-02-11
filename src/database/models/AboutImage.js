@@ -1,8 +1,8 @@
 "use strict";
 
 module.exports = (sequelize, DataTypes) => {
-  const RecoveryRequest = sequelize.define(
-    "RecoveryRequest",
+  const AboutImage = sequelize.define(
+    "AboutImage",
     {
       id: {
         type: DataTypes.INTEGER,
@@ -10,33 +10,26 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         allowNull: false,
       },
-      user_id: {
+      content_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "users",
+          model: "about_content",
           key: "id",
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      status: {
-        type: DataTypes.INTEGER,
+      image: {
+        type: DataTypes.TEXT("long"),
         allowNull: false,
       },
     },
     {
-      tableName: "recovery_requests",
-      timestamps: true,
+      tableName: "about_images",
+      timestamps: false,
     }
   );
 
-  RecoveryRequest.associate = function (models) {
-    RecoveryRequest.belongsTo(models.User, {
-      foreignKey: "user_id",
-      as: "user",
-    });
-  };
-
-  return RecoveryRequest;
+  return AboutImage;
 };

@@ -23,8 +23,9 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       status: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: true,
+        type: DataTypes.ENUM("0", "1"),
+        allowNull: false,
+        defaultValue: 1,
       },
       added_by: {
         type: DataTypes.INTEGER,

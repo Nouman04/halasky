@@ -10,17 +10,12 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         allowNull: false,
       },
-      role_id: {
+      user_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: "users",
-          key: "id",
-        },
-        onUpdate: "CASCADE",
+        references: { model: "users", key: "id" },
         onDelete: "CASCADE",
       },
-      permission_id: {
+      role_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
@@ -38,8 +33,8 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   UserRole.associate = function (models) {
-    UserRole.belongsTo(models.User, { foreignKey: "role_id" });
-    UserRole.belongsTo(models.Permission, { foreignKey: "permission_id" });
+    UserRole.belongsTo(models.User, { foreignKey: "user_id" });
+    UserRole.belongsTo(models.Role, { foreignKey: "role_id" });
   };
 
   return UserRole;

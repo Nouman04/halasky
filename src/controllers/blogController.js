@@ -1,10 +1,12 @@
 const fs = require("fs");
 const path = require("path");
-const Blog = require("../database/models/Blog");
-const Tag = require("../database/models/Tag");
-const Comment = require("../database/models/Comment");
+const { Blog } = require("../database/models");
+const { Tag } = require("../database/models");
+const { Comment } = require("../database/models");
 const mutateHtmlContent = require("../Helpers/mutateHtmlContent");
 const { dynamicUploader } = require("../Helpers/fileUploadHelper");
+const { isEmpty, isInt, isBoolean, isLength, isArray } = require("validator");
+const { fail } = require("assert");
 
 module.exports = {
   add: async (request, response) => {
@@ -24,6 +26,40 @@ module.exports = {
       );
       const upload = dynamicUploader(blogThumbnailPath);
 
+      let { categoryId, title, userId, isPublished, tags } = request.body;
+
+      if (!title || isEmpty(title)) {
+        return response.status(400).json({
+          status: fail,
+          message: "Blog Title is required! ",
+        });
+      }
+
+      if (!categoryId || !isInt(categoryId.toString())) {
+        return response.status(400).json({
+          status: fail,
+          message: "Valid categoryId is required.",
+        });
+      }
+
+      if (!userId || !isInt(userId.toString())) {
+        return response.status(400).json({
+          status: false,
+          message: "Valid userId is required.",
+        });
+      }
+
+      if (
+        isPublished !== undefined &&
+        isPublished !== null &&
+        !isBoolean(isPublished.toString())
+      ) {
+        return response.status(400).json({
+          status: false,
+          message: "isPublished must be a boolean value.",
+        });
+      }
+
       let content = mutateHtmlContent(request.body.content, blogImagesPath);
       let thumbnailUpload = upload.single("thumbnail");
       await new Promise((resolve, reject) => {
@@ -36,15 +72,17 @@ module.exports = {
         });
       });
 
+      if (!request.file) {
+        return response.status(400).json({
+          status: false,
+          message: "Thumbnail image is required",
+        });
+      }
+
       let thumbnailDetail = request.file.find(
         (file) => file.fieldname === "thumbnail"
       );
       let thumbnailFileName = thumbnailDetail.fileName;
-      let categoryId = request.body.categoryId;
-      let title = request.body.title;
-      let userId = request.body.userId;
-      let isPublished = request.body.isPublished;
-      let tags = request.body.tags;
       let blog = await Blog.create({
         category_id: categoryId,
         created_by: userId,
@@ -95,7 +133,41 @@ module.exports = {
       const upload = dynamicUploader(blogThumbnailPath);
       let blogId = request.body.id;
 
-      await Tag.delete({
+      if (!blogId || !isInt(blogId.toString())) {
+        return response.status(400).json({
+          status: false,
+          message: "Valid blogId is required.",
+        });
+      }
+
+      if (!request.body.title || isEmpty(request.body.title)) {
+        return response.status(400).json({
+          status: false,
+          message: "Blog Title is required.",
+        });
+      }
+
+      if (
+        request.body.categoryId &&
+        !isInt(request.body.categoryId.toString())
+      ) {
+        return response.status(400).json({
+          status: false,
+          message: "Valid categoryId is required.",
+        });
+      }
+
+      if (
+        request.body.isPublished &&
+        !isBoolean(request.body.isPublished.toString())
+      ) {
+        return response.status(400).json({
+          status: false,
+          message: "isPublished must be a boolean value.",
+        });
+      }
+
+      await Tag.destroy({
         where: {
           tagable_type: "Blog",
           tagable_id: blogId,
@@ -171,6 +243,14 @@ module.exports = {
   delete: async (request, response) => {
     try {
       let blogId = request.body.id;
+
+      if (!blogId || !isInt(blogId.toString())) {
+        return response.status(400).json({
+          status: "fail",
+          message: "Valid blogId is required.",
+        });
+      }
+
       const blogImagesPath = path.join(
         __dirname,
         "..",
@@ -179,7 +259,7 @@ module.exports = {
         "blogs"
       );
 
-      await Tag.delete({
+      await Tag.destroy({
         where: {
           tagable_type: "Blog",
           tagable_id: blogId,
@@ -215,6 +295,20 @@ module.exports = {
   list: async (request, response) => {
     try {
       let status = request.body.status;
+
+      if (typeof status !== "boolean") {
+        return response.status(400).json({
+          status: false,
+          message: "Status must be a boolean value.",
+        });
+      }
+
+      if (!pageNo || !isInt(pageNo.toString(), { min: 1 })) {
+        return response.status(400).json({
+          status: false,
+          message: "Page number must be a positive integer.",
+        });
+      }
 
       whereCondition = {};
       if (status) {
@@ -255,8 +349,15 @@ module.exports = {
 
   changeStatus: async (request, response) => {
     try {
-      let blogId = request.body.blogId;
-      let status = request.body.status;
+      let { blogId, status } = request.body;
+
+      if (!blogId || !isInt(blogId.toString())) {
+        return response.status(400).json({
+          status: false,
+          message: "Valid blogId is required.",
+        });
+      }
+
       await Blog.update(
         {
           is_published: status,
@@ -266,6 +367,13 @@ module.exports = {
             id: blogId,
           },
         }
+      );
+
+      await LogActivityHandler(
+        request.body.userId,
+        "Blog status", // title
+        "Update", //action
+        "change blog status" //information
       );
 
       return response.status(200).json({
@@ -283,9 +391,29 @@ module.exports = {
 
   addComment: async (request, response) => {
     try {
-      let blogId = request.body.blogId;
-      let userId = request.body.userId;
-      let comment = request.body.comment;
+      let { blogId, userId, comment } = request.body;
+
+      if (!blogId || !isInt(blogId.toString())) {
+        return response.status(400).json({
+          status: false,
+          message: "Valid blogId is required.",
+        });
+      }
+
+      if (!userId || !isInt(userId.toString())) {
+        return response.status(400).json({
+          status: false,
+          message: "Valid userId is required.",
+        });
+      }
+
+      if (!comment || isEmpty(comment.trim())) {
+        return response.status(400).json({
+          status: false,
+          message: "Comment is required.",
+        });
+      }
+
       await Comment.create({
         commentable_id: blogId,
         commentable_type: "Blog",
