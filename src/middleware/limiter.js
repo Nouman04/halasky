@@ -1,8 +1,5 @@
 const rateLimiter = require('express-rate-limit');
 const suspiciousIPHandler =require('../Helpers/suspiciousIPHandler');
-
-console.log("inside limiter");
-
 const limiter = rateLimiter({
     windowMs: 2 * 60 * 1000,
     max: 50,

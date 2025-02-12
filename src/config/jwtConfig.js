@@ -27,7 +27,7 @@ module.exports  = {
     
             let token = jwt.sign(userData , process.env.NOD_SECRET_KEY , {expiresIn: '4h'});
     
-            return response.status(200).json({status : true , "message" : "Login Successfull" , token : token})
+            return response.status(200).json({status : true , "message" : "Login Successfull" , token : token , user : userData});
 
         } catch (error){
             return response.status(500).json({

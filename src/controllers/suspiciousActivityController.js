@@ -8,7 +8,6 @@ module.exports = {
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let status = request.body.status;
             let ip = request.body.ip;
-            console.log(skip , status , ip);
 
             let whereCondition = {};
 
