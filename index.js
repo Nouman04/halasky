@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const limiter = require('./src/middleware/limiter');
 const passport = require('passport');
 const initializePassport = require('./src/config/passportConfig');
+const cronJobs = require('./src/jobs/index');
 initializePassport(passport);
 //routest starts here
 const userRoutes = require('./src/routes/userRoutes');
@@ -38,5 +39,6 @@ app.use('/activity' , suspiciousActivityRoutes);
 app.use('/auth' , authRoutes);
 
 app.listen( PORT , () => {
+    cronJobs();
     console.log(`App is listening at port: ${PORT}`)
 })

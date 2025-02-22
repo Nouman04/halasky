@@ -14,6 +14,7 @@ const appConst = {
     mediumPriority: 1,
     highPriority : 2,
     criticalPriority : 3,
+    sabreFlights: 'SABRE_FLIGHT',
 }
 
 module.exports = appConst;
