@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     status: {
       type: DataTypes.INTEGER,
+      defaultValue : 0,
       allowNull: true,
     },
     token : {
@@ -51,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     password : {
       type : DataTypes.TEXT('long'),
-      allowNull : false
+      allowNull : true
     },
   }, {
     tableName: 'users',

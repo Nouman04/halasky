@@ -34,6 +34,7 @@ module.exports = {
       },
       status: {
         type : Sequelize.DataTypes.INTEGER,
+        defaultValue : 0,
         allowNull : false
       },
       password : {

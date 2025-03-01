@@ -224,7 +224,7 @@ module.exports = {
         try{
            let skip = (parseInt(request.body.pageNo) - 1) * 10;
            let status = request.body.status;
-           let activeMembers = await  User.findAll({
+           let nemberList = await  User.findAll({
                                             include : {
                                                 model : Role,
                                                 where : {
@@ -242,7 +242,7 @@ module.exports = {
                                         });
             return response.status(200).json({
                 status : true,
-                activeMembers : activeMembers
+                members : nemberList
             });
         } catch (error){
             return response.status(500).json({
