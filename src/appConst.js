@@ -1,6 +1,9 @@
 'use strict';
 
 const appConst = {
+    inactiveUser: 0,
+    activeUser : 1,
+    bannedUser : 2,
     recoveryPending : 0,
     recoveryAccepted : 1,
     recoveryRejected : 2,

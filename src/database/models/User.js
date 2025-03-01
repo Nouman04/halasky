@@ -55,15 +55,12 @@ module.exports = (sequelize, DataTypes) => {
     },
   }, {
     tableName: 'users',
-    timestamps: false, 
+    timestamps: true, 
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
   });
 
   User.associate = function(models) {
-    // Define associations if any, for example:
-    // User.hasMany(models.RolePermission, {
-    //   foreignKey: 'role_id',
-    // });
-    // User.belongsToMany( sequelize.define('Role'), { through: 'user_roles', foreignKey: 'user_id'  , otherKey : 'role_id' });
        User.belongsToMany(models.Role , {through: 'UserRole', foreignKey: 'user_id'  , otherKey : 'role_id' });
        User.hasMany(models.RecoveryRequest, { foreignKey: 'user_id' });
   };

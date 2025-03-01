@@ -38,7 +38,7 @@ module.exports = {
       },
       password : {
         type : Sequelize.DataTypes.TEXT('long'),
-        allowNull : false
+        allowNull : true
       },
       token : {
         type : Sequelize.DataTypes.TEXT('long'),

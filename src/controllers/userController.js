@@ -119,6 +119,54 @@ module.exports = {
         }
     },
 
+    statusList : async (request , response) =>{
+        try{
+
+           let statusList = [
+            {inactiveUser : appConst.inactiveUser},
+            {activeUser : appConst.activeUser},
+            {bannedUser : appConst.bannedUser}
+           ]
+
+
+            return response.status(200).json({
+                status: true,
+                data : statusList
+            })
+        } catch (error){
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            })
+        }
+    },
+
+    updateAccountStatus : async (request ,response) =>{
+        try{
+            const { userId , status } = request.body;
+            console.log(status);
+            console.log(userId);
+            await User.update(
+                {status : status},
+                {where : {id : userId}}
+            );
+
+            
+
+            return response.status(200).json({
+                status: true,
+                message : 'Account status updated successfully'
+            })
+        } catch (error){
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            })
+        }
+    },
+
     updateAccountPassword : async (request , response) =>{
         try {
             let userId = request.body.id;
@@ -319,8 +367,6 @@ module.exports = {
                 });
 
             }
-        
-
         } catch (error){
             return response.status(500).json({
                 status : false,
@@ -338,7 +384,9 @@ module.exports = {
                             where: {
                                 email : email 
                             }
-                        })
+                        });
+
+
             if(!user){
                 return response.status(200).json({
                     status : false,
@@ -388,18 +436,17 @@ module.exports = {
                 requestStatus = appConst.requestPending;
             }
 
-            let userRecoveryRequest = await RecoveryRequest.findAll({
-                    where : {status : requestStatus},
-                    include : {
-                        model : User,
-                        where : {
-                            status : 0
-                        },
-                        required : true
-                    },
-                    offset : skip,
-                    limit : 10
-            });
+            //here start work
+            let userRecoveryRequest = await User.findAll({
+                where : { status : 0 },
+                include : {
+                    model : RecoveryRequest,
+                    required : true,
+                    
+                },
+                offset : skip,
+                limit : 10
+            })
 
             return response.status(200).json({
                 status : true,

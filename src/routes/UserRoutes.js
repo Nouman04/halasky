@@ -6,6 +6,8 @@ const passport = require('passport');
 router.use(passport.authenticate('jwt', { session: false }));
 
 router.get('/roles-list' , UserController.getRoleslist );
+router.get('/status-list' , UserController.statusList );
+router.post('/update-status' , UserController.updateAccountStatus );
 router.post('/active' , UserController.activeUser );
 router.post('/non-active' , UserController.nonActiveUser );
 router.post('/search' , UserController.searchUser );

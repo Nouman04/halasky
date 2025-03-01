@@ -1,13 +1,15 @@
 const { CronJob } = require('cron')
 const path = require('path')
 const fs = require('fs');
-const { Json } = require('sequelize/lib/utils');
+// const { Json } = require('sequelize/lib/utils');
 const { JsonHandler } = require('../database/models');
 const appConst = require('../appConst');
-
+// 0 1 * * 1,5
+// * * * * * *
 const tokenJob = new CronJob("0 1 * * 1,5" , async function(){
     const logFilePath = path.join(__dirname, '..', 'storage', 'cron-logs.js');
     const dir = path.dirname(logFilePath);
+    
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
     }
@@ -44,16 +46,17 @@ const tokenJob = new CronJob("0 1 * * 1,5" , async function(){
                     {where : { id : token.id}}
                 );
 
-                const message = `[${new Date().toISOString()}] Token Updated\n`;
+                const message = `[${new Date().toISOString()}] Authentication Token Updated\n`;
                 fs.appendFileSync(logFilePath, message, 'utf8');
-
+                console.log("cron executed");
             } else {
                 await JsonHandler.create({
                     information : result,
                     type : appConst.sabreFlights
                 });
-                const message = `[${new Date().toISOString()}] Token Created\n`;
+                const message = `[${new Date().toISOString()}] Authentication Token Created\n`;
                 fs.appendFileSync(logFilePath, message, 'utf8');
+                console.log("cron executed");
             }
         })
         .catch((error) => {
