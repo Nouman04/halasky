@@ -8,7 +8,13 @@ module.exports = {
 
     getRoleslist : async (request, response) => {
         try {
-            let roles = await Role.findAll();
+            let roles = await Role.findAll({
+                where: {
+                  title: {
+                    [Op.ne]: "user"
+                  }
+                }
+              });
             return response.status(200).json({
                 status: true,
                 roles: roles
