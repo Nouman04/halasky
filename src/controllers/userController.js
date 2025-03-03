@@ -29,9 +29,10 @@ module.exports = {
         }
     },
 
-    activeUser : async (request , response) =>{
+    list : async (request , response) =>{
         try{
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
+            let status = request.body.status;
             const activeUsers = await User.findAll({
                 include : {
                     model : Role,
@@ -42,7 +43,7 @@ module.exports = {
                     required : false
                 },
                 where : {
-                    status : 1
+                    status : status
                 },
                 offset : skip,
                 limit: 10,
@@ -296,7 +297,6 @@ module.exports = {
         try {
             let uId = request.body.uId;
             let rId = request.body.rId;
-            let userId = request.body.userId;
 
             let userRole = await UserRole.findOne({ where : {user_id : uId}});
             
@@ -311,7 +311,7 @@ module.exports = {
 
           
             await LogActivityHandler(
-                request.body.userId,
+                request.body.uId,
                 'User role', // title
                 'Update', //action
                 'change user role', //information

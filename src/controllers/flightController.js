@@ -3,9 +3,9 @@ const AppConst = require('../appConst');
 
 module.exports = {
     list : async (request ,response)=>{
-        const { travelList } = request.body;
+        const { destinationList , passengerList } = request.body;
 
-        const travelJson = travelList.map( detail => {
+        const travelJson = destinationList.map( detail => {
           return {
                   "DepartureDateTime": detail.travelDate,
                   "OriginLocation": {
@@ -17,6 +17,14 @@ module.exports = {
                 }
         }); 
 
+        const passengerJson = passengerList.filter( passenger => {
+                                                      return passenger.total > 0;
+                                                    }).map(passenger => {
+                                                      return {
+                                                            "Code": passenger.type,
+                                                            "Quantity": passenger.total
+                                                          }
+                                                    });
         // [
         //   {
         //     "DepartureDateTime": "2025-04-11T01:00:00",
@@ -79,12 +87,7 @@ module.exports = {
                   "TravelerInfoSummary": {
                     "AirTravelerAvail": [
                       {
-                        "PassengerTypeQuantity": [
-                          {
-                            "Code": "ADT",
-                            "Quantity": 1
-                          }
-                        ]
+                        "PassengerTypeQuantity": passengerJson
                       }
                     ]
                   },
