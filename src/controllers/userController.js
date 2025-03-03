@@ -33,6 +33,10 @@ module.exports = {
         try{
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let status = request.body.status;
+            let whereCondition = {};
+            if(status){
+                whereCondition.status = status
+            }
             const activeUsers = await User.findAll({
                 include : {
                     model : Role,
@@ -42,9 +46,7 @@ module.exports = {
                     // through: { attributes: [] },
                     required : false
                 },
-                where : {
-                    status : status
-                },
+                where : whereCondition,
                 offset : skip,
                 limit: 10,
             });
