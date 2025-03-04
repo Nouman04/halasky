@@ -201,7 +201,6 @@ module.exports = {
             if(status){
                 whereCondition.is_published = status;
             }
-            console.log(whereCondition);
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             const blogs = await Blog.findAll({
                 include : [
