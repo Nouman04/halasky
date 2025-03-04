@@ -8,14 +8,13 @@ module.exports = {
 
     add : async (request , response ) =>{
         try{
-           
             const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
             let content = mutateHtmlContent(request.body.content , blogImagesPath);
             
             let thumbnailFileName = request.file.filename;
             let categoryId = request.body.categoryId;
             let title = request.body.title;
-            let userId =request.body.userId;
+            let userId =request.user.id;
             let isPublished = request.body.isPublished;
             let tags = request.body.tags;
             let blog = await Blog.create({
@@ -38,7 +37,7 @@ module.exports = {
            Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Blog request', // title
                 'Add', //action
                 'Add blog and detail', //information
@@ -118,7 +117,7 @@ module.exports = {
             await Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Update blog request', // title
                 'Update', //action
                 'change blog information', //information
@@ -173,7 +172,7 @@ module.exports = {
             });
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Delete blog', // title
                 'Delete', //action
                 'delete blog request', //information
@@ -257,7 +256,7 @@ module.exports = {
             )
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Blog status', // title
                 'Update', //action
                 'change blog status', //information

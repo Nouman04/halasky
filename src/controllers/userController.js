@@ -43,7 +43,6 @@ module.exports = {
                     where : {
                         title : 'user'
                     },
-                    // through: { attributes: [] },
                     required : false
                 },
                 where : whereCondition,
@@ -67,6 +66,46 @@ module.exports = {
         }
 
     },
+
+    listUsers: async (request, response) => {
+        try {
+          let skip = (parseInt(request.body.pageNo) - 1) * 10;
+    
+          let users = await User.findAll({
+            attributes: ["id", "email", "name", "number", "status"],
+            include: [
+              {
+                model: Violation,
+                as: "violations",
+                attributes: ["id", "reason"],
+              },
+            ],
+            offset: skip,
+            limit: 10,
+          });
+    
+          let formattedUsers = users.map((user) => ({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            number: user.number,
+            status: user.status,
+            violation_count: user.violations.length,
+            violations: user.violations.map((v) => v.reason),
+          }));
+    
+          return response.status(200).json({
+            status: true,
+            data: formattedUsers,
+          });
+        } catch (error) {
+          return response.status(500).json({
+            status: false,
+            message: "Something Went Wrong",
+            error: error.message,
+          });
+        }
+      },
 
     nonActiveUser : async (request , response) =>{
         try{

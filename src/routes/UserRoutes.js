@@ -11,6 +11,7 @@ router.post('/update-status' , UserController.updateAccountStatus );
 // router.post('/active' , UserController.activeUser );
 // router.post('/non-active' , UserController.nonActiveUser );
 router.post('/list' , UserController.list );
+router.post("/user-violation-list", UserController.listUsers);
 router.post('/search' , UserController.searchUser );
 router.put('/update-password' , UserController.updateAccountPassword );
 router.post('/account-detail' , UserController.userAccountDetail );
