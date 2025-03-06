@@ -13,5 +13,6 @@ router.use( (request ,response ,next)=>{
 })
 
 router.post('/get' ,   flightController.list );
+router.post('/availability' ,   flightController.findAvailability );
 
 module.exports = router;

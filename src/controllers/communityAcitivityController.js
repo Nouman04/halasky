@@ -35,7 +35,7 @@ module.exports = {
             await Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Post created', // title
                 'Add', //action
                 `Post added with tags and details`, //information
@@ -114,7 +114,7 @@ module.exports = {
             await Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Post updated', // title
                 'Update', //action
                 `Post updated with tags and details`, //information
@@ -170,7 +170,7 @@ module.exports = {
             })
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Post deleted', // title
                 'Delete', //action
                 `delete post`, //information
@@ -254,7 +254,7 @@ module.exports = {
 
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Status Update', // title
                 'Update', //action
                 `Post Status Updated`, //information
@@ -289,7 +289,7 @@ module.exports = {
             );
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Approval Update', // title
                 'Update', //action
                 `Approval Status Updated`, //information
