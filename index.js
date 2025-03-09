@@ -16,7 +16,8 @@ const commonRoutes = require('./src/routes/commonRoutes');
 const settingsRoutes = require('./src/routes/settingRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const suspiciousActivityRoutes = require('./src/routes/suspiciousActivityRoutes');
-const flighRoutes = require('./src/routes/flightRoutes');
+const flightRoutes = require('./src/routes/flightRoutes');
+const hotelRoutes = require('./src/routes/hotelRoutes');
 const testRoutes = require('./src/routes/testRoutes');
 
 const cors = require('cors');
@@ -37,7 +38,8 @@ app.use('/query' , customerQueryRoutes);
 app.use('/common' , commonRoutes);
 app.use('/settings' , settingsRoutes);
 app.use('/activity' , suspiciousActivityRoutes);
-app.use('/flight' , flighRoutes );
+app.use('/flight' , flightRoutes );
+app.use('/hotel' , hotelRoutes );
 app.use('/auth' , authRoutes);
 app.use('/test' , testRoutes);
 

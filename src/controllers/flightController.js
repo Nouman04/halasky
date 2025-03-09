@@ -278,6 +278,8 @@ module.exports = {
                 // })
                 return response.status(200).json({
                     status: true,
+                    // data : result
+                    // data : itineraryGroupDetail
                     data: itineraryGroupDetail[0].itinerariesList[0],
                 });
             })
@@ -401,242 +403,223 @@ module.exports = {
         // }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-        // let searchRequest = {
-        //   "OTA_AirLowFareSearchRQ": {
-        //     "Version": "4.0.0",
-        //     "POS": {
-        //       "Source": [
-        //         {
-        //           "PseudoCityCode": "3GML",
-        //           "RequestorID": {
-        //             "Type": "1",
-        //             "ID": "1",
-        //             "CompanyName": {
-        //               "Code": "TN"
-        //             }
-        //           }
-        //         }
-        //       ]
-        //     },
-        //     "OriginDestinationInformation": [
-        //       {
-        //         "DepartureDateTime": "2025-03-23T09:30:00",
-        //         "OriginLocation": {
-        //           "LocationCode": "ISB"
-        //         },
-        //         "DestinationLocation": {
-        //           "LocationCode": "LCY"
-        //         },
-        //         "RPH": "1",
-        //         "TPA_Extensions": {
-        //           "Flight": [
-        //             {
-        //               "Airline": {
-        //                 "Marketing": "QR",
-        //                 "Operating": "QR"
-        //               },
-        //               "ArrivalDateTime": "2025-03-23T11:10:00",
-        //               "ClassOfService": "Y",
-        //               "DepartureDateTime": "2025-03-23T09:30:00",
-        //               "DestinationLocation": {
-        //                 "LocationCode": "DOH"
-        //               },
-        //               "Number": 615,
-        //               "OriginLocation": {
-        //                 "LocationCode": "ISB"
-        //               },
-        //               "Type": "A"
-        //             },
-        //             {
-        //               "Airline": {
-        //                 "Marketing": "QR",
-        //                 "Operating": "QR"
-        //               },
-        //               "ArrivalDateTime": "2025-03-23T19:55:00",
-        //               "ClassOfService": "Y",
-        //               "DepartureDateTime": "2025-03-23T14:30:00",
-        //               "DestinationLocation": {
-        //                 "LocationCode": "MAN"
-        //               },
-        //               "Number": 23,
-        //               "OriginLocation": {
-        //                 "LocationCode": "DOH"
-        //               },
-        //               "Type": "A"
-        //             },
-        //             {
-        //               "Airline": {
-        //                 "Marketing": "9B",
-        //                 "Operating": "9B"
-        //               },
-        //               "ArrivalDateTime": "2025-03-23T08:45:00",
-        //               "ClassOfService": "Y",
-        //               "DepartureDateTime": "2025-03-23T05:05:00",
-        //               "DestinationLocation": {
-        //                 "LocationCode": "LCY"
-        //               },
-        //               "Number": 6977,
-        //               "OriginLocation": {
-        //                 "LocationCode": "QQM"
-        //               },
-        //               "Type": "A"
-        //             }
-        //           ]
-        //         }
-        //       }
-        //     ],
-        //     "TravelPreferences": {
-        //       "CabinPref": [
-        //         {
-        //           "Cabin": "Y"
-        //         }
-        //       ]
-        //     },
-        //     "TravelerInfoSummary": {
-        //       "AirTravelerAvail": [
-        //         {
-        //           "PassengerTypeQuantity": [
-        //             {
-        //               "Code": "ADT",
-        //               "Quantity": 1
-        //             }
-        //           ]
-        //         }
-        //       ],
-        //       "PriceRequestInformation": {
-        //         "CurrencyCode": "SAR",
-        //         "FareQualifier": "ADVJR1"
-        //       }
-        //     },
-        //     "TPA_Extensions": {
-        //       "IntelliSellTransaction": {
-        //         "RequestType": {
-        //           "Name": "Revalidate"
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
 
-        let searchRequest ={
-          "OTA_AirLowFareSearchRQ": {
-            "Version": "4.0.0",
-            "POS": {
-              "Source": [
-                {
-                  "PseudoCityCode": "3GML",
-                  "RequestorID": {
-                    "Type": "1",
-                    "ID": "1",
-                    "CompanyName": {
-                      "Code": "TN"
-                    }
-                  }
-                }
-              ]
-            },
-            "OriginDestinationInformation": [
-              {
-                "DepartureDateTime": "2025-03-23T03:35:00",
+
+        const { priceSource , legList , passengerDetail } = request.body;
+        let originDestinationDetail = [];
+
+        legList.forEach((leg , index )=> {
+            let legFlights = leg.flights;
+        
+            // Mapping flights
+            let flights = legFlights.map(flight => {
+                let flightDetail =  {
+                    "Airline": {
+                        "Marketing": flight.airline.marketing,
+                        "Operating": flight.airline.operating
+                    },
+                    "ArrivalDateTime": flight.arrivalDateTime,
+                    "ClassOfService": "Y",
+                    "DepartureDateTime": flight.departureDateTime,
+                    "DestinationLocation": {
+                        "LocationCode": flight.destinationLocationCode // Corrected
+                    },
+                    "Number": flight.number,
+                    "OriginLocation": {
+                        "LocationCode": flight.originLocationCode // Corrected
+                    },
+                    "Type": "A"
+                };
+
+                return flightDetail;
+
+            });
+        
+            // Ensure DepartureDateTime comes before OriginLocation
+            originDestinationDetail.push({
+                "DepartureDateTime": flights[0].DepartureDateTime, // Added DepartureDateTime
                 "OriginLocation": {
-                  "LocationCode": "ISB"
+                    "LocationCode": leg.originLocation
                 },
                 "DestinationLocation": {
-                  "LocationCode": "LCY"
+                    "LocationCode": leg.destinationLocation
                 },
-                "RPH": "1",
+                "RPH": (index+1).toString(),
                 "TPA_Extensions": {
-                  "Flight": [
-                    {
-                      "Airline": {
-                        "Marketing": "QR",
-                        "Operating": "QR"
-                      },
-                      "ArrivalDateTime": "2025-03-23T05:15:00",
-                      "ClassOfService": "Y",
-                      "DepartureDateTime": "2025-03-23T03:35:00",
-                      "DestinationLocation": {
-                        "LocationCode": "DOH"
-                      },
-                      "Number": 633,
-                      "OriginLocation": {
-                        "LocationCode": "ISB"
-                      },
-                      "Type": "A"
-                    },
-                    {
-                      "Airline": {
-                        "Marketing": "QR",
-                        "Operating": "QR"
-                      },
-                      "ArrivalDateTime": "2025-03-23T13:10:00",
-                      "ClassOfService": "Y",
-                      "DepartureDateTime": "2025-03-23T07:40:00",
-                      "DestinationLocation": {
-                        "LocationCode": "EDI"
-                      },
-                      "Number": 29,
-                      "OriginLocation": {
-                        "LocationCode": "DOH"
-                      },
-                      "Type": "A"
-                    },
-                    {
-                      "Airline": {
-                        "Marketing": "BA",
-                        "Operating": "BA"
-                      },
-                      "ArrivalDateTime": "2025-03-23T17:30:00",
-                      "ClassOfService": "Y",
-                      "DepartureDateTime": "2025-03-23T16:00:00",
-                      "DestinationLocation": {
-                        "LocationCode": "LCY"
-                      },
-                      "Number": 8707,
-                      "OriginLocation": {
-                        "LocationCode": "EDI"
-                      },
-                      "Type": "A"
-                    }
-                  ]
+                    "Flight": flights
                 }
-              }
+            });
+        });
+        
+        let passengers = passengerDetail.map(passenger => {
+            return {
+                "Code": passenger.type,
+                "Quantity": passenger.total
+            };
+        });
+        
+        let travelSummary = {
+            "AirTravelerAvail": [
+                {
+                    "PassengerTypeQuantity": passengers
+                }
             ],
-            "TravelPreferences": {
-              "CabinPref": [
-                {
-                  "Cabin": "Y"
-                }
-              ]
-            },
-            "TravelerInfoSummary": {
-              "AirTravelerAvail": [
-                {
-                  "PassengerTypeQuantity": [
-                    {
-                      "Code": "ADT",
-                      "Quantity": 1
+            "PriceRequestInformation": {
+                "CurrencyCode": "SAR",
+                "FareQualifier": priceSource
+            }
+        };
+        
+        let searchRequest = {
+            "OTA_AirLowFareSearchRQ": {
+                "Version": "4.0.0",
+                "POS": {
+                    "Source": [
+                        {
+                            "PseudoCityCode": "3GML",
+                            "RequestorID": {
+                                "Type": "1",
+                                "ID": "1",
+                                "CompanyName": {
+                                    "Code": "TN"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "OriginDestinationInformation": originDestinationDetail,
+                "TravelerInfoSummary": travelSummary,
+                "TPA_Extensions": {
+                    "IntelliSellTransaction": {
+                        "RequestType": {
+                            "Name": "Revalidate"
+                        }
                     }
-                  ]
+                }
+            }
+        };
+
+
+        // return response.status(200).json(searchRequest);
+
+        let searchRequest1 = {
+            "OTA_AirLowFareSearchRQ": {
+              "Version": "4.0.0",
+              "POS": {
+                "Source": [
+                  {
+                    "PseudoCityCode": "3GML",
+                    "RequestorID": {
+                      "Type": "1",
+                      "ID": "1",
+                      "CompanyName": {
+                        "Code": "TN"
+                      }
+                    }
+                  }
+                ]
+              },
+              "OriginDestinationInformation": [
+                {
+                  "DepartureDateTime": "2025-04-11T10:00:00",
+                  "OriginLocation": {
+                    "LocationCode": "ISB"
+                  },
+                  "DestinationLocation": {
+                    "LocationCode": "KHI"
+                  },
+                  "RPH": "1",
+                  "TPA_Extensions": {
+                    "Flight": [
+                      {
+                        "Airline": {
+                          "Marketing": "PK",
+                          "Operating": "PK"
+                        },
+                        "ArrivalDateTime": "2025-04-11T11:55:00",
+                        "ClassOfService": "Y",
+                        "DepartureDateTime": "2025-04-11T10:00:00",
+                        "DestinationLocation": {
+                          "LocationCode": "KHI"
+                        },
+                        "Number": 301,
+                        "OriginLocation": {
+                          "LocationCode": "ISB"
+                        },
+                        "Type": "A"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "DepartureDateTime": "2025-04-11T16:00:00",
+                  "OriginLocation": {
+                    "LocationCode": "KHI"
+                  },
+                  "DestinationLocation": {
+                    "LocationCode": "ISB"
+                  },
+                  "RPH": "2",
+                  "TPA_Extensions": {
+                    "Flight": [
+                      {
+                        "Airline": {
+                          "Marketing": "PK",
+                          "Operating": "PK"
+                        },
+                        "ArrivalDateTime": "2025-04-11T17:55:00",
+                        "ClassOfService": "Y",
+                        "DepartureDateTime": "2025-04-11T16:00:00",
+                        "DestinationLocation": {
+                          "LocationCode": "ISB"
+                        },
+                        "Number": 308,
+                        "OriginLocation": {
+                          "LocationCode": "KHI"
+                        },
+                        "Type": "A"
+                      }
+                    ]
+                  }
                 }
               ],
-              "PriceRequestInformation": {
-                "CurrencyCode": "SAR",
-                "FareQualifier": "ADVJR1"
-              }
-            },
-            "TPA_Extensions": {
-              "IntelliSellTransaction": {
-                "RequestType": {
-                  "Name": "Revalidate"
+              "TravelPreferences": {
+                "CabinPref": [
+                  {
+                    "Cabin": "Y"
+                  }
+                ]
+              },
+              "TravelerInfoSummary": {
+                "AirTravelerAvail": [
+                  {
+                    "PassengerTypeQuantity": [
+                      {
+                        "Code": "ADT",
+                        "Quantity": 1
+                      }
+                    ]
+                  }
+                ],
+                "PriceRequestInformation": {
+                  "CurrencyCode": "SAR",
+                  "FareQualifier": "ADVJR1"
+                }
+              },
+              "TPA_Extensions": {
+                "IntelliSellTransaction": {
+                  "RequestType": {
+                    "Name": "Revalidate"
+                  }
                 }
               }
             }
           }
-        }
+
+
+        // return response.status(200).json(searchRequest);
         
-        
-        
+ 
 
         const requestOptions = {
           method: "POST",
@@ -653,6 +636,7 @@ module.exports = {
 
             return response.status(200).json({
               status: true,
+              msg : "hre2",
               data: result,
           });
         })

@@ -118,7 +118,7 @@ module.exports = {
     addViolation : async (request , response ) =>{
         try{
             let personId = request.body.personId;
-            let addedBy = request.body.userId;
+            let addedBy = request.user.id;
             let violationableType  = request.body.type;
             let  violationableId= request.body.id;
             let reason = request.body.reason;
@@ -130,7 +130,7 @@ module.exports = {
                             user_id : personId
                         });
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Violation', // title
                 'Add', //action
                 `add ${violationableType} violation`, //information
