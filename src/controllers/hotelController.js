@@ -3,11 +3,27 @@ const AppConst = require('../appConst');
 
 module.exports = {
     list : async (request ,response)=>{
+
+        const { checkIn , checkOut , cityCode , countryCode , rooms } = request.body;
         const tokenDetail = await JsonHandler.findOne({
             where : {type : AppConst.sabreFlights}
         });
 
         const accessToken = tokenDetail.information.access_token;
+
+        let mappedRooms = rooms.map( (room , index) => {
+                roomDetail = {};
+                roomDetail.Index = index+1;
+                roomDetail.Adults = room.Adults; 
+                
+                if(room.Children){
+                    roomDetail.Children =  room.Children;
+                    roomDetail.ChildAges = room.ChildAges;
+                 }
+                return roomDetail;
+        })
+
+        
         
         try{
             let endpoint = 'https://api.cert.sabre.com/v3.0.0/get/hotelavail';
@@ -28,17 +44,16 @@ module.exports = {
                 "OffSet": 1,
                 "SortBy": "TotalRate",
                 "SortOrder": "ASC",
-                "PageSize": 40,
                 "TierLabels": true,
                 "GeoSearch": {
                   "GeoRef": {
                     "Radius": 50,
                     "UOM": "KM",
                     "RefPoint": {
-                      "Value": "LCY",
+                      "Value": cityCode,
                       "ValueContext": "CODE",
                       "RefPointType": "6",
-                      "CountryCode": "UK"
+                      "CountryCode": countryCode
                     }
                   }
                 },
@@ -49,16 +64,11 @@ module.exports = {
                   "RefundableOnly": false,
                   "ConvertedRateInfoOnly": true,
                   "StayDateRange": {
-                    "StartDate": "2025-04-01",
-                    "EndDate": "2025-04-05"
+                    "StartDate": checkIn,
+                    "EndDate": checkOut
                   },
                   "Rooms": {
-                    "Room": [
-                      {
-                        "Index": 1,
-                        "Adults": 1
-                      }
-                    ]
+                    "Room": mappedRooms
                   }
                 },
                 "ImageRef": {
@@ -68,7 +78,10 @@ module.exports = {
               }
             }
           }
-
+        //   return response.status(200).json({
+        //     status: true,
+        //     data: searchRequest,
+        // });
 
         const requestOptions = {
             method: "POST",
@@ -83,6 +96,7 @@ module.exports = {
         .then(async (result) => { 
             return response.status(200).json({
                 status: true,
+                message : "rim1",
                 data: result,
             });
         })

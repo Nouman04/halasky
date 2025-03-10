@@ -344,6 +344,9 @@ module.exports = {
                 error: error.message
             });
         }
-    }
+    },
 
+    updateTemplate : async ( request , response ) =>{
+
+    }
 }
