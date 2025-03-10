@@ -7,7 +7,7 @@ module.exports = {
         try{
             console.log(request.body);
             let id = request.body.id;
-            let userId = request.body.userId;
+            let userId = request.user.id;
             let comment  = request.body.comment;
             let commentType = request.body.type
             await Comment.create({
@@ -19,7 +19,7 @@ module.exports = {
 
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Comment', // title
                 'Add', //action
                 `Add ${commentType} comment`, //information
@@ -55,7 +55,7 @@ module.exports = {
 
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Comment', // title
                 'Update', //action
                 `Update ${commentDetail.commentable_type} comment`, //information
@@ -92,7 +92,7 @@ module.exports = {
             });
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Comment', // title
                 'Delete', //action
                 `delete ${commentType} comment`, //information
@@ -171,7 +171,7 @@ module.exports = {
                     );
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Violation', // title
                 'Update', //action
                 `Update ${violationDetail.violationable_type} violation`, //information
@@ -265,7 +265,7 @@ module.exports = {
             });
 
             await LogActivityHandler(
-                request.body.userId,
+                request.user.id,
                 'Delete Violation', // title
                 'delete', //action
                 `delete ${violationableType} violation`, //information
