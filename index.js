@@ -18,6 +18,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const suspiciousActivityRoutes = require('./src/routes/suspiciousActivityRoutes');
 const flightRoutes = require('./src/routes/flightRoutes');
 const hotelRoutes = require('./src/routes/hotelRoutes');
+const chatRoutes = require('./src/routes/chatRoutes');
 const testRoutes = require('./src/routes/testRoutes');
 
 const cors = require('cors');
@@ -41,6 +42,7 @@ app.use('/activity' , suspiciousActivityRoutes);
 app.use('/flight' , flightRoutes );
 app.use('/hotel' , hotelRoutes );
 app.use('/auth' , authRoutes);
+app.use('/chat' , chatRoutes);
 app.use('/test' , testRoutes);
 
 app.listen( PORT , () => {
