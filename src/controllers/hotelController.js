@@ -9,7 +9,7 @@ module.exports = {
             where : {type : AppConst.sabreFlights}
         });
 
-        const accessToken = tokenDetail.information.access_token;
+        // const accessToken = tokenDetail.information.access_token;
 
         let mappedRooms = rooms.map( (room , index) => {
                 roomDetail = {};
@@ -27,7 +27,7 @@ module.exports = {
         
         try{
             let endpoint = 'https://api.cert.sabre.com/v3.0.0/get/hotelavail';
-    
+            accessToken = "T1RLAQLbboWf7xtBW4hR+UNU18eYkiyOlKNUxRhFTmOl8PCu1xCUSGCKQO9v+vHkvrsnbqdRAADQhuwAur0Dtp0XDdQTiW7VP5Sq9SkH74LFGxcrGiECeaQTky7qaY4PNfK04+h3qXXzsHZFw2C1TFHBBcSMfz8wGXRBDjiOATc7DrN29yEiZDp9o7VyJzmP4tiLzo+ez4Lrl/X7KtTSQAb65wHv98zhAcIP14DWmnEfPEqPgG0k9ir9bY8eFFv12e8nDZXtDxI84Jdq1Hm9KprI9EYq8p0pmNfVIa7a6wKOMaIVncXYEqtWSUEWRMTKceGu80Z7hXhcgzwu91PyMxl8EAWezpEqhw**";
             const myHeaders = new Headers();
             myHeaders.append("Authorization", `Bearer ${accessToken}`);
             myHeaders.append("Content-Type", "application/json");
