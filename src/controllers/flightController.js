@@ -286,7 +286,7 @@ module.exports = {
                     status: true,
                     // data : result
                     // data : itineraryGroupDetail
-                    data: itineraryGroupDetail,
+                    data: itineraryGroupDetail[0].itinerariesList[0],
                 });
             })
             .catch((error) => {

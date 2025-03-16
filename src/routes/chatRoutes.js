@@ -5,5 +5,6 @@ const chatController = require('../controllers/chatController');
 
 router.use(passport.authenticate('jwt', { session: false }));
 router.post('/ask-question' , chatController.askQuestion);
+router.post('send-message' , chatController.sendMessage);
 
 module.exports = router;

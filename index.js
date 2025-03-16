@@ -5,6 +5,7 @@ const limiter = require('./src/middleware/limiter');
 const passport = require('passport');
 const initializePassport = require('./src/config/passportConfig');
 const cronJobs = require('./src/jobs/index');
+
 initializePassport(passport);
 //routest starts here
 const userRoutes = require('./src/routes/userRoutes');
@@ -44,6 +45,16 @@ app.use('/hotel' , hotelRoutes );
 app.use('/auth' , authRoutes);
 app.use('/chat' , chatRoutes);
 app.use('/test' , testRoutes);
+
+//socket code starts here
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+io.on('connection' ,(socket)=>{
+    console.log(`socket connection connected, connection id:${socket.id}`)
+})
 
 app.listen( PORT , () => {
     cronJobs();
