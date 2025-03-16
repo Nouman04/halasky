@@ -32,7 +32,8 @@ module.exports = {
         });
 
         const accessToken = tokenDetail.information.access_token;
-        console.log(accessToken);
+
+        
         try{
             let endpoint = 'https://api.cert.sabre.com/v5/offers/shop';
     
@@ -107,6 +108,7 @@ module.exports = {
             //     status: true,
             //     data: result,
             // });
+
 
         let itineraryGroups = result.groupedItineraryResponse.itineraryGroups;
         let legsInformation = result.groupedItineraryResponse.legDescs;
@@ -276,11 +278,15 @@ module.exports = {
                 // let token = await JsonHandler.findOne({
                 //     where : { type : appConst.sabreFlights }
                 // })
+
+              //   return response.status(200).json(itineraryGroupDetail
+              // );
+
                 return response.status(200).json({
                     status: true,
                     // data : result
                     // data : itineraryGroupDetail
-                    data: itineraryGroupDetail[0].itinerariesList[0],
+                    data: itineraryGroupDetail,
                 });
             })
             .catch((error) => {
@@ -641,6 +647,131 @@ module.exports = {
           });
         })
 
+
+        } catch (error){
+          return response.status(500).json({
+              status: false,
+              message: 'Something Went Wrong',
+              error: error.message,
+          });
+      }
+    },
+
+    generatePnr : async (request , response ) => {
+      const tokenDetail = await JsonHandler.findOne({
+        where : {type : AppConst.sabreFlights}
+        });
+        const accessToken = tokenDetail.information.access_token;
+        try{
+
+          let endpoint = 'https://api.cert.sabre.com/v2.5.0/passenger/records';
+          const myHeaders = new Headers();
+          myHeaders.append("Authorization", `Bearer ${accessToken}`);
+          myHeaders.append("Content-Type", "application/json");
+          myHeaders.append("Accept", "application/json");
+
+          let searchRequest = {
+            "CreatePassengerNameRecordRQ": {
+                "version": "2.5.0",
+                "TravelItineraryAddInfo": {
+                    "CustomerInfo": {
+                        "PersonName": [
+                            {
+                                "GivenName": "John",
+                                "Surname": "Doe",
+                                "PassengerType": "ADT"
+                            }
+                        ]
+                    }
+                },
+                "AirBook": {
+                    "OriginDestinationInformation": {
+                        "FlightSegment": [
+                            {
+                                "DepartureDateTime": "2025-04-11T01:45:00+03:00",
+                                "ArrivalDateTime": "2025-04-11T03:05:00+03:00",
+                                "FlightNumber": "1643",
+                                "ResBookDesigCode": "V",
+                                "Status": "NN",
+                                "DestinationLocation": {
+                                    "LocationCode": "JED"
+                                },
+                                "MarketingAirline": {
+                                    "Code": "SV"
+                                },
+                                "OriginLocation": {
+                                    "LocationCode": "AHB"
+                                }
+                            }
+                        ]
+                    }
+                },
+                "Ticketing": {
+                    "TicketTimeLimit": "2025-04-11T01:45:00"
+                },
+                "PriceInfo": {
+                    "TotalFare": {
+                        "Amount": 219.65,
+                        "CurrencyCode": "SAR"
+                    },
+                    "BaseFare": {
+                        "Amount": 146,
+                        "CurrencyCode": "SAR"
+                    },
+                    "Taxes": [
+                        {
+                            "Amount": 10,
+                            "CurrencyCode": "SAR",
+                            "TaxCode": "IO"
+                        },
+                        {
+                            "Amount": 21.9,
+                            "CurrencyCode": "SAR",
+                            "TaxCode": "K75"
+                        },
+                        {
+                            "Amount": 6.75,
+                            "CurrencyCode": "SAR",
+                            "TaxCode": "K76"
+                        },
+                        {
+                            "Amount": 35,
+                            "CurrencyCode": "SAR",
+                            "TaxCode": "YRF"
+                        }
+                    ]
+                },
+                "PostProcessing": {
+                    "EndTransaction": {
+                        "Source": {
+                            "ReceivedFrom": "Test User"
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+
+          const requestOptions = {
+            method: "POST",
+            headers: myHeaders,
+            body: JSON.stringify(searchRequest),
+            redirect: "follow"
+        };
+
+        fetch( endpoint , requestOptions)
+        .then((response) => response.json()) 
+        .then(async (result) => {
+            // console.log(result)
+
+          //   return response.status(200).json({
+          //     status: true,
+          //     msg : "hre2",
+          //     data: result,
+          // });
+          return response.status(200).json( result );
+        })
 
         } catch (error){
           return response.status(500).json({

@@ -10,6 +10,7 @@ module.exports = {
 
     const accessToken = tokenDetail.information.access_token;
 
+
     let mappedRooms = rooms.map((room, index) => {
       roomDetail = {};
       roomDetail.Index = index + 1;

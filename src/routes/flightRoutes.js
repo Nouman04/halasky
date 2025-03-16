@@ -14,5 +14,6 @@ router.use( (request ,response ,next)=>{
 
 router.post('/get' ,   flightController.list );
 router.post('/availability' ,   flightController.findAvailability );
+router.post('/generate-pnr' ,   flightController.generatePnr );
 
 module.exports = router;
