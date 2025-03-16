@@ -1,13 +1,3 @@
-<<<<<<< HEAD
-require('dotenv').config();
-const express = require('express');
-const bodyParser = require('body-parser');
-const limiter = require('./src/middleware/limiter');
-const passport = require('passport');
-const initializePassport = require('./src/config/passportConfig');
-const cronJobs = require('./src/jobs/index');
-
-=======
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -15,7 +5,6 @@ const limiter = require("./src/middleware/limiter");
 const passport = require("passport");
 const initializePassport = require("./src/config/passportConfig");
 const cronJobs = require("./src/jobs/index");
->>>>>>> a6207ce03bd2ee8f2ab7ded5d3990590016486e5
 initializePassport(passport);
 //routest starts here
 const userRoutes = require("./src/routes/userRoutes");
