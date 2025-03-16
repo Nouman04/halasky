@@ -428,6 +428,323 @@
 [2025-03-06T16:58:14.431Z] Authentication Token Updated
 [2025-03-06T16:58:15.438Z] Authentication Token Updated
 [2025-03-06T16:58:16.581Z] Authentication Token Updated
-[2025-03-14T00:53:58.162Z] TypeError: fetch failed
-[2025-03-14T01:09:46.403Z] Authentication Token Updated
-[2025-03-14T01:09:47.005Z] Authentication Token Updated
+[2025-03-11T18:13:42.849Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:42.851Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:43.836Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:44.488Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:45.932Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:46.617Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:47.543Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:48.800Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:50.391Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:50.950Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:52.223Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:52.748Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:53.672Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:54.625Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:56.417Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:56.914Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:58.487Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:58.946Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:13:59.994Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:00.521Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:01.855Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:02.785Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:03.762Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:04.918Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:05.761Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:06.534Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:07.627Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:08.909Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:09.707Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:10.714Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:12.248Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:13.163Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:13.779Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:14.903Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:15.878Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:16.832Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:17.692Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:18.747Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:19.634Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:20.956Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:21.985Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:22.709Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:23.749Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:24.734Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:25.881Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:27.162Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:28.736Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:28.863Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:29.787Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:30.856Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:31.880Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:32.931Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:33.657Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:34.650Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:45.004Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:45.010Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:45.119Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:45.641Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:46.119Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:46.121Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:46.218Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:46.987Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:47.517Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:47.657Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:48.037Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:48.158Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:49.008Z] TypeError: fetch failed
+[2025-03-11T18:14:49.613Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:49.713Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:50.765Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:52.496Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:52.804Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:53.804Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:54.926Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:55.663Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:57.247Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:58.303Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:14:58.666Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:00.629Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:00.734Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:01.716Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:02.724Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:03.779Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:04.824Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:05.870Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:06.666Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:08.099Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:09.656Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:09.886Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:10.884Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:12.735Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:12.901Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:13.784Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:15.448Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:15.888Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:17.626Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:18.084Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:18.811Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:20.125Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:20.736Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:22.419Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:23.264Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:24.542Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:24.844Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:26.286Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:26.935Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:27.535Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:28.615Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:29.705Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:31.263Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:31.906Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:32.985Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:33.861Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:34.844Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:35.615Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:36.525Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:37.571Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:38.684Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:39.565Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:40.929Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:41.978Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:42.968Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:44.010Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:45.216Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:45.598Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:47.163Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:47.710Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:48.752Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:49.773Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:50.508Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:51.899Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:52.918Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:53.501Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:54.640Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:55.622Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:56.738Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:57.825Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:58.691Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:15:59.876Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:00.824Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:01.540Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:02.886Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:03.633Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:04.887Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:05.932Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:06.915Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:07.706Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:08.526Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:10.059Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:11.667Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:11.741Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:12.684Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:13.730Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:14.784Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:15.525Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:16.879Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:17.616Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:18.620Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:19.724Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:21.136Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:22.784Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:22.825Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:24.220Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:24.877Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:25.894Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:26.838Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:27.885Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:28.621Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:29.588Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:30.789Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:31.769Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:32.672Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:33.816Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:34.766Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:35.812Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:36.860Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:37.909Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:38.603Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:16:40.009Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:47.486Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:48.710Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:48.818Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:50.603Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:51.125Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:52.108Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:53.158Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:54.207Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:55.259Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:55.881Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:56.827Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:58.404Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:58.924Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:18:59.632Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:01.249Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:01.731Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:02.715Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:03.710Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:05.047Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:05.808Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:06.797Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:07.839Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:08.463Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:09.444Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:10.660Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:12.033Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:13.081Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:14.011Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:15.056Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:15.689Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:16.597Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:17.729Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:18.852Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:19.810Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:20.755Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:21.804Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:22.619Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:23.597Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:19:24.626Z] SequelizeDatabaseError: Table 'halasky.json_handler' doesn't exist
+[2025-03-11T18:23:34.357Z] Authentication Token Created
+[2025-03-11T18:23:34.359Z] Authentication Token Created
+[2025-03-11T18:23:36.022Z] Authentication Token Updated
+[2025-03-11T18:23:36.769Z] Authentication Token Updated
+[2025-03-11T18:23:36.770Z] Authentication Token Updated
+[2025-03-11T18:23:37.827Z] Authentication Token Updated
+[2025-03-11T18:23:38.859Z] Authentication Token Updated
+[2025-03-11T18:23:39.917Z] Authentication Token Updated
+[2025-03-11T18:23:40.730Z] Authentication Token Updated
+[2025-03-11T18:23:41.874Z] Authentication Token Updated
+[2025-03-11T18:23:43.058Z] Authentication Token Updated
+[2025-03-11T18:23:43.865Z] Authentication Token Updated
+[2025-03-11T18:23:44.711Z] Authentication Token Updated
+[2025-03-11T18:23:45.677Z] Authentication Token Updated
+[2025-03-11T18:23:46.727Z] Authentication Token Updated
+[2025-03-11T18:23:47.892Z] Authentication Token Updated
+[2025-03-11T18:23:48.644Z] Authentication Token Updated
+[2025-03-11T18:23:49.992Z] Authentication Token Updated
+[2025-03-11T18:23:50.975Z] Authentication Token Updated
+[2025-03-11T18:23:52.020Z] Authentication Token Updated
+[2025-03-11T18:23:52.734Z] Authentication Token Updated
+[2025-03-11T18:23:54.126Z] Authentication Token Updated
+[2025-03-11T18:23:55.692Z] Authentication Token Updated
+[2025-03-11T18:23:55.826Z] Authentication Token Updated
+[2025-03-11T18:23:56.793Z] Authentication Token Updated
+[2025-03-11T18:23:57.793Z] Authentication Token Updated
+[2025-03-11T18:23:59.112Z] Authentication Token Updated
+[2025-03-11T18:24:00.615Z] Authentication Token Updated
+[2025-03-11T18:24:00.870Z] Authentication Token Updated
+[2025-03-11T18:24:01.939Z] Authentication Token Updated
+[2025-03-11T18:24:02.864Z] Authentication Token Updated
+[2025-03-11T18:24:03.762Z] Authentication Token Updated
+[2025-03-11T18:24:04.810Z] Authentication Token Updated
+[2025-03-11T18:24:05.494Z] Authentication Token Updated
+[2025-03-11T18:24:06.648Z] Authentication Token Updated
+[2025-03-11T18:24:07.959Z] Authentication Token Updated
+[2025-03-11T18:24:08.902Z] Authentication Token Updated
+[2025-03-11T18:24:09.622Z] Authentication Token Updated
+[2025-03-11T18:24:10.823Z] Authentication Token Updated
+[2025-03-11T18:24:11.741Z] Authentication Token Updated
+[2025-03-11T18:24:12.898Z] Authentication Token Updated
+[2025-03-11T18:24:13.963Z] Authentication Token Updated
+[2025-03-11T18:24:14.507Z] Authentication Token Updated
+[2025-03-11T18:24:15.867Z] Authentication Token Updated
+[2025-03-11T18:24:16.708Z] Authentication Token Updated
+[2025-03-11T18:24:17.705Z] Authentication Token Updated
+[2025-03-11T18:24:18.689Z] Authentication Token Updated
+[2025-03-11T18:24:19.645Z] Authentication Token Updated
+[2025-03-11T18:24:20.648Z] Authentication Token Updated
+[2025-03-11T18:24:21.657Z] Authentication Token Updated
+[2025-03-11T18:24:23.011Z] Authentication Token Updated
+[2025-03-11T18:24:24.087Z] Authentication Token Updated
+[2025-03-11T18:24:24.692Z] Authentication Token Updated
+[2025-03-11T18:24:26.090Z] Authentication Token Updated
+[2025-03-11T18:24:26.850Z] Authentication Token Updated
+[2025-03-11T18:24:27.745Z] Authentication Token Updated
+[2025-03-11T18:24:28.875Z] Authentication Token Updated
+[2025-03-11T18:24:29.754Z] Authentication Token Updated
+[2025-03-11T18:24:30.679Z] Authentication Token Updated
+[2025-03-11T18:24:31.859Z] Authentication Token Updated
+[2025-03-11T18:24:32.617Z] Authentication Token Updated
+[2025-03-11T18:24:33.612Z] Authentication Token Updated
+[2025-03-11T18:24:34.662Z] Authentication Token Updated
+[2025-03-11T18:24:35.736Z] Authentication Token Updated
+[2025-03-11T18:24:36.741Z] Authentication Token Updated
+[2025-03-11T18:24:37.785Z] Authentication Token Updated
+[2025-03-11T18:24:38.920Z] Authentication Token Updated
+[2025-03-11T18:24:39.802Z] Authentication Token Updated
+[2025-03-11T18:24:41.002Z] Authentication Token Updated
+[2025-03-11T18:24:41.585Z] Authentication Token Updated
+[2025-03-11T18:24:42.552Z] Authentication Token Updated
+[2025-03-11T18:24:43.612Z] Authentication Token Updated
+[2025-03-11T18:24:44.464Z] Authentication Token Updated
+[2025-03-11T18:24:45.774Z] Authentication Token Updated
+[2025-03-11T18:24:46.691Z] Authentication Token Updated
+[2025-03-11T18:24:47.835Z] Authentication Token Updated
+[2025-03-11T18:24:48.812Z] Authentication Token Updated
+[2025-03-11T18:24:49.790Z] Authentication Token Updated
+[2025-03-11T18:24:50.777Z] Authentication Token Updated
+[2025-03-11T18:24:51.824Z] Authentication Token Updated
+[2025-03-11T18:24:52.564Z] Authentication Token Updated
+[2025-03-11T18:24:53.698Z] Authentication Token Updated
+[2025-03-11T18:24:54.635Z] Authentication Token Updated
+[2025-03-11T18:24:55.668Z] Authentication Token Updated
+[2025-03-11T18:24:56.698Z] Authentication Token Updated
+[2025-03-11T18:24:57.745Z] Authentication Token Updated
+[2025-03-11T18:24:58.771Z] Authentication Token Updated
+[2025-03-11T18:24:59.815Z] Authentication Token Updated
+[2025-03-11T18:25:00.832Z] Authentication Token Updated
+[2025-03-11T18:25:01.842Z] Authentication Token Updated
+[2025-03-11T18:25:02.511Z] Authentication Token Updated
+[2025-03-11T18:25:03.533Z] Authentication Token Updated
+[2025-03-11T18:25:04.992Z] Authentication Token Updated
+[2025-03-11T18:25:05.912Z] Authentication Token Updated
+[2025-03-11T18:25:06.664Z] Authentication Token Updated
+[2025-03-11T18:25:07.615Z] Authentication Token Updated
+[2025-03-11T18:25:08.568Z] Authentication Token Updated
+[2025-03-11T18:25:09.640Z] Authentication Token Updated
+[2025-03-11T18:25:10.579Z] Authentication Token Updated
+[2025-03-11T18:25:11.611Z] Authentication Token Updated
+[2025-03-11T18:25:12.702Z] Authentication Token Updated
+[2025-03-11T18:25:13.614Z] Authentication Token Updated

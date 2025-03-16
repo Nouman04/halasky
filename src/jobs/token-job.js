@@ -1,76 +1,72 @@
-const { CronJob } = require('cron')
-const path = require('path')
-const fs = require('fs');
+const { CronJob } = require("cron");
+const path = require("path");
+const fs = require("fs");
 // const { Json } = require('sequelize/lib/utils');
-const { JsonHandler } = require('../database/models');
-const appConst = require('../appConst');
+const { JsonHandler } = require("../database/models");
+const appConst = require("../appConst");
 // 0 1 * * 1,5
 // * * * * * *
-const tokenJob = new CronJob("0 1 * * 1,5" , async function(){
-    const logFilePath = path.join(__dirname, '..', 'storage', 'cron-logs.js');
-    const dir = path.dirname(logFilePath);
-    
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-    try{
-        let endpoint = 'https://api.cert.platform.sabre.com/v2/auth/token';
+const tokenJob = new CronJob("0 1 * * 1,5", async function () {
+  const logFilePath = path.join(__dirname, "..", "storage", "cron-logs.js");
+  const dir = path.dirname(logFilePath);
 
-        const myHeaders = new Headers();
-        myHeaders.append("Authorization", "Basic VmpFNk1UVXpOamd3T2pOSFRVdzZRVUU9OmJXVmtNalZrYlcwPQ==");
-        myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  try {
+    let endpoint = "https://api.cert.platform.sabre.com/v2/auth/token";
 
-        const urlencoded = new URLSearchParams();
-        urlencoded.append("grant_type", "client_credentials");
+    const myHeaders = new Headers();
+    myHeaders.append(
+      "Authorization",
+      "Basic VmpFNk1UVXpOamd3T2pOSFRVdzZRVUU9OmJXVmtNalZrYlcwPQ=="
+    );
+    myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
-        const requestOptions = {
-            method: "POST",
-            headers: myHeaders,
-            body: urlencoded,
-            redirect: "follow"
-        };
+    const urlencoded = new URLSearchParams();
+    urlencoded.append("grant_type", "client_credentials");
 
-        fetch( endpoint , requestOptions)
-        .then((response) => response.json()) 
-        .then(async (result) => {
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: urlencoded,
+      redirect: "follow",
+    };
 
-            let token = await JsonHandler.findOne({
-                where : { type : appConst.sabreFlights }
-            })
-
-
-
-            if(token) {
-                await JsonHandler.update(
-                    {information : result},
-                    {where : { id : token.id}}
-                );
-
-                const message = `[${new Date().toISOString()}] Authentication Token Updated\n`;
-                fs.appendFileSync(logFilePath, message, 'utf8');
-                console.log("cron executed");
-            } else {
-                await JsonHandler.create({
-                    information : result,
-                    type : appConst.sabreFlights
-                });
-                const message = `[${new Date().toISOString()}] Authentication Token Created\n`;
-                fs.appendFileSync(logFilePath, message, 'utf8');
-                console.log("cron executed");
-            }
-        })
-        .catch((error) => {
-            const errorMessage = `[${new Date().toISOString()}] ${error}\n`;
-            fs.appendFileSync(logFilePath, errorMessage, 'utf8');
+    fetch(endpoint, requestOptions)
+      .then((response) => response.json())
+      .then(async (result) => {
+        let token = await JsonHandler.findOne({
+          where: { type: appConst.sabreFlights },
         });
 
-    } catch (error){
-        
-        const errorMessage = `[${new Date().toISOString()}] ${error.stack}\n`;
-        fs.appendFileSync(logFilePath, errorMessage, 'utf8');
-    }
+        if (token) {
+          await JsonHandler.update(
+            { information: result },
+            { where: { id: token.id } }
+          );
+
+          const message = `[${new Date().toISOString()}] Authentication Token Updated\n`;
+          fs.appendFileSync(logFilePath, message, "utf8");
+          console.log("cron executed");
+        } else {
+          await JsonHandler.create({
+            information: result,
+            type: appConst.sabreFlights,
+          });
+          const message = `[${new Date().toISOString()}] Authentication Token Created\n`;
+          fs.appendFileSync(logFilePath, message, "utf8");
+          console.log("cron executed");
+        }
+      })
+      .catch((error) => {
+        const errorMessage = `[${new Date().toISOString()}] ${error}\n`;
+        fs.appendFileSync(logFilePath, errorMessage, "utf8");
+      });
+  } catch (error) {
+    const errorMessage = `[${new Date().toISOString()}] ${error.stack}\n`;
+    fs.appendFileSync(logFilePath, errorMessage, "utf8");
+  }
 });
 
-
 module.exports = tokenJob;
-
