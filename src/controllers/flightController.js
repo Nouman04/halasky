@@ -692,11 +692,12 @@ module.exports = {
         const accessToken = tokenDetail.information.access_token;
         try{
 
-          let endpoint = 'https://api.cert.sabre.com/v2.5.0/passenger/records';
+          let endpoint = 'https://api.cert.sabre.com/v2.5.0/passenger/records?mode=create';
           const myHeaders = new Headers();
           myHeaders.append("Authorization", `Bearer ${accessToken}`);
           myHeaders.append("Content-Type", "application/json");
-          myHeaders.append("Accept", "application/json");
+          
+          
 
           let searchRequest = {
             "CreatePassengerNameRecordRQ": {
@@ -734,41 +735,41 @@ module.exports = {
                         ]
                     }
                 },
-                "Ticketing": {
-                    "TicketTimeLimit": "2025-04-11T01:45:00"
-                },
-                "PriceInfo": {
-                    "TotalFare": {
-                        "Amount": 219.65,
-                        "CurrencyCode": "SAR"
-                    },
-                    "BaseFare": {
-                        "Amount": 146,
-                        "CurrencyCode": "SAR"
-                    },
-                    "Taxes": [
-                        {
-                            "Amount": 10,
-                            "CurrencyCode": "SAR",
-                            "TaxCode": "IO"
-                        },
-                        {
-                            "Amount": 21.9,
-                            "CurrencyCode": "SAR",
-                            "TaxCode": "K75"
-                        },
-                        {
-                            "Amount": 6.75,
-                            "CurrencyCode": "SAR",
-                            "TaxCode": "K76"
-                        },
-                        {
-                            "Amount": 35,
-                            "CurrencyCode": "SAR",
-                            "TaxCode": "YRF"
-                        }
-                    ]
-                },
+                // "Ticketing": {
+                //     "TicketTimeLimit": "2025-04-11T01:45:00"
+                // },
+                // "PriceInfo": {
+                //     "TotalFare": {
+                //         "Amount": 219.65,
+                //         "CurrencyCode": "SAR"
+                //     },
+                //     "BaseFare": {
+                //         "Amount": 146,
+                //         "CurrencyCode": "SAR"
+                //     },
+                //     "Taxes": [
+                //         {
+                //             "Amount": 10,
+                //             "CurrencyCode": "SAR",
+                //             "TaxCode": "IO"
+                //         },
+                //         {
+                //             "Amount": 21.9,
+                //             "CurrencyCode": "SAR",
+                //             "TaxCode": "K75"
+                //         },
+                //         {
+                //             "Amount": 6.75,
+                //             "CurrencyCode": "SAR",
+                //             "TaxCode": "K76"
+                //         },
+                //         {
+                //             "Amount": 35,
+                //             "CurrencyCode": "SAR",
+                //             "TaxCode": "YRF"
+                //         }
+                //     ]
+                // },
                 "PostProcessing": {
                     "EndTransaction": {
                         "Source": {

@@ -1,4 +1,4 @@
-const { User } = require('../database/models');
+const { User , Role , UserRole } = require('../database/models');
 const transport = require('../config/mailConfig');
 const bcrypt = require('bcrypt');
 const moment = require('moment');
@@ -34,7 +34,7 @@ module.exports = {
             const token = generateRandomToken();
             const tokenExpiryTime = moment().add( 10 , 'minutes').format('YYYY-MM-DD HH:mm:ss');
 
-            await User.create({
+            let createdUser = await User.create({
                 name : name,
                 email : email,
                 password : hashedPassword,
@@ -42,6 +42,13 @@ module.exports = {
                 token : token,
                 expires_at : tokenExpiryTime
             })
+
+            let role = await Role.findOne({where : {title : 'user'}});
+
+            await UserRole.create({
+                user_id : createdUser.id,
+                role_id : role.id
+            });
 
             const mailOptions= {
                 from : 'test@gmail.com',
