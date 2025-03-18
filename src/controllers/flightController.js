@@ -1,7 +1,35 @@
 const { JsonHandler } = require('../database/models');
 const AppConst = require('../appConst');
+const airports = require('../public/files/locations.json');
+
 
 module.exports = {
+
+    airportList : async (request , response) => {
+      const { searchQuery } = request.body;
+      try{
+        filteredAirports = airports.filter( airport => {
+          let airportCode = airport.code.toLowerCase();
+          let airportName = airport.name.toLowerCase();
+          return airportCode.includes(searchQuery.toLowerCase()) || airportName.includes(searchQuery.toLowerCase());
+        });
+
+        return response.status(200).json({
+            status: true,
+            data: filteredAirports,
+        });
+      } catch (error){
+        return response.status(500).json({
+            status: false,
+            message: 'Something Went Wrong',
+            error: error.message,
+        });
+    }
+      
+
+    },
+
+
     list : async (request ,response)=>{
         const { destinationList , passengerList } = request.body;
 
@@ -286,7 +314,7 @@ module.exports = {
                     status: true,
                     // data : result
                     // data : itineraryGroupDetail
-                    data: itineraryGroupDetail[0].itinerariesList[0],
+                    data: itineraryGroupDetail,
                 });
             })
             .catch((error) => {

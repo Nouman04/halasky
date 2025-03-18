@@ -13,6 +13,7 @@ router.use((request, response, next) => {
 
 router.post("/get", hotelController.list);
 router.post("/get/trending", hotelController.trending);
+router.post("/locations", hotelController.locationList);
 // router.post('/availability' ,   hotelController.findAvailability );
 
 module.exports = router;

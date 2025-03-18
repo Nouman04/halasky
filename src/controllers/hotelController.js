@@ -1,7 +1,45 @@
 const { JsonHandler } = require("../database/models");
 const AppConst = require("../appConst");
+const locations = require('../public/files/locations.json');
 
 module.exports = {
+
+  locationList : async (request , response) => {
+        const { searchQuery } = request.body;
+        try{
+          filteredLocations = locations.filter( location => {
+            let locationCode = location.code.toLowerCase();
+            let locationCity = location.city.toLowerCase();
+            return locationCode.includes(searchQuery.toLowerCase()) || locationCity.includes(searchQuery.toLowerCase());
+          }).map( location => {
+
+            return {
+                    "code": location.code,
+                    "lat": location.lat,
+                    "lon": location.lon,
+                    "city": location.city,
+                    "state": location.state,
+                    "country": location.country
+                  };
+    
+          });
+  
+          return response.status(200).json({
+              status: true,
+              data: filteredLocations,
+          });
+        } catch (error){
+          return response.status(500).json({
+              status: false,
+              message: 'Something Went Wrong',
+              error: error.message,
+          });
+      }
+        
+  
+      },
+
+
   list: async (request, response) => {
     const { checkIn, checkOut, cityCode, countryCode, rooms } = request.body;
     const tokenDetail = await JsonHandler.findOne({
