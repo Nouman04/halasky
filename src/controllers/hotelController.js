@@ -1,6 +1,6 @@
 const { JsonHandler } = require("../database/models");
 const AppConst = require("../appConst");
-const locations = require('../public/files/locations.json');
+const locations = require('../public/files/destinations.json');
 
 module.exports = {
 
@@ -12,18 +12,19 @@ module.exports = {
             let locationCity = location.city.toLowerCase();
             return locationCode.includes(searchQuery.toLowerCase()) || locationCity.includes(searchQuery.toLowerCase());
           }).map( location => {
-
             return {
                     "code": location.code,
                     "lat": location.lat,
                     "lon": location.lon,
                     "city": location.city,
                     "state": location.state,
-                    "country": location.country
+                    "country": location.country,
+                    "country_code" : location.country_code
                   };
     
           });
-  
+
+         
           return response.status(200).json({
               status: true,
               data: filteredLocations,
