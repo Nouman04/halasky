@@ -104,9 +104,6 @@ module.exports = {
             let addedTokenTime  = moment(user.expires_at);
             let currentTime = moment();
 
-            console.log(addedTokenTime)
-            console.log(currentTime);
-
             if(addedTokenTime.isBefore(currentTime) ){
                 return response.status(200).json({
                     status: false,
@@ -151,6 +148,17 @@ module.exports = {
             const token = generateRandomToken();
             const tokenExpiryTime = moment().add( 10 , 'minutes').format('YYYY-MM-DD HH:mm:ss');
 
+            const user = await User.findOne({
+                where : {email : email}
+            })
+
+            if(!user){
+                return response.status(500).json({
+                    status : false,
+                    message : "User not found with this email"
+                })
+            }
+
             await User.update(
                 { token : token, expires_at : tokenExpiryTime}, 
                 { where :  {email : email} } 
@@ -183,6 +191,63 @@ module.exports = {
                 error: error.message
             });
         }
-    }
+    },
+
+
+    updatePassword : async ( request , response ) => {
+        try {
+
+            const { token , email , password } = request.body;
+
+            const user = await User.findOne({
+                where : { email : email}
+            });
+
+            if(!user){
+                return response.status(500).json({
+                    status : false,
+                    message : "User not found with this email"
+                })
+            }
+
+            if(user.token != token){
+                return response.status(500).json({
+                    status : false,
+                    message : "Code doesn't match"
+                })
+            }
+
+
+            let addedTokenTime  = moment(user.expires_at);
+            let currentTime = moment();
+
+            if(addedTokenTime.isBefore(currentTime) ){
+                return response.status(200).json({
+                    status: false,
+                    message: 'Your verification token is expired'
+                })
+            }
+
+
+            let saltcount  = 10;
+            let hashedPassword = await bcrypt.hash( password , saltcount);
+
+            await User.update(
+                {password : hashedPassword},
+                {where : {email : email} }
+            )
+
+
+            return response.status(200).json({
+                status: true,
+                message: 'Password Updated',
+            })
+        } catch (error){
+            return response.status(500).json({
+                status : false,
+                message : error.message
+            })
+        }
+    },
 
 }
