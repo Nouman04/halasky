@@ -7,7 +7,7 @@ const publicRoutes = [ '/list'  ,  '/airports'];
 router.use( (request ,response ,next)=>{
 
     if(publicRoutes.includes(request.path)){
-        next();
+        return next();
     }
     passport.authenticate('jwt' , {session: false})(request ,response ,next);
 })
