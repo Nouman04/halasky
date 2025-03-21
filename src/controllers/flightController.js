@@ -129,7 +129,6 @@ module.exports = {
             fetch( endpoint , requestOptions)
             .then((response) => response.json()) 
             .then(async (result) => {
-               
               //new code starts here
 
               let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
@@ -141,7 +140,7 @@ module.exports = {
                 });
               }
 
-              
+
 
 
 
@@ -282,7 +281,7 @@ module.exports = {
                 //     where : { type : appConst.sabreFlights }
                 // })
 
-              return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
+              //return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
               // );
 
                 return response.status(200).json({
