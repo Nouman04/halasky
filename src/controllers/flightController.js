@@ -132,10 +132,15 @@ module.exports = {
                
               //new code starts here
 
-            //   return response.status(200).json({
-            //     status: true,
-            //     data: result,
-            // });
+              let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
+
+              if(!foundItenararies){
+                return response.status(200).json({
+                  status: false,
+                  message: "No flight found.",
+                });
+              }
+
 
 
         let itineraryGroups = result.groupedItineraryResponse.itineraryGroups;
@@ -275,7 +280,7 @@ module.exports = {
                 //     where : { type : appConst.sabreFlights }
                 // })
 
-              // return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
+              return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
               // );
 
                 return response.status(200).json({
@@ -668,125 +673,117 @@ module.exports = {
 	
 
 
-let searchRequest = {
-  "CreatePassengerNameRecordRQ": {
-      "version": "2.5.0",
-      "TravelItineraryAddInfo": {
-          "CustomerInfo": {
-              "PersonName": [
-                  {
+          let searchRequest = {
+            "CreatePassengerNameRecordRQ": {
+              "version": "2.5.0",
+              "TravelItineraryAddInfo": {
+                "CustomerInfo": {
+                  "PersonName": [
+                    {
                       "GivenName": "John",
                       "Surname": "Aflen",
-                      "PassengerType": "ADT"
-                  },
-              ],
-              "ContactNumbers": {
-                  "ContactNumber": [
-                      {
-                          "NameNumber": "1.1",
-                          "Phone": "3545642324324",
-                          "PhoneUseType": "H"
-                      }
-                  ]
-              }
-          },
-          "AgencyInfo": {
-              "Address": {
-                  "AddressLine": "Test Agency",
-                  "CityName": "Jeddah",
-                  "CountryCode": "SA"
-              },
-              "Ticketing": {
-                  "TicketType": "7TAW"
-              }
-          }
-      },
-      "AirBook": {
-          "OriginDestinationInformation": {
-              "FlightSegment": [
-                  {
-                      "DepartureDateTime": "2025-04-11T04:20:00",
-                      "ArrivalDateTime": "2025-04-11T06:45:00",
-                      "ResBookDesigCode": "Y",
-                      "FlightNumber": "435",
-                      "Status": "HK", 
-                      "NumberInParty": "1",
-                      "OriginLocation": {
-                          "LocationCode": "ISB"
-                      },
-                      "DestinationLocation": {
-                          "LocationCode": "AUH"
-                      },
-                      "MarketingAirline": {
-                          "Code": "EY",
-                          "FlightNumber": "303"
-                      }
-                  },
-                  {
-                    "DepartureDateTime": "2025-04-11T14:25:00",
-                    "ArrivalDateTime": "2025-04-11T06:45:00",
-                    "ResBookDesigCode": "Y",
-                    "FlightNumber": "435",
-                    "Status": "HK", 
-                    "NumberInParty": "1",
-                    "OriginLocation": {
-                        "LocationCode": "AUH"
+                      "PassengerType": "ADT",
+                      "NameNumber": "1.1"
                     },
-                    "DestinationLocation": {
-                        "LocationCode": "AUH"
-                    },
-                    "MarketingAirline": {
-                        "Code": "EY",
-                        "FlightNumber": "303"
+                    {
+                      "NameReference": "DEF456",
+                      "GivenName": "Sara",
+                      "Surname": "Smith",
+                      "PassengerType": "ADT",
+                      "NameNumber": "2.1"
                     }
+                  ],
+                  "ContactNumbers": {
+                    "ContactNumber": [
+                      {
+                        "NameNumber": "1.1",
+                        "Phone": "3545642324324",
+                        "PhoneUseType": "H"
+                      },
+                      {
+                        "NameNumber": "2.1",
+                        "Phone": "3545642324455",
+                        "PhoneUseType": "H"
+                      }
+                    ]
+                  }
                 },
-                {
-                      "DepartureDateTime": "2025-04-11T04:20:00",
-                      "ArrivalDateTime": "2025-04-11T06:45:00",
+                "AgencyInfo": {
+                  "Address": {
+                    "AddressLine": "Test Agency",
+                    "CityName": "Jeddah",
+                    "CountryCode": "SA"
+                  },
+                  "Ticketing": {
+                    "TicketType": "7TAW"
+                  }
+                }
+              },
+              "AirBook": {
+                "OriginDestinationInformation": {
+                  "FlightSegment": [
+                    {
+                      "DepartureDateTime": "2025-04-11T05:10:00",
+                      "ArrivalDateTime": "2025-04-11T07:25:00",
                       "ResBookDesigCode": "Y",
-                      "FlightNumber": "435",
-                      "Status": "HK", 
-                      "NumberInParty": "1",
-                      "OriginLocation": {
-                          "LocationCode": "ISB"
-                      },
-                      "DestinationLocation": {
-                          "LocationCode": "AUH"
-                      },
-                      "MarketingAirline": {
-                          "Code": "EY",
-                          "FlightNumber": "303"
-                      }
-                  }
-              ]
-          }
-      },
-      "AirPrice": [
-          {
-              "PriceRequestInformation": {
-                  "Retain": true,
-                  "OptionalQualifiers": {
+                      "FlightNumber": "206",
+                      "Status": "HK",
+                      "NumberInParty": "2",
+                      "OriginLocation": {"LocationCode": "ISB"},
+                      "DestinationLocation": {"LocationCode": "KWI"},
+                      "MarketingAirline": {"Code": "KU", "FlightNumber": "206"}
+                    },
+                    {
+                      "DepartureDateTime": "2025-04-11T08:35:00",
+                      "ArrivalDateTime": "2025-04-11T12:15:00",
+                      "ResBookDesigCode": "Y",
+                      "FlightNumber": "165",
+                      "Status": "HK",
+                      "NumberInParty": "2",
+                      "OriginLocation": {"LocationCode": "KWI"},
+                      "DestinationLocation": {"LocationCode": "ROM"},
+                      "MarketingAirline": {"Code": "KU", "FlightNumber": "165"}
+                    },
+                    {
+                      "DepartureDateTime": "2025-04-11T14:40:00",
+                      "ArrivalDateTime": "2025-04-11T16:10:00",
+                      "ResBookDesigCode": "Y",
+                      "FlightNumber": "214",
+                      "Status": "HK",
+                      "NumberInParty": "2",
+                      "OriginLocation": {"LocationCode": "ROM"},
+                      "DestinationLocation": {"LocationCode": "LON"},
+                      "MarketingAirline": {"Code": "AZ", "FlightNumber": "214"}
+                    }
+                  ]
+                }
+              },
+              "AirPrice": [
+                {
+                  "PriceRequestInformation": {
+                    "Retain": true,
+                    "OptionalQualifiers": {
                       "PricingQualifiers": {
-                          "PassengerType": [
-                              {
-                                  "Code": "ADT",
-                                  "Quantity": "1"
-                              },
-                          ]
+                        "PassengerType": [
+                          {
+                            "Code": "ADT",
+                            "Quantity": "2"  // Matches the two passengers and NumberInParty
+                          }
+                        ]
                       }
+                    }
                   }
+                }
+              ],
+              "PostProcessing": {
+                "EndTransaction": {
+                  "Source": {
+                    "ReceivedFrom": "Test User"
+                  }
+                }
               }
-          }
-      ],
-      "PostProcessing": {
-          "EndTransaction": {
-              "Source": {
-                  "ReceivedFrom": "Test User"
-              }
-          }
-      }
-  }
-};
+            }
+          };
         
         
 
