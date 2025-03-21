@@ -22,7 +22,7 @@ module.exports = {
                     "country_code" : location.country_code
                   };
     
-          });
+          }).slice(0 , 20);
 
          
           return response.status(200).json({

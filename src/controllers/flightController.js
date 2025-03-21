@@ -12,7 +12,7 @@ module.exports = {
           let airportCode = airport.code.toLowerCase();
           let airportName = airport.name.toLowerCase();
           return airportCode.includes(searchQuery.toLowerCase()) || airportName.includes(searchQuery.toLowerCase());
-        });
+        }).slice(0 , 20);
 
         return response.status(200).json({
             status: true,
