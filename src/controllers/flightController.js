@@ -141,6 +141,8 @@ module.exports = {
                 });
               }
 
+              
+
 
 
         let itineraryGroups = result.groupedItineraryResponse.itineraryGroups;
