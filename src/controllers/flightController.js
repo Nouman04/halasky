@@ -754,7 +754,6 @@ let searchRequest = {
                           "FlightNumber": "303"
                       }
                   },
-                  //////////////////////////////////////
                   {
                     "DepartureDateTime": "2025-04-11T14:25:00",
                     "ArrivalDateTime": "2025-04-11T06:45:00",
@@ -772,7 +771,7 @@ let searchRequest = {
                         "Code": "EY",
                         "FlightNumber": "303"
                     }
-                }
+                },
                 {
                       "DepartureDateTime": "2025-04-11T04:20:00",
                       "ArrivalDateTime": "2025-04-11T06:45:00",
