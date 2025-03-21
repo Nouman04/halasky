@@ -9,6 +9,7 @@ router.use( (request ,response ,next)=>{
     if(publicRoutes.includes(request.path)){
         return next();
     }
+    
     passport.authenticate('jwt' , {session: false})(request ,response ,next);
 })
 
