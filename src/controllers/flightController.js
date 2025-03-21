@@ -307,7 +307,7 @@ module.exports = {
                 //     where : { type : appConst.sabreFlights }
                 // })
 
-              //   return response.status(200).json(itineraryGroupDetail
+              return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
               // );
 
                 return response.status(200).json({
@@ -536,119 +536,119 @@ module.exports = {
 
         // return response.status(200).json(searchRequest);
 
-        let searchRequest1 = {
-            "OTA_AirLowFareSearchRQ": {
-              "Version": "4.0.0",
-              "POS": {
-                "Source": [
-                  {
-                    "PseudoCityCode": "3GML",
-                    "RequestorID": {
-                      "Type": "1",
-                      "ID": "1",
-                      "CompanyName": {
-                        "Code": "TN"
-                      }
-                    }
-                  }
-                ]
-              },
-              "OriginDestinationInformation": [
-                {
-                  "DepartureDateTime": "2025-04-11T10:00:00",
-                  "OriginLocation": {
-                    "LocationCode": "ISB"
-                  },
-                  "DestinationLocation": {
-                    "LocationCode": "KHI"
-                  },
-                  "RPH": "1",
-                  "TPA_Extensions": {
-                    "Flight": [
-                      {
-                        "Airline": {
-                          "Marketing": "PK",
-                          "Operating": "PK"
-                        },
-                        "ArrivalDateTime": "2025-04-11T11:55:00",
-                        "ClassOfService": "Y",
-                        "DepartureDateTime": "2025-04-11T10:00:00",
-                        "DestinationLocation": {
-                          "LocationCode": "KHI"
-                        },
-                        "Number": 301,
-                        "OriginLocation": {
-                          "LocationCode": "ISB"
-                        },
-                        "Type": "A"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "DepartureDateTime": "2025-04-11T16:00:00",
-                  "OriginLocation": {
-                    "LocationCode": "KHI"
-                  },
-                  "DestinationLocation": {
-                    "LocationCode": "ISB"
-                  },
-                  "RPH": "2",
-                  "TPA_Extensions": {
-                    "Flight": [
-                      {
-                        "Airline": {
-                          "Marketing": "PK",
-                          "Operating": "PK"
-                        },
-                        "ArrivalDateTime": "2025-04-11T17:55:00",
-                        "ClassOfService": "Y",
-                        "DepartureDateTime": "2025-04-11T16:00:00",
-                        "DestinationLocation": {
-                          "LocationCode": "ISB"
-                        },
-                        "Number": 308,
-                        "OriginLocation": {
-                          "LocationCode": "KHI"
-                        },
-                        "Type": "A"
-                      }
-                    ]
-                  }
-                }
-              ],
-              "TravelPreferences": {
-                "CabinPref": [
-                  {
-                    "Cabin": "Y"
-                  }
-                ]
-              },
-              "TravelerInfoSummary": {
-                "AirTravelerAvail": [
-                  {
-                    "PassengerTypeQuantity": [
-                      {
-                        "Code": "ADT",
-                        "Quantity": 1
-                      }
-                    ]
-                  }
-                ],
-                "PriceRequestInformation": {
-                  "CurrencyCode": "SAR",
-                  "FareQualifier": "ADVJR1"
-                }
-              },
-              "TPA_Extensions": {
-                "IntelliSellTransaction": {
-                  "RequestType": {
-                    "Name": "Revalidate"
-                  }
-                }
-              }
-            }
-          }
+        // let searchRequest1 = {
+        //     "OTA_AirLowFareSearchRQ": {
+        //       "Version": "4.0.0",
+        //       "POS": {
+        //         "Source": [
+        //           {
+        //             "PseudoCityCode": "3GML",
+        //             "RequestorID": {
+        //               "Type": "1",
+        //               "ID": "1",
+        //               "CompanyName": {
+        //                 "Code": "TN"
+        //               }
+        //             }
+        //           }
+        //         ]
+        //       },
+        //       "OriginDestinationInformation": [
+        //         {
+        //           "DepartureDateTime": "2025-04-11T10:00:00",
+        //           "OriginLocation": {
+        //             "LocationCode": "ISB"
+        //           },
+        //           "DestinationLocation": {
+        //             "LocationCode": "KHI"
+        //           },
+        //           "RPH": "1",
+        //           "TPA_Extensions": {
+        //             "Flight": [
+        //               {
+        //                 "Airline": {
+        //                   "Marketing": "PK",
+        //                   "Operating": "PK"
+        //                 },
+        //                 "ArrivalDateTime": "2025-04-11T11:55:00",
+        //                 "ClassOfService": "Y",
+        //                 "DepartureDateTime": "2025-04-11T10:00:00",
+        //                 "DestinationLocation": {
+        //                   "LocationCode": "KHI"
+        //                 },
+        //                 "Number": 301,
+        //                 "OriginLocation": {
+        //                   "LocationCode": "ISB"
+        //                 },
+        //                 "Type": "A"
+        //               }
+        //             ]
+        //           }
+        //         },
+        //         {
+        //           "DepartureDateTime": "2025-04-11T16:00:00",
+        //           "OriginLocation": {
+        //             "LocationCode": "KHI"
+        //           },
+        //           "DestinationLocation": {
+        //             "LocationCode": "ISB"
+        //           },
+        //           "RPH": "2",
+        //           "TPA_Extensions": {
+        //             "Flight": [
+        //               {
+        //                 "Airline": {
+        //                   "Marketing": "PK",
+        //                   "Operating": "PK"
+        //                 },
+        //                 "ArrivalDateTime": "2025-04-11T17:55:00",
+        //                 "ClassOfService": "Y",
+        //                 "DepartureDateTime": "2025-04-11T16:00:00",
+        //                 "DestinationLocation": {
+        //                   "LocationCode": "ISB"
+        //                 },
+        //                 "Number": 308,
+        //                 "OriginLocation": {
+        //                   "LocationCode": "KHI"
+        //                 },
+        //                 "Type": "A"
+        //               }
+        //             ]
+        //           }
+        //         }
+        //       ],
+        //       "TravelPreferences": {
+        //         "CabinPref": [
+        //           {
+        //             "Cabin": "Y"
+        //           }
+        //         ]
+        //       },
+        //       "TravelerInfoSummary": {
+        //         "AirTravelerAvail": [
+        //           {
+        //             "PassengerTypeQuantity": [
+        //               {
+        //                 "Code": "ADT",
+        //                 "Quantity": 1
+        //               }
+        //             ]
+        //           }
+        //         ],
+        //         "PriceRequestInformation": {
+        //           "CurrencyCode": "SAR",
+        //           "FareQualifier": "ADVJR1"
+        //         }
+        //       },
+        //       "TPA_Extensions": {
+        //         "IntelliSellTransaction": {
+        //           "RequestType": {
+        //             "Name": "Revalidate"
+        //           }
+        //         }
+        //       }
+        //     }
+        //   }
 
 
         // return response.status(200).json(searchRequest);
@@ -697,88 +697,129 @@ module.exports = {
           myHeaders.append("Authorization", `Bearer ${accessToken}`);
           myHeaders.append("Content-Type", "application/json");
           
-          
+	
 
-          let searchRequest = {
-            "CreatePassengerNameRecordRQ": {
-                "version": "2.5.0",
-                "TravelItineraryAddInfo": {
-                    "CustomerInfo": {
-                        "PersonName": [
-                            {
-                                "GivenName": "John",
-                                "Surname": "Doe",
-                                "PassengerType": "ADT"
-                            }
-                        ]
-                    }
-                },
-                "AirBook": {
-                    "OriginDestinationInformation": {
-                        "FlightSegment": [
-                            {
-                                "DepartureDateTime": "2025-04-11T01:45:00+03:00",
-                                "ArrivalDateTime": "2025-04-11T03:05:00+03:00",
-                                "FlightNumber": "1643",
-                                "ResBookDesigCode": "V",
-                                "Status": "NN",
-                                "DestinationLocation": {
-                                    "LocationCode": "JED"
-                                },
-                                "MarketingAirline": {
-                                    "Code": "SV"
-                                },
-                                "OriginLocation": {
-                                    "LocationCode": "AHB"
-                                }
-                            }
-                        ]
-                    }
-                },
-                // "Ticketing": {
-                //     "TicketTimeLimit": "2025-04-11T01:45:00"
-                // },
-                // "PriceInfo": {
-                //     "TotalFare": {
-                //         "Amount": 219.65,
-                //         "CurrencyCode": "SAR"
-                //     },
-                //     "BaseFare": {
-                //         "Amount": 146,
-                //         "CurrencyCode": "SAR"
-                //     },
-                //     "Taxes": [
-                //         {
-                //             "Amount": 10,
-                //             "CurrencyCode": "SAR",
-                //             "TaxCode": "IO"
-                //         },
-                //         {
-                //             "Amount": 21.9,
-                //             "CurrencyCode": "SAR",
-                //             "TaxCode": "K75"
-                //         },
-                //         {
-                //             "Amount": 6.75,
-                //             "CurrencyCode": "SAR",
-                //             "TaxCode": "K76"
-                //         },
-                //         {
-                //             "Amount": 35,
-                //             "CurrencyCode": "SAR",
-                //             "TaxCode": "YRF"
-                //         }
-                //     ]
-                // },
-                "PostProcessing": {
-                    "EndTransaction": {
-                        "Source": {
-                            "ReceivedFrom": "Test User"
-                        }
+
+let searchRequest = {
+  "CreatePassengerNameRecordRQ": {
+      "version": "2.5.0",
+      "TravelItineraryAddInfo": {
+          "CustomerInfo": {
+              "PersonName": [
+                  {
+                      "GivenName": "John",
+                      "Surname": "Aflen",
+                      "PassengerType": "ADT"
+                  },
+              ],
+              "ContactNumbers": {
+                  "ContactNumber": [
+                      {
+                          "NameNumber": "1.1",
+                          "Phone": "3545642324324",
+                          "PhoneUseType": "H"
+                      }
+                  ]
+              }
+          },
+          "AgencyInfo": {
+              "Address": {
+                  "AddressLine": "Test Agency",
+                  "CityName": "Jeddah",
+                  "CountryCode": "SA"
+              },
+              "Ticketing": {
+                  "TicketType": "7TAW"
+              }
+          }
+      },
+      "AirBook": {
+          "OriginDestinationInformation": {
+              "FlightSegment": [
+                  {
+                      "DepartureDateTime": "2025-04-11T04:20:00",
+                      "ArrivalDateTime": "2025-04-11T06:45:00",
+                      "ResBookDesigCode": "Y",
+                      "FlightNumber": "435",
+                      "Status": "HK", 
+                      "NumberInParty": "1",
+                      "OriginLocation": {
+                          "LocationCode": "ISB"
+                      },
+                      "DestinationLocation": {
+                          "LocationCode": "AUH"
+                      },
+                      "MarketingAirline": {
+                          "Code": "EY",
+                          "FlightNumber": "303"
+                      }
+                  },
+                  //////////////////////////////////////
+                  {
+                    "DepartureDateTime": "2025-04-11T14:25:00",
+                    "ArrivalDateTime": "2025-04-11T06:45:00",
+                    "ResBookDesigCode": "Y",
+                    "FlightNumber": "435",
+                    "Status": "HK", 
+                    "NumberInParty": "1",
+                    "OriginLocation": {
+                        "LocationCode": "AUH"
+                    },
+                    "DestinationLocation": {
+                        "LocationCode": "AUH"
+                    },
+                    "MarketingAirline": {
+                        "Code": "EY",
+                        "FlightNumber": "303"
                     }
                 }
-            }
-        }
+                {
+                      "DepartureDateTime": "2025-04-11T04:20:00",
+                      "ArrivalDateTime": "2025-04-11T06:45:00",
+                      "ResBookDesigCode": "Y",
+                      "FlightNumber": "435",
+                      "Status": "HK", 
+                      "NumberInParty": "1",
+                      "OriginLocation": {
+                          "LocationCode": "ISB"
+                      },
+                      "DestinationLocation": {
+                          "LocationCode": "AUH"
+                      },
+                      "MarketingAirline": {
+                          "Code": "EY",
+                          "FlightNumber": "303"
+                      }
+                  }
+              ]
+          }
+      },
+      "AirPrice": [
+          {
+              "PriceRequestInformation": {
+                  "Retain": true,
+                  "OptionalQualifiers": {
+                      "PricingQualifiers": {
+                          "PassengerType": [
+                              {
+                                  "Code": "ADT",
+                                  "Quantity": "1"
+                              },
+                          ]
+                      }
+                  }
+              }
+          }
+      ],
+      "PostProcessing": {
+          "EndTransaction": {
+              "Source": {
+                  "ReceivedFrom": "Test User"
+              }
+          }
+      }
+  }
+};
         
         
 

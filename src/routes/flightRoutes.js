@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const flightController = require('../controllers/flightController');
 const passport = require('passport');
-const publicRoutes = [ '/list' ];
+const publicRoutes = [ '/list'  ,  '/airports'];
 
 router.use( (request ,response ,next)=>{
 
