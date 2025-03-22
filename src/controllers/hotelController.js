@@ -47,7 +47,7 @@ module.exports = {
       where: { type: AppConst.sabreFlights },
     });
 
-    const accessToken = tokenDetail.information.access_token;
+    const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
 
     let mappedRooms = rooms.map((room, index) => {
@@ -151,7 +151,7 @@ module.exports = {
       where: { type: AppConst.sabreFlights },
     });
 
-    const accessToken = tokenDetail.information.access_token;
+    const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
     let mappedRooms = rooms.map((room, index) => {
       roomDetail = {};

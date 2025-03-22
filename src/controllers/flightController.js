@@ -288,7 +288,7 @@ module.exports = {
                 //     where : { type : appConst.sabreFlights }
                 // })
 
-              //return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
+              return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
               // );
 
                 return response.status(200).json({
@@ -319,11 +319,11 @@ module.exports = {
 
 
     findAvailability : async ( request , response ) => {
-      const tokenDetail = await JsonHandler.findOne({
-          where : {type : AppConst.sabreFlights}
-      });
-      const accessToken = tokenDetail.information.access_token;
       try{
+        const tokenDetail = await JsonHandler.findOne({
+            where : {type : AppConst.sabreFlights}
+        });
+        const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
         
         let endpoint = 'https://api.cert.sabre.com//v4/shop/flights/revalidate';
         const myHeaders = new Headers();
@@ -667,11 +667,11 @@ module.exports = {
     },
 
     generatePnr : async (request , response ) => {
-      const tokenDetail = await JsonHandler.findOne({
-        where : {type : AppConst.sabreFlights}
-        });
-        const accessToken = tokenDetail.information.access_token;
-        try{
+      try{
+          const tokenDetail = await JsonHandler.findOne({
+            where : {type : AppConst.sabreFlights}
+          });
+          const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
           let endpoint = 'https://api.cert.sabre.com/v2.5.0/passenger/records?mode=create';
           const myHeaders = new Headers();
@@ -692,13 +692,6 @@ module.exports = {
                       "Surname": "Aflen",
                       "PassengerType": "ADT",
                       "NameNumber": "1.1"
-                    },
-                    {
-                      "NameReference": "DEF456",
-                      "GivenName": "Sara",
-                      "Surname": "Smith",
-                      "PassengerType": "ADT",
-                      "NameNumber": "2.1"
                     }
                   ],
                   "ContactNumbers": {
@@ -708,11 +701,6 @@ module.exports = {
                         "Phone": "3545642324324",
                         "PhoneUseType": "H"
                       },
-                      {
-                        "NameNumber": "2.1",
-                        "Phone": "3545642324455",
-                        "PhoneUseType": "H"
-                      }
                     ]
                   }
                 },
@@ -731,37 +719,26 @@ module.exports = {
                 "OriginDestinationInformation": {
                   "FlightSegment": [
                     {
-                      "DepartureDateTime": "2025-04-11T05:10:00",
-                      "ArrivalDateTime": "2025-04-11T07:25:00",
+                      "DepartureDateTime": "2025-04-01T10:00:00",
+                      "ArrivalDateTime": "2025-04-01T11:55:00",
                       "ResBookDesigCode": "Y",
-                      "FlightNumber": "206",
+                      "FlightNumber": "301",
                       "Status": "HK",
-                      "NumberInParty": "2",
+                      "NumberInParty": "1",
                       "OriginLocation": {"LocationCode": "ISB"},
-                      "DestinationLocation": {"LocationCode": "KWI"},
-                      "MarketingAirline": {"Code": "KU", "FlightNumber": "206"}
+                      "DestinationLocation": {"LocationCode": "KHI"},
+                      "MarketingAirline": {"Code": "PK", "FlightNumber": "301"}
                     },
                     {
-                      "DepartureDateTime": "2025-04-11T08:35:00",
-                      "ArrivalDateTime": "2025-04-11T12:15:00",
+                      "DepartureDateTime": "2025-04-06T07:00:00",
+                      "ArrivalDateTime": "2025-04-06T08:55:00",
                       "ResBookDesigCode": "Y",
-                      "FlightNumber": "165",
+                      "FlightNumber": "300",
                       "Status": "HK",
-                      "NumberInParty": "2",
-                      "OriginLocation": {"LocationCode": "KWI"},
-                      "DestinationLocation": {"LocationCode": "ROM"},
-                      "MarketingAirline": {"Code": "KU", "FlightNumber": "165"}
-                    },
-                    {
-                      "DepartureDateTime": "2025-04-11T14:40:00",
-                      "ArrivalDateTime": "2025-04-11T16:10:00",
-                      "ResBookDesigCode": "Y",
-                      "FlightNumber": "214",
-                      "Status": "HK",
-                      "NumberInParty": "2",
-                      "OriginLocation": {"LocationCode": "ROM"},
-                      "DestinationLocation": {"LocationCode": "LON"},
-                      "MarketingAirline": {"Code": "AZ", "FlightNumber": "214"}
+                      "NumberInParty": "1",
+                      "OriginLocation": {"LocationCode": "KHI"},
+                      "DestinationLocation": {"LocationCode": "ISB"},
+                      "MarketingAirline": {"Code": "PK", "FlightNumber": "300"}
                     }
                   ]
                 }
@@ -775,7 +752,7 @@ module.exports = {
                         "PassengerType": [
                           {
                             "Code": "ADT",
-                            "Quantity": "2"  // Matches the two passengers and NumberInParty
+                            "Quantity": "1"  // Matches the two passengers and NumberInParty
                           }
                         ]
                       }
