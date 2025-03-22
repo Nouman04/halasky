@@ -59,7 +59,7 @@ module.exports = {
             where : {type : AppConst.sabreFlights}
         });
 
-        const accessToken = typeof(tokenDetail.information) == string ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
+        const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
         
         // console.log(typeof(tokenDetail.information));
         // console.log(accessToken);
