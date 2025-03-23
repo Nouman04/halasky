@@ -394,6 +394,19 @@ module.exports = {
     try {
       const { userId, answers } = request.body;
 
+      // userId:1
+      // answers: [
+      //     {
+      //         optionId: 1,
+      //     },
+      //     {
+      //         optionId: 2,
+      //     },
+      //     {
+      //         optionId: 3,
+      //     },
+      // ]
+
       for (const answer of answers) {
         const existingAnswer = await PollAnswer.findOne({
           where: { user_id: userId, poll_option_id: answer.optionId },
@@ -432,6 +445,8 @@ module.exports = {
   getPollResults: async (request, response) => {
     try {
       const { pollId } = request.params;
+
+      // pollId:1
 
       const questions = await PollQuestion.findAll({
         where: { community_activity_id: pollId },
@@ -473,6 +488,8 @@ module.exports = {
   getCommunityActivityWithPoll: async (req, res) => {
     try {
       const { postId } = req.params;
+
+      // postId:2
 
       const activity = await CommunityActivity.findOne({
         where: { id: postId },
