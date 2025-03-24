@@ -1,0 +1,28 @@
+name: Deploy to prod-server-1
+
+on:
+  push:
+    branches:
+      - master  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_GITHUB_AWS }}
+
+      - name: SSH to prod-server-1 
+        run: |
+          ssh -o StrictHostKeyChecking=no githubactions@${{ secrets.AWS_prod_server_1_IP }} << 'EOF'
+            cd /var/www/Project1/halasky
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/SSH_AWS_GITHUB
+            git stash
+            git pull origin master
+          EOF
