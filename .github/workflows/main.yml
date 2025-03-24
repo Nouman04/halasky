@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master   
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -14,8 +15,8 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_GITHUB_AWS }}   
-   
+          ssh-private-key: ${{ secrets.SSH_GITHUB_AWS }}
+
       - name: SSH to prod-server-1 
         run: |
-          ssh -o StrictHostKeyChecking=no -i ${{ secrets.SSH_GITHUB_AWS }} githubactions@${{ secrets.AWS_prod_server_1_ip }} "cd /var/www/Project1/halasky && echo 'Test content' > test.txt"
+          ssh -o StrictHostKeyChecking=no githubactions@${{ secrets.AWS_prod_server_1_IP }} "cd /var/www/Project1/halasky && echo 'Test content' > test.txt"
