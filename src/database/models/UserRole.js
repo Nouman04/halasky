@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false,
     },
-    role_id: {
+    user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {

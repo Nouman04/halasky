@@ -14,26 +14,16 @@ router.post(
   upload.single("thumbnail"),
   CommunityActivityController.add
 );
-router.put(
-  "/edit",
-  upload.single("thumbnail"),
-  CommunityActivityController.edit
-);
+router.put( "/edit", upload.single("thumbnail"), CommunityActivityController.edit);
 router.post("/delete", CommunityActivityController.delete);
 router.post("/list", CommunityActivityController.list);
 router.put("/change-status", CommunityActivityController.changeStatus);
 router.put("/approval-status", CommunityActivityController.changeApproval);
-router.put(
-  "/change-restriction",
-  CommunityActivityController.updateRestriction
-);
+router.put( "/change-restriction", CommunityActivityController.updateRestriction);
 
 router.post("/poll", CommunityActivityController.createPoll);
 router.post("/poll/answer", CommunityActivityController.submitPollAnswer);
 router.get("/poll/results/:pollId", CommunityActivityController.getPollResults);
-router.get(
-  "/:postId",
-  CommunityActivityController.getCommunityActivityWithPoll
-);
+router.get( "/:postId", CommunityActivityController.getCommunityActivityWithPoll );
 
 module.exports = router;

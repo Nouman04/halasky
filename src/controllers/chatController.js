@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+
 module.exports = {
 
     askQuestion : async (request , response ) =>{
@@ -59,5 +60,9 @@ module.exports = {
             // });
         }
     },
+
+    sendMessage : (request ,response ) => {
+
+    }
 
 }

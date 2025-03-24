@@ -1,3 +1,6 @@
+const { response } = require("express");
+const path = require('path')
+
 module.exports = {
     flight : (request ,response)=>{
         let flightDetail = {
@@ -13814,5 +13817,10 @@ module.exports = {
         // console.log(form);
 
 
+    },
+    testSocketPage : (request ,response) =>{
+        
+        filePath = path.join(__dirname,'..','public', 'views' , 'index.html' );
+        response.sendFile(filePath);
     }
 }

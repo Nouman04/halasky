@@ -46,7 +46,18 @@ app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
 app.use("/test", testRoutes);
 
-app.listen(PORT, () => {
-  cronJobs();
-  console.log(`App is listening at port: ${PORT}`);
-});
+//socket code starts here
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+io.on('connection' ,(socket)=>{
+    console.log(`socket connection connected, connection id:${socket.id}`)
+})
+
+app.listen( PORT , () => {
+    cronJobs();
+    console.log(`App is listening at port: ${PORT}`)
+})
+

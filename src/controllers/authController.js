@@ -1,4 +1,4 @@
-const { User } = require('../database/models');
+const { User , Role , UserRole } = require('../database/models');
 const transport = require('../config/mailConfig');
 const bcrypt = require('bcrypt');
 const moment = require('moment');
@@ -34,7 +34,7 @@ module.exports = {
             const token = generateRandomToken();
             const tokenExpiryTime = moment().add( 10 , 'minutes').format('YYYY-MM-DD HH:mm:ss');
 
-            await User.create({
+            let createdUser = await User.create({
                 name : name,
                 email : email,
                 password : hashedPassword,
@@ -42,6 +42,13 @@ module.exports = {
                 token : token,
                 expires_at : tokenExpiryTime
             })
+
+            let role = await Role.findOne({where : {title : 'user'}});
+
+            await UserRole.create({
+                user_id : createdUser.id,
+                role_id : role.id
+            });
 
             const mailOptions= {
                 from : 'test@gmail.com',
@@ -97,9 +104,6 @@ module.exports = {
             let addedTokenTime  = moment(user.expires_at);
             let currentTime = moment();
 
-            console.log(addedTokenTime)
-            console.log(currentTime);
-
             if(addedTokenTime.isBefore(currentTime) ){
                 return response.status(200).json({
                     status: false,
@@ -144,6 +148,17 @@ module.exports = {
             const token = generateRandomToken();
             const tokenExpiryTime = moment().add( 10 , 'minutes').format('YYYY-MM-DD HH:mm:ss');
 
+            const user = await User.findOne({
+                where : {email : email}
+            })
+
+            if(!user){
+                return response.status(500).json({
+                    status : false,
+                    message : "User not found with this email"
+                })
+            }
+
             await User.update(
                 { token : token, expires_at : tokenExpiryTime}, 
                 { where :  {email : email} } 
@@ -176,6 +191,63 @@ module.exports = {
                 error: error.message
             });
         }
-    }
+    },
+
+
+    updatePassword : async ( request , response ) => {
+        try {
+
+            const { token , email , password } = request.body;
+
+            const user = await User.findOne({
+                where : { email : email}
+            });
+
+            if(!user){
+                return response.status(500).json({
+                    status : false,
+                    message : "User not found with this email"
+                })
+            }
+
+            if(user.token != token){
+                return response.status(500).json({
+                    status : false,
+                    message : "Code doesn't match"
+                })
+            }
+
+
+            let addedTokenTime  = moment(user.expires_at);
+            let currentTime = moment();
+
+            if(addedTokenTime.isBefore(currentTime) ){
+                return response.status(200).json({
+                    status: false,
+                    message: 'Your verification token is expired'
+                })
+            }
+
+
+            let saltcount  = 10;
+            let hashedPassword = await bcrypt.hash( password , saltcount);
+
+            await User.update(
+                {password : hashedPassword},
+                {where : {email : email} }
+            )
+
+
+            return response.status(200).json({
+                status: true,
+                message: 'Password Updated',
+            })
+        } catch (error){
+            return response.status(500).json({
+                status : false,
+                message : error.message
+            })
+        }
+    },
 
 }
