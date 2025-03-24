@@ -42,14 +42,6 @@ module.exports = {
         type : Sequelize.DataTypes.BOOLEAN,
         defaultValue: 0
       },
-      flight_id : {
-        type : Sequelize.DataTypes.STRING,
-        allowNull: false
-      },
-      flight_code : {
-        type : Sequelize.DataTypes.STRING,
-        allowNull: false
-      },
       payment_id : {
         type : Sequelize.DataTypes.STRING,
         allowNull: false

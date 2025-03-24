@@ -120,6 +120,9 @@ module.exports = {
                       "RequestType": {
                         "Name": "50ITINS"
                       }
+                    },
+                    "RichContent": {
+                      "FlightAmenities": true, // Moved here to request amenities
                     }
                   }
                 }
@@ -137,7 +140,7 @@ module.exports = {
             .then((response) => response.json()) 
             .then(async (result) => {
               //new code starts here
-
+            //return response.status(200).json(result.groupedItineraryResponse.itineraryGroups[0].itineraries[0])
               let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
 
               if(!foundItenararies){
@@ -150,7 +153,7 @@ module.exports = {
 
 
 
-
+        let flightAmenities = result.groupedItineraryResponse.flightAmenities;
         let itineraryGroups = result.groupedItineraryResponse.itineraryGroups;
         let legsInformation = result.groupedItineraryResponse.legDescs;
         let baggageDescs = result.groupedItineraryResponse.baggageAllowanceDescs;
@@ -166,6 +169,13 @@ module.exports = {
         let mappedTaxSummary = Object.fromEntries(taxSummaryDescs.map(taxSummary => [taxSummary.id , taxSummary]));
         let mappedFareComponent = Object.fromEntries(fareComponentDescs.map(fareComponent => [fareComponent.id , fareComponent]));
         let mappedObFees = Object.fromEntries(obFeeDescs.map(obFee => [obFee.id , obFee]));
+        let mappedEntertainment = flightAmenities.entertainment ? Object.fromEntries(flightAmenities.entertainment.map( entertainment => [entertainment.id , entertainment])) : [];
+        let mappedFood = flightAmenities.food ? Object.fromEntries(flightAmenities.food.map( food => [food.id , food])) : [];
+        let mappedLayout = flightAmenities.layout ? Object.fromEntries(flightAmenities.layout.map( layout => [layout.id , layout])) : [];
+        let mappedPower = flightAmenities.power ? Object.fromEntries(flightAmenities.power.map( power => [power.id , power])) : [];
+        let mappedSeat = flightAmenities.seat ? Object.fromEntries(flightAmenities.seat.map( seat => [seat.id , seat])) : [];
+        let mappedWifi = flightAmenities.wifi ? Object.fromEntries(flightAmenities.wifi.map( wifi => [wifi.id , wifi])) : [];
+
         let itineraryGroupDetail = [];
        
     //    console.log(itineraryGroups);
@@ -216,14 +226,57 @@ module.exports = {
 
                         // passenger fare components
                         passengerDetail.FareComponents = passengerFareComponentList.map( pfc => {
-                        
-                            let fareComponentDetail = mappedFareComponent[pfc.ref];
+                          
 
+                            let segmentList = pfc.segments;
+                            let segmentAmenitiesList = []; 
+                            segmentList.forEach( segment => {
+
+                              let amenitiesList = segment.segment.flightAmenities;
+                              
+                              if(amenitiesList){
+                                amenitiesList.forEach( eachAmenity => {
+
+                                  let amenitiesInformation = [];
+                                  for(const key in eachAmenity){
+                                    // console.log(key)
+                                    switch (key){
+                                      case "entertainmentRef":
+                                        amenitiesInformation.push({ key : "entertainment" ,  ...mappedEntertainment[eachAmenity[key]] });
+                                      break;
+                                      case "foodRef":
+                                        amenitiesInformation.push({ key : "food" ,  ...mappedFood[eachAmenity[key]] });
+                                      break;
+                                      case "layoutRef":
+                                        amenitiesInformation.push({ key : "layout" ,  ...mappedLayout[eachAmenity[key]] });
+                                      break;
+                                      case "powerRef":
+                                        amenitiesInformation.push({ key : "power" ,  ...mappedPower[eachAmenity[key]] });
+                                      break;
+                                      case "seatRef":
+                                        amenitiesInformation.push({ key : "seat" ,  ...mappedSeat[eachAmenity[key]] });
+                                      break;
+                                      case "wifiRef":
+                                        amenitiesInformation.push({ key : "wifi" ,  ...mappedWifi[eachAmenity[key]] });
+                                      break;
+                                    }
+                                  }
+                                  segmentAmenitiesList.push(amenitiesInformation);
+                                })
+                              }
+                              
+
+                          })
+
+                            let fareComponentDetail = mappedFareComponent[pfc.ref];
+                            // console.log(segmentAmenitiesList);
+                            // let amenities = segmentAmenitiesList;
                             return { 
                                 beginAirport : pfc.beginAirport, 
                                 endAirport : pfc.endAirport,
                                 segments : pfc.segments,
-                                fareComponentDetail :fareComponentDetail
+                                fareComponentDetail :fareComponentDetail,
+                                amenities : segmentAmenitiesList
                             }
                         })
 
@@ -279,9 +332,28 @@ module.exports = {
        });
 
 
+       //new code starts here
+       let amounts = [], amenities = [], transitsAmount = [];
+       let minimumAmount =null, maximumAmount = null;
+       itineraryGroupDetail.forEach( group => {
 
-              //new code ends here 
+          group.itinerariesList.forEach( itenerary => {
+            let legs = itenerary.legList //array
+            let passengerPriceDetail = itenerary.passengerPriceDetail; // array
 
+              passengerPriceDetail.forEach( priceDetail => {
+
+                let totalFareDetail = priceDetail.totalFareDetail;
+                  amounts.push(totalFareDetail.totalPrice);
+
+              });
+
+          })
+
+       });
+       //new code ends here
+       minimumAmount = Math.min(...amounts);
+       maximumAmount = Math.max(...amounts);
 
 
                 // let token = await JsonHandler.findOne({
@@ -295,7 +367,7 @@ module.exports = {
                     status: true,
                     // data : result
                     // data : itineraryGroupDetail
-                    data: itineraryGroupDetail,
+                    data: { itineraryGroupDetail , minimumAmount , maximumAmount },
                 });
             })
             .catch((error) => {
@@ -325,7 +397,7 @@ module.exports = {
         });
         const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
         
-        let endpoint = 'https://api.cert.sabre.com//v4/shop/flights/revalidate';
+        let endpoint = 'https://api.cert.sabre.com/v4/shop/flights/revalidate';
         const myHeaders = new Headers();
         myHeaders.append("Authorization", `Bearer ${accessToken}`);
         myHeaders.append("Content-Type", "application/json");

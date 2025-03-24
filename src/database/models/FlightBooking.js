@@ -36,14 +36,6 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    flight_id: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    flight_code: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     payment_id: {
       type: DataTypes.STRING,
       allowNull: false,

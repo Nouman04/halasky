@@ -15,6 +15,9 @@ router.use( (request ,response ,next)=>{
 router.post("/get", hotelController.list);
 router.post("/get/trending", hotelController.trending);
 router.post("/locations", hotelController.locationList);
+router.post("/detail", hotelController.hotelDetail); 
+router.post("/images", hotelController.images);
+router.post("/confirm-rate", hotelController.confirmRate);
 // router.post('/availability' ,   hotelController.findAvailability );
 
 module.exports = router;
