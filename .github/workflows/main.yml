@@ -19,4 +19,10 @@ jobs:
 
       - name: SSH to prod-server-1 
         run: |
-          ssh -o StrictHostKeyChecking=no githubactions@${{ secrets.AWS_prod_server_1_IP }} "cd /var/www/Project1/halasky && echo 'Test content' > test.txt"
+          ssh -o StrictHostKeyChecking=no githubactions@${{ secrets.AWS_prod_server_1_IP }} << 'EOF'
+            cd /var/www/Project1/halasky
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/SSH_AWS_GITHUB
+            git stash
+            git pull origin master
+          EOF
