@@ -1,6 +1,6 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const { User } = require("../database/models");
+const { User , Role } = require("../database/models");
 const bcrypt = require("bcrypt");
 
 module.exports = {
@@ -8,12 +8,12 @@ module.exports = {
     try {
       const { email, password } = request.body;
 
-      console.log("Email:", email);
-      console.log("Password:", password);
-
-      const userDetail = await User.findOne({ where: { email: email } });
-
-      console.log("User Detail:", userDetail);
+      const userDetail = await User.findOne({ 
+        include : {
+          model : Role
+        },
+        where: { email: email } 
+      });
 
       if (!userDetail) {
         return response
@@ -32,8 +32,6 @@ module.exports = {
       let userData = userDetail.get();
 
       delete userData.password;
-
-      console.log("User Data Before Token:", userData);
 
       let token = jwt.sign(userData, process.env.NOD_SECRET_KEY, {
         expiresIn: "4h",

@@ -1,7 +1,35 @@
 const { JsonHandler } = require('../database/models');
 const AppConst = require('../appConst');
+const airports = require('../public/files/locations.json');
+
 
 module.exports = {
+
+    airportList : async (request , response) => {
+      const { searchQuery } = request.body;
+      try{
+        filteredAirports = airports.filter( airport => {
+          let airportCode = airport.code.toLowerCase();
+          let airportName = airport.name.toLowerCase();
+          return airportCode.includes(searchQuery.toLowerCase()) || airportName.includes(searchQuery.toLowerCase());
+        }).slice(0 , 20);
+
+        return response.status(200).json({
+            status: true,
+            data: filteredAirports,
+        });
+      } catch (error){
+        return response.status(500).json({
+            status: false,
+            message: 'Something Went Wrong',
+            error: error.message,
+        });
+    }
+      
+
+    },
+
+
     list : async (request ,response)=>{
         const { destinationList , passengerList } = request.body;
 
@@ -31,11 +59,18 @@ module.exports = {
             where : {type : AppConst.sabreFlights}
         });
 
-        const accessToken = tokenDetail.information.access_token;
+        const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
+        
+        // console.log(typeof(tokenDetail.information));
+        // console.log(accessToken);
 
+        // const accessToken = tokenDetail.information.access_token;
+
+        // console.log(accessToken);
         
         try{
             let endpoint = 'https://api.cert.sabre.com/v5/offers/shop';
+            
     
             const myHeaders = new Headers();
             myHeaders.append("Authorization", `Bearer ${accessToken}`);
@@ -101,13 +136,19 @@ module.exports = {
             fetch( endpoint , requestOptions)
             .then((response) => response.json()) 
             .then(async (result) => {
-               
               //new code starts here
 
-            //   return response.status(200).json({
-            //     status: true,
-            //     data: result,
-            // });
+              let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
+
+              if(!foundItenararies){
+                return response.status(200).json({
+                  status: false,
+                  message: "No flight found.",
+                });
+              }
+
+
+
 
 
         let itineraryGroups = result.groupedItineraryResponse.itineraryGroups;
@@ -239,38 +280,6 @@ module.exports = {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
               //new code ends here 
 
 
@@ -279,7 +288,7 @@ module.exports = {
                 //     where : { type : appConst.sabreFlights }
                 // })
 
-              //   return response.status(200).json(itineraryGroupDetail
+              return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
               // );
 
                 return response.status(200).json({
@@ -310,11 +319,11 @@ module.exports = {
 
 
     findAvailability : async ( request , response ) => {
-      const tokenDetail = await JsonHandler.findOne({
-          where : {type : AppConst.sabreFlights}
-      });
-      const accessToken = tokenDetail.information.access_token;
       try{
+        const tokenDetail = await JsonHandler.findOne({
+            where : {type : AppConst.sabreFlights}
+        });
+        const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
         
         let endpoint = 'https://api.cert.sabre.com//v4/shop/flights/revalidate';
         const myHeaders = new Headers();
@@ -508,119 +517,119 @@ module.exports = {
 
         // return response.status(200).json(searchRequest);
 
-        let searchRequest1 = {
-            "OTA_AirLowFareSearchRQ": {
-              "Version": "4.0.0",
-              "POS": {
-                "Source": [
-                  {
-                    "PseudoCityCode": "3GML",
-                    "RequestorID": {
-                      "Type": "1",
-                      "ID": "1",
-                      "CompanyName": {
-                        "Code": "TN"
-                      }
-                    }
-                  }
-                ]
-              },
-              "OriginDestinationInformation": [
-                {
-                  "DepartureDateTime": "2025-04-11T10:00:00",
-                  "OriginLocation": {
-                    "LocationCode": "ISB"
-                  },
-                  "DestinationLocation": {
-                    "LocationCode": "KHI"
-                  },
-                  "RPH": "1",
-                  "TPA_Extensions": {
-                    "Flight": [
-                      {
-                        "Airline": {
-                          "Marketing": "PK",
-                          "Operating": "PK"
-                        },
-                        "ArrivalDateTime": "2025-04-11T11:55:00",
-                        "ClassOfService": "Y",
-                        "DepartureDateTime": "2025-04-11T10:00:00",
-                        "DestinationLocation": {
-                          "LocationCode": "KHI"
-                        },
-                        "Number": 301,
-                        "OriginLocation": {
-                          "LocationCode": "ISB"
-                        },
-                        "Type": "A"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "DepartureDateTime": "2025-04-11T16:00:00",
-                  "OriginLocation": {
-                    "LocationCode": "KHI"
-                  },
-                  "DestinationLocation": {
-                    "LocationCode": "ISB"
-                  },
-                  "RPH": "2",
-                  "TPA_Extensions": {
-                    "Flight": [
-                      {
-                        "Airline": {
-                          "Marketing": "PK",
-                          "Operating": "PK"
-                        },
-                        "ArrivalDateTime": "2025-04-11T17:55:00",
-                        "ClassOfService": "Y",
-                        "DepartureDateTime": "2025-04-11T16:00:00",
-                        "DestinationLocation": {
-                          "LocationCode": "ISB"
-                        },
-                        "Number": 308,
-                        "OriginLocation": {
-                          "LocationCode": "KHI"
-                        },
-                        "Type": "A"
-                      }
-                    ]
-                  }
-                }
-              ],
-              "TravelPreferences": {
-                "CabinPref": [
-                  {
-                    "Cabin": "Y"
-                  }
-                ]
-              },
-              "TravelerInfoSummary": {
-                "AirTravelerAvail": [
-                  {
-                    "PassengerTypeQuantity": [
-                      {
-                        "Code": "ADT",
-                        "Quantity": 1
-                      }
-                    ]
-                  }
-                ],
-                "PriceRequestInformation": {
-                  "CurrencyCode": "SAR",
-                  "FareQualifier": "ADVJR1"
-                }
-              },
-              "TPA_Extensions": {
-                "IntelliSellTransaction": {
-                  "RequestType": {
-                    "Name": "Revalidate"
-                  }
-                }
-              }
-            }
-          }
+        // let searchRequest1 = {
+        //     "OTA_AirLowFareSearchRQ": {
+        //       "Version": "4.0.0",
+        //       "POS": {
+        //         "Source": [
+        //           {
+        //             "PseudoCityCode": "3GML",
+        //             "RequestorID": {
+        //               "Type": "1",
+        //               "ID": "1",
+        //               "CompanyName": {
+        //                 "Code": "TN"
+        //               }
+        //             }
+        //           }
+        //         ]
+        //       },
+        //       "OriginDestinationInformation": [
+        //         {
+        //           "DepartureDateTime": "2025-04-11T10:00:00",
+        //           "OriginLocation": {
+        //             "LocationCode": "ISB"
+        //           },
+        //           "DestinationLocation": {
+        //             "LocationCode": "KHI"
+        //           },
+        //           "RPH": "1",
+        //           "TPA_Extensions": {
+        //             "Flight": [
+        //               {
+        //                 "Airline": {
+        //                   "Marketing": "PK",
+        //                   "Operating": "PK"
+        //                 },
+        //                 "ArrivalDateTime": "2025-04-11T11:55:00",
+        //                 "ClassOfService": "Y",
+        //                 "DepartureDateTime": "2025-04-11T10:00:00",
+        //                 "DestinationLocation": {
+        //                   "LocationCode": "KHI"
+        //                 },
+        //                 "Number": 301,
+        //                 "OriginLocation": {
+        //                   "LocationCode": "ISB"
+        //                 },
+        //                 "Type": "A"
+        //               }
+        //             ]
+        //           }
+        //         },
+        //         {
+        //           "DepartureDateTime": "2025-04-11T16:00:00",
+        //           "OriginLocation": {
+        //             "LocationCode": "KHI"
+        //           },
+        //           "DestinationLocation": {
+        //             "LocationCode": "ISB"
+        //           },
+        //           "RPH": "2",
+        //           "TPA_Extensions": {
+        //             "Flight": [
+        //               {
+        //                 "Airline": {
+        //                   "Marketing": "PK",
+        //                   "Operating": "PK"
+        //                 },
+        //                 "ArrivalDateTime": "2025-04-11T17:55:00",
+        //                 "ClassOfService": "Y",
+        //                 "DepartureDateTime": "2025-04-11T16:00:00",
+        //                 "DestinationLocation": {
+        //                   "LocationCode": "ISB"
+        //                 },
+        //                 "Number": 308,
+        //                 "OriginLocation": {
+        //                   "LocationCode": "KHI"
+        //                 },
+        //                 "Type": "A"
+        //               }
+        //             ]
+        //           }
+        //         }
+        //       ],
+        //       "TravelPreferences": {
+        //         "CabinPref": [
+        //           {
+        //             "Cabin": "Y"
+        //           }
+        //         ]
+        //       },
+        //       "TravelerInfoSummary": {
+        //         "AirTravelerAvail": [
+        //           {
+        //             "PassengerTypeQuantity": [
+        //               {
+        //                 "Code": "ADT",
+        //                 "Quantity": 1
+        //               }
+        //             ]
+        //           }
+        //         ],
+        //         "PriceRequestInformation": {
+        //           "CurrencyCode": "SAR",
+        //           "FareQualifier": "ADVJR1"
+        //         }
+        //       },
+        //       "TPA_Extensions": {
+        //         "IntelliSellTransaction": {
+        //           "RequestType": {
+        //             "Name": "Revalidate"
+        //           }
+        //         }
+        //       }
+        //     }
+        //   }
 
 
         // return response.status(200).json(searchRequest);
@@ -658,98 +667,108 @@ module.exports = {
     },
 
     generatePnr : async (request , response ) => {
-      const tokenDetail = await JsonHandler.findOne({
-        where : {type : AppConst.sabreFlights}
-        });
-        const accessToken = tokenDetail.information.access_token;
-        try{
+      try{
+          const tokenDetail = await JsonHandler.findOne({
+            where : {type : AppConst.sabreFlights}
+          });
+          const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
-          let endpoint = 'https://api.cert.sabre.com/v2.5.0/passenger/records';
+          let endpoint = 'https://api.cert.sabre.com/v2.5.0/passenger/records?mode=create';
           const myHeaders = new Headers();
           myHeaders.append("Authorization", `Bearer ${accessToken}`);
           myHeaders.append("Content-Type", "application/json");
-          myHeaders.append("Accept", "application/json");
+          
+	
+
 
           let searchRequest = {
             "CreatePassengerNameRecordRQ": {
-                "version": "2.5.0",
-                "TravelItineraryAddInfo": {
-                    "CustomerInfo": {
-                        "PersonName": [
-                            {
-                                "GivenName": "John",
-                                "Surname": "Doe",
-                                "PassengerType": "ADT"
-                            }
-                        ]
+              "version": "2.5.0",
+              "TravelItineraryAddInfo": {
+                "CustomerInfo": {
+                  "PersonName": [
+                    {
+                      "GivenName": "John",
+                      "Surname": "Aflen",
+                      "PassengerType": "ADT",
+                      "NameNumber": "1.1"
                     }
-                },
-                "AirBook": {
-                    "OriginDestinationInformation": {
-                        "FlightSegment": [
-                            {
-                                "DepartureDateTime": "2025-04-11T01:45:00+03:00",
-                                "ArrivalDateTime": "2025-04-11T03:05:00+03:00",
-                                "FlightNumber": "1643",
-                                "ResBookDesigCode": "V",
-                                "Status": "NN",
-                                "DestinationLocation": {
-                                    "LocationCode": "JED"
-                                },
-                                "MarketingAirline": {
-                                    "Code": "SV"
-                                },
-                                "OriginLocation": {
-                                    "LocationCode": "AHB"
-                                }
-                            }
-                        ]
-                    }
-                },
-                "Ticketing": {
-                    "TicketTimeLimit": "2025-04-11T01:45:00"
-                },
-                "PriceInfo": {
-                    "TotalFare": {
-                        "Amount": 219.65,
-                        "CurrencyCode": "SAR"
-                    },
-                    "BaseFare": {
-                        "Amount": 146,
-                        "CurrencyCode": "SAR"
-                    },
-                    "Taxes": [
-                        {
-                            "Amount": 10,
-                            "CurrencyCode": "SAR",
-                            "TaxCode": "IO"
-                        },
-                        {
-                            "Amount": 21.9,
-                            "CurrencyCode": "SAR",
-                            "TaxCode": "K75"
-                        },
-                        {
-                            "Amount": 6.75,
-                            "CurrencyCode": "SAR",
-                            "TaxCode": "K76"
-                        },
-                        {
-                            "Amount": 35,
-                            "CurrencyCode": "SAR",
-                            "TaxCode": "YRF"
-                        }
+                  ],
+                  "ContactNumbers": {
+                    "ContactNumber": [
+                      {
+                        "NameNumber": "1.1",
+                        "Phone": "3545642324324",
+                        "PhoneUseType": "H"
+                      },
                     ]
+                  }
                 },
-                "PostProcessing": {
-                    "EndTransaction": {
-                        "Source": {
-                            "ReceivedFrom": "Test User"
-                        }
-                    }
+                "AgencyInfo": {
+                  "Address": {
+                    "AddressLine": "Test Agency",
+                    "CityName": "Jeddah",
+                    "CountryCode": "SA"
+                  },
+                  "Ticketing": {
+                    "TicketType": "7TAW"
+                  }
                 }
+              },
+              "AirBook": {
+                "OriginDestinationInformation": {
+                  "FlightSegment": [
+                    {
+                      "DepartureDateTime": "2025-04-01T10:00:00",
+                      "ArrivalDateTime": "2025-04-01T11:55:00",
+                      "ResBookDesigCode": "Y",
+                      "FlightNumber": "301",
+                      "Status": "HK",
+                      "NumberInParty": "1",
+                      "OriginLocation": {"LocationCode": "ISB"},
+                      "DestinationLocation": {"LocationCode": "KHI"},
+                      "MarketingAirline": {"Code": "PK", "FlightNumber": "301"}
+                    },
+                    {
+                      "DepartureDateTime": "2025-04-06T07:00:00",
+                      "ArrivalDateTime": "2025-04-06T08:55:00",
+                      "ResBookDesigCode": "Y",
+                      "FlightNumber": "300",
+                      "Status": "HK",
+                      "NumberInParty": "1",
+                      "OriginLocation": {"LocationCode": "KHI"},
+                      "DestinationLocation": {"LocationCode": "ISB"},
+                      "MarketingAirline": {"Code": "PK", "FlightNumber": "300"}
+                    }
+                  ]
+                }
+              },
+              "AirPrice": [
+                {
+                  "PriceRequestInformation": {
+                    "Retain": true,
+                    "OptionalQualifiers": {
+                      "PricingQualifiers": {
+                        "PassengerType": [
+                          {
+                            "Code": "ADT",
+                            "Quantity": "1"  // Matches the two passengers and NumberInParty
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ],
+              "PostProcessing": {
+                "EndTransaction": {
+                  "Source": {
+                    "ReceivedFrom": "Test User"
+                  }
+                }
+              }
             }
-        }
+          };
         
         
 
