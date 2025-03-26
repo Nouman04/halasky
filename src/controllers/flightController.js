@@ -203,6 +203,7 @@ module.exports = {
 
                 let priceInformationList = gi.pricingInformation;
                 let priceDetail = [];
+                let segmentAmenitiesList = []; 
 
                 priceInformationList.forEach( pi => {
                     let price = {};
@@ -229,7 +230,7 @@ module.exports = {
                           
 
                             let segmentList = pfc.segments;
-                            let segmentAmenitiesList = []; 
+                            let segmentAmenities = []; 
                             segmentList.forEach( segment => {
 
                               let amenitiesList = segment.segment.flightAmenities;
@@ -261,12 +262,14 @@ module.exports = {
                                       break;
                                     }
                                   }
-                                  segmentAmenitiesList.push(amenitiesInformation);
+                                  segmentAmenities.push(amenitiesInformation);
                                 })
                               }
                               
 
                           })
+
+                          segmentAmenitiesList.push({ segments : segmentAmenities});
 
                             let fareComponentDetail = mappedFareComponent[pfc.ref];
                             // console.log(segmentAmenitiesList);
@@ -276,7 +279,7 @@ module.exports = {
                                 endAirport : pfc.endAirport,
                                 segments : pfc.segments,
                                 fareComponentDetail :fareComponentDetail,
-                                amenities : segmentAmenitiesList
+                                // amenities : segmentAmenitiesList
                             }
                         })
 
@@ -325,7 +328,7 @@ module.exports = {
                 // console.log( priceDetail[0][0].fare.passengerInfoList[0].passengerInfo.taxes );
                 // // price.passengerList
                 // throw '';
-                return {priceSource : priceSource, legIds : legIds , legList : legDetail , passengerPriceDetail : priceDetail };
+                return {priceSource : priceSource, legIds : legIds , legList : legDetail , passengerPriceDetail : priceDetail,   amenities : segmentAmenitiesList };
             });
 
             itineraryGroupDetail.push({ description : groupDescription , itinerariesList : itinerariesList });
@@ -333,7 +336,7 @@ module.exports = {
 
 
        //new code starts here
-       let amounts = [], amenities = [], transitsAmount = [];
+       let amounts = [], transitsAmount = [];
        let minimumAmount =null, maximumAmount = null;
        itineraryGroupDetail.forEach( group => {
 
@@ -360,7 +363,7 @@ module.exports = {
                 //     where : { type : appConst.sabreFlights }
                 // })
 
-              //return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
+              return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
               // );
 
                 return response.status(200).json({
