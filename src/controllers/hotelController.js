@@ -130,9 +130,19 @@ module.exports = {
       fetch(endpoint, requestOptions)
         .then((response) => response.json())
         .then(async (result) => {
+
+          let detail = result.GetHotelAvailRS;
+          let amountList = [];
+          if(detail.ApplicationResults.status == "Complete"){
+            let hotelList = detail.HotelAvailInfos.HotelAvailInfo;
+
+            
+
+          }
+
+
           return response.status(200).json({
             status: true,
-            message: "rim1",
             data: result,
           });
         });
