@@ -140,7 +140,18 @@ module.exports = {
             .then((response) => response.json()) 
             .then(async (result) => {
               //new code starts here
-           // return response.status(200).json(result.groupedItineraryResponse.itineraryGroups[0].itineraries[0])
+
+              if(result.status == "NotProcessed")
+              {
+                return response.status(500).json({
+                    status: false,
+                    message: result.message,
+                    error: result.errorCode,
+                }); 
+              }
+
+              //return response.status(200).json(result);
+              //return response.status(200).json(result.groupedItineraryResponse.itineraryGroups[0].itineraries[0])
               let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
 
               if(!foundItenararies){
