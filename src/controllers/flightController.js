@@ -405,6 +405,7 @@ module.exports = {
                 // })
 
               //return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
+              
               // );
 
                 return response.status(200).json({
