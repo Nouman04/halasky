@@ -214,7 +214,7 @@ module.exports = {
 
                 let priceInformationList = gi.pricingInformation;
                 let priceDetail = [];
-                // let segmentAmenitiesList = []; 
+                let segmentAmenitiesList = []; 
                 let newAmenities = [];
 
                 priceInformationList.forEach( pi => {
@@ -257,7 +257,7 @@ module.exports = {
                             //new amenities code ends here
 
                             let segmentList = pfc.segments;
-                            // let segmentAmenities = []; 
+                            let segmentAmenities = []; 
                             segmentList.forEach( (segment , index) => {
 
                               let amenitiesList = segment.segment.flightAmenities;
@@ -291,7 +291,7 @@ module.exports = {
                                   }
 
                                   passengerScheduleList.segments.push({segmentIndex : (index + 1) ,  amenitiesList : amenitiesInformation});
-                                  //segmentAmenities.push(amenitiesInformation);
+                                  segmentAmenities.push(amenitiesInformation);
                                 })
                               }
                               
@@ -300,7 +300,7 @@ module.exports = {
                           //new code starts here
                           namenitiesDetail.scheduleDetail.push(passengerScheduleList)
                           //new code ends here 
-                          // segmentAmenitiesList.push({ segments : segmentAmenities});
+                          segmentAmenitiesList.push({ segments : segmentAmenities});
 
                             let fareComponentDetail = mappedFareComponent[pfc.ref];
                             // console.log(segmentAmenitiesList);
@@ -367,8 +367,8 @@ module.exports = {
                   legIds : legIds, 
                   legList : legDetail, 
                   passengerPriceDetail : priceDetail,   
-                  // amenities : segmentAmenitiesList,
-                  amenities : newAmenities 
+                  amenities : segmentAmenitiesList,
+                  amenities1 : newAmenities 
                 };
             });
 
