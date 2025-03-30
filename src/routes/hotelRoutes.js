@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const hotelController = require("../controllers/hotelController");
 const passport = require("passport");
-const publicRoutes = ["/list" , "/locations" , "/get"];
+const publicRoutes = ["/list" , "/locations" , "/get" , "/detail" , "/images"];
 
 router.use( (request ,response ,next)=>{
 

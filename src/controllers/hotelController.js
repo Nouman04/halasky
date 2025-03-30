@@ -287,7 +287,7 @@ module.exports = {
           SearchCriteria: {
             HotelRefs: {
               HotelRef: {
-                HotelCode: "100500336", 
+                HotelCode: "100561270", 
                 CodeContext: "GLOBAL"
               }
             },
@@ -324,7 +324,6 @@ module.exports = {
         .then(async (result) => {
           return response.status(200).json({
             status: true,
-            message: "rim1",
             data: result,
           });
         });
@@ -440,7 +439,7 @@ module.exports = {
           },
           // "CorporateNumber": "DK44391RC",
           RateInfoRef: {
-            RateKey: "sqpUwSyzpETt9AZSIUefQYhfPWurg0nPYd5gbvlNRr3YpaswcLtYx+VkmTRyGq83kz3E2e5bx6jn9GW1V3KrGVVNPnZBHjlWP4zxIkFuhnzIjf6H8EvKZBN9B3NxoAk3cY4S1PXOwzJFXE3n+cYXfzhgvdWwHjtS3GUyQRoRwjttj/tZJNEsy4+wuWdbSHjfI/RzdWQwu79kDLlxuf5RBOcBWB5KVPH4XOUR3cgAmqnSQRF3PUqRS+pPxWDc4pAbnLEqEHm0Xpsg5Y7vTr8pjkXbR0lGbWex2HctH1HCgGpHvwATTUXpge2zUJcGi//pQgXqYJTQIystuvJUWDGoOzIpucwSfIXnfVeHCGggxfNJIi+bUVIgqwu/0MIFwHdBvDuDEsBeFO6AQmYmeJEy+mUCx3pdQ2QwlnCf9ucZ3xJq34CiLi5vyC2Ci9sIt2gDpB5e+3NJC4WkzUpg1rxg9aTfiE8A737cJ6pCnyFKXvEJNBQwfg4Jzqt1A9vUTn75gY0cmZqTRAADD8Z9dG8HfVN+C5age+mIbOnEdGU0p5jTo7ufeCm/PreTfrV7yZM2kW2M2ZM1M4kJMUoCL/PQMF5LgB11XyjgNG0DKP+BoagVB2w0iXh+SpLg/YD07C0ZlBifwKHhbWvRoNLS/MiBlQ==",
+            RateKey: "sqpUwSyzpETt9AZSIUefQZYKSzBxTRZz5vrAfGL5Byj8JopPStdDnFHwOIM90XPOAv3HvcGd981zLFbn2G4KucJVTN8Ew57IoQ5hJEQp+CfRDziUUQ8v+i3COVO7czZrIDAuV8/+Y4mP1l9b0ljmE1gzW5vdn13p8nst71OsKbLF6WMcvU9/PSimzta3owSlRf4HRX5aPmi5H6dTC3hkDlegtn9wSjGR/IIdvTHNNJ5If5oqZDmkRi/DQ/t9kX49bC3a6B37RqxbxE0Ig8BF5+EWtOkbHfGzlmnfB8f1JPLgrNnwW7/GX3iepNBEPWdoH8utVi5lB+FLOKSOSPp1Ietwh/bm6WpLCLZf7it/NpNEvRGFHj3yYPcHGPhBIYXDTIUtnYrofr33en78ffTloo+CnIBVt9OFGIjmS6/mTAvhRrXHmrEvRRczXdj/RWoTrQ1sGRRn6t4aifuQtlr8EkaL0oG6QOR9sXqafGTsDa3PriZd0PUeSzWKuv4+CnABSPyFfM7di98vv4TZLXCP7kIZ56WaF+QNjrHHUsuW4nBUIp2pjNdtkVKESOwjStjhLih/BXD0bzt1Hz0ZNQ4Er0GWMXjA5rBq5I1miVmb9aJ5o5bCT8Nfbxae7TXGtZ1fQezDp+NEdBuAU6YRHWJGyA==",
               StayDateTimeRange: {
               StartDate: "2025-04-10", 
                 EndDate: "2025-04-13"  
@@ -512,6 +511,10 @@ module.exports = {
         error: error.message,
       });
     }
+  },
+
+  createBooking : (req , res) => {
+
   }
 
 

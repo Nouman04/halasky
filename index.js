@@ -28,7 +28,7 @@ const PORT = process.env.NOD_PORT;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(limiter);
+// app.use(limiter);
 app.use(passport.initialize());
 // app.use(passport.session());
 

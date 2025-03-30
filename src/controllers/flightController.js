@@ -140,7 +140,7 @@ module.exports = {
             .then((response) => response.json()) 
             .then(async (result) => {
               //new code starts here
-
+              // return response.status(200).json(result);
               if(result.status == "NotProcessed")
               {
                 return response.status(500).json({
