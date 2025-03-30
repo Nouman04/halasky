@@ -20,6 +20,7 @@ const flightRoutes = require("./src/routes/flightRoutes");
 const hotelRoutes = require("./src/routes/hotelRoutes");
 const chatRoutes = require("./src/routes/chatRoutes");
 const testRoutes = require("./src/routes/testRoutes");
+const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
 
 const cors = require("cors");
 const app = express();
@@ -29,6 +30,13 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(limiter);
+app.use( (req , res , next ) => {
+    if(nonLimitorRoutes.includes(req.path))
+    {
+        return next();
+    }
+    limiter(req , res , next);
+})
 app.use(passport.initialize());
 // app.use(passport.session());
 

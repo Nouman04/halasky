@@ -18,6 +18,6 @@ router.post("/locations", hotelController.locationList);
 router.post("/detail", hotelController.hotelDetail); 
 router.post("/images", hotelController.images);
 router.post("/confirm-rate", hotelController.confirmRate);
-// router.post('/availability' ,   hotelController.findAvailability );
+router.post("/add-booking", hotelController.createBooking);
 
 module.exports = router;
