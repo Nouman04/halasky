@@ -25,4 +25,5 @@ jobs:
             ssh-add ~/.ssh/SSH_AWS_GITHUB
             git stash
             git pull origin master
+            pm2 reload halasky
           EOF
