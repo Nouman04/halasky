@@ -1,3 +1,4 @@
 node_modules
 src/public/uploads
 .github/workflows/main.yml
+config.bat
