@@ -12,5 +12,6 @@ router.post('/add-violation' , CommonController.addViolation );
 router.put('/update-violation' , CommonController.updateViolation );
 router.post('/delete-violation' , CommonController.deleteViolation );
 router.post('/violation-list' , CommonController.listViolation );
+router.get('/categories' , CommonController.categories);
 
 module.exports = router;

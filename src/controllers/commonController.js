@@ -1,5 +1,6 @@
-const {Comment , Violation , User}= require('../database/models');
+const {Comment , Violation , User, Category}= require('../database/models');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
+
 
 module.exports = {
 
@@ -283,8 +284,28 @@ module.exports = {
                 error: error.message,
             });
         }
+
+        
     },
 
+    categories: async (request, response) => {
+        try {
+            const categories = await Category.findAll();
+    
+            return response.status(200).json({
+                status: true,
+                data: categories,
+            });
+    
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message,
+            });
+        }
+
+    }
 
 
 
