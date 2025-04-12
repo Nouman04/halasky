@@ -1,9 +1,9 @@
-name: Deploy to prod-server-1
+name: Deploy to stage-server-1
 
 on:
   push:
     branches:
-      - master  
+      - staging  
 
 jobs:
   deploy:
@@ -17,13 +17,13 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_GITHUB_AWS }}
 
-      - name: SSH to prod-server-1 
+      - name: SSH to stage-server-1 
         run: |
-          ssh -o StrictHostKeyChecking=no githubactions@${{ secrets.AWS_prod_server_1_IP }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no githubactions@${{ secrets.AWS_STAGE_SERVER_1_IP }} << 'EOF'
             cd /var/www/Project1/halasky
             eval $(ssh-agent -s)
             ssh-add ~/.ssh/SSH_AWS_GITHUB
             git stash
-            git pull origin master
+            git pull origin staging
             pm2 reload halasky
           EOF
