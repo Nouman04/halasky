@@ -6,7 +6,7 @@ const { User } = require('../database/models');
 
 const initializePassport = (passport) => {
     passport.use( new JwtStrategy({
-        secretOrKey : process.env.NOD_SECRET_KEY,
+        secretOrKey : process.env.NODE_SECRET_KEY,
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
     },  async function(payload , next){
         const email = payload.email;

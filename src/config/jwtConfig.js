@@ -33,7 +33,7 @@ module.exports = {
 
       delete userData.password;
 
-      let token = jwt.sign(userData, process.env.NOD_SECRET_KEY, {
+      let token = jwt.sign(userData, process.env.NODE_SECRET_KEY, {
         expiresIn: "4h",
       });
 
