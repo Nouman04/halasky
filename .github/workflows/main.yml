@@ -25,5 +25,5 @@ jobs:
             ssh-add ~/.ssh/SSH_AWS_GITHUB
             git stash
             git pull origin staging
-            pm2 restart halasky-staging
+            pm2 restart halasky-staging --update-env
           EOF
