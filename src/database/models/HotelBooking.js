@@ -32,19 +32,11 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
     },
-    status: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+    pnr : {
+      type : DataTypes.STRING,
+      allowNull: false
     },
     hotel_id: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    hotel_code: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    payment_id: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -56,9 +48,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
+    to: {
+      type: DataTypes.DOUBLE(10 , 2),
+      allowNull: false,
+    },
+    booking_key: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   }, {
     tableName: 'hotel_bookings', 
-    timestamps: false,   
+    timestamps: true,
+    createdAt : "created_at",
+    updatedAt : "updated_at",   
   });
 
   // Associations
@@ -72,6 +74,11 @@ module.exports = (sequelize, DataTypes) => {
     HotelBooking.belongsTo(models.Promotion, {
       foreignKey: 'code_id',
       as: 'promotion', 
+    });
+
+    HotelBooking.hasMany(models.Guest, {
+      foreignKey: 'hotel_booking_id',
+      as: 'guests', 
     });
   };
 

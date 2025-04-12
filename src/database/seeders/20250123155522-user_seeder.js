@@ -1,7 +1,8 @@
 'use strict';
 const bcrypt = require('bcrypt');
-
+const { RolePermission , Role , User } = require('../models'); 
 /** @type {import('sequelize-cli').Migration} */
+
 module.exports = {
 
   async up (queryInterface, Sequelize) {
@@ -40,12 +41,20 @@ module.exports = {
      return userList;
     }
 
+    
     let users = await processUsers()
-
+    
     queryInterface.bulkInsert('users', users);
+
+    let roles = await Role.findAll();
+    let activeStatusUser = await User.findAll({ where: {status : 1 }});
+    //mapping role to active user
+    let userWithRole = activeStatusUser.map( (user , index)=>{ return {user_id : user.id , role_id : roles[index].id} });
+    RolePermission.bulkCreate(userWithRole);
   },
 
   async down (queryInterface, Sequelize) {
     await queryInterface.bulkDelete('users' , null , {});
   }
 };
+

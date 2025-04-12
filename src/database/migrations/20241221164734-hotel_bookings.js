@@ -34,23 +34,15 @@ module.exports = {
         onUpdate : 'CASCADE',
         onDelete: 'CASCADE'
       },
-      status : {
-        type : Sequelize.DataTypes.INTEGER,
-        allowNull : false
-      },
       is_applied_code : {
         type : Sequelize.DataTypes.BOOLEAN,
         defaultValue: 0
       },
+      pnr : {
+        type : Sequelize.DataTypes.STRING,
+        allowNull: false
+      },
       hotel_id : {
-        type : Sequelize.DataTypes.STRING,
-        allowNull: false
-      },
-      hotel_code : {
-        type : Sequelize.DataTypes.STRING,
-        allowNull: false
-      },
-      payment_id : {
         type : Sequelize.DataTypes.STRING,
         allowNull: false
       },
@@ -60,6 +52,14 @@ module.exports = {
       },
       to : {
         type : Sequelize.DataTypes.DATE,
+        allowNull: false
+      },
+      amount : {
+        type : Sequelize.DataTypes.DOUBLE(10 , 2),
+        allowNull: false
+      },
+      booking_key : {
+        type : Sequelize.DataTypes.STRING,
         allowNull: false
       },
       created_at : {
