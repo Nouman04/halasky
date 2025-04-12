@@ -24,7 +24,7 @@ const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
 
 const cors = require("cors");
 const app = express();
-const PORT = process.env.NOD_PORT;
+const PORT = process.env.NODE_PORT;
 
 app.use(cors());
 app.use(bodyParser.json());
