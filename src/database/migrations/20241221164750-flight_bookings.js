@@ -42,16 +42,12 @@ module.exports = {
         type : Sequelize.DataTypes.BOOLEAN,
         defaultValue: 0
       },
-      payment_id : {
+      pnr : {
         type : Sequelize.DataTypes.STRING,
         allowNull: false
       },
-      from : {
-        type : Sequelize.DataTypes.DATE,
-        allowNull: false
-      },
-      to : {
-        type : Sequelize.DataTypes.DATE,
+      amount : {
+        type : Sequelize.DataTypes.DOUBLE(10 , 2),
         allowNull: false
       },
       created_at : {

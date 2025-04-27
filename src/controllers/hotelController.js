@@ -133,8 +133,8 @@ module.exports = {
         .then((response) => response.json())
         .then(async (result) => {
 
-        // return response.status(200).json(result);
 
+          
           let detail = result.GetHotelAvailRS;
 
           if(result.status && result.status == 'NotProcessed')
