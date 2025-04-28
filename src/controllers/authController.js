@@ -195,7 +195,7 @@ module.exports = {
     },
 
 
-    updatePassword : async ( request , response ) => {
+    updateForgotPassword : async ( request , response ) => {
         try {
 
             const { token , email , password } = request.body;
@@ -250,5 +250,7 @@ module.exports = {
             })
         }
     },
+
+   
 
 }
