@@ -1,6 +1,7 @@
 const { JsonHandler , FlightBooking, Flight, Segment, Passenger  } = require('../database/models');
 const AppConst = require('../appConst');
 const airports = require('../public/files/locations.json');
+const locationHelper = require('../Helpers/LocationHelper');
 
 
 module.exports = {
@@ -768,7 +769,6 @@ module.exports = {
 
             return response.status(200).json({
               status: true,
-              msg : "hre2",
               data: result,
           });
         })
@@ -1030,6 +1030,7 @@ module.exports = {
                 booking_id: flightBookingId,
                 origin: flight.description.departure_location,
                 destination: flight.description.arrival_location,
+                country :locationHelper.locationDetail(flight.description.arrival_location).country,
                 date: flight.description.departure_date
               });
       

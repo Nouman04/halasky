@@ -36,7 +36,8 @@ module.exports = {
       },
       status : {
         type : Sequelize.DataTypes.INTEGER,
-        allowNull : false
+        allowNull : false,
+        defaultValue: 0
       },
       is_applied_code : {
         type : Sequelize.DataTypes.BOOLEAN,

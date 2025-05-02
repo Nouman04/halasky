@@ -28,6 +28,10 @@ module.exports = {
         type: Sequelize.DataTypes.STRING,
         allowNull: false,
       },
+      country: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: false,
+      },
       date: {
         type: Sequelize.DataTypes.DATEONLY,
         allowNull: false,

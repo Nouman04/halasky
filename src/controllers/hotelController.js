@@ -1,6 +1,7 @@
 const { JsonHandler , HotelBooking , Guest , PaymentDetail } = require("../database/models");
 const AppConst = require("../appConst");
 const locations = require('../public/files/destinations.json');
+const locationHelper = require('../Helpers/LocationHelper');
 
 module.exports = {
 
@@ -555,7 +556,7 @@ module.exports = {
         email,
         personList,
         roomList,
-        paymentDetail
+        paymentDetail,
       } = request.body;
 
       //contact detail
@@ -700,7 +701,7 @@ module.exports = {
         let to = request.body.to;
         let hotel_id = request.body.hotel_id;
         let amount = request.body.amount;
-
+        let country = locationHelper.locationDetail(request.body.location_code).country;
         let hotelDetail = await HotelBooking.create({
                                   pnr : PNR,
                                   user_id : user_id,
@@ -710,7 +711,8 @@ module.exports = {
                                   from : from,
                                   to : to,
                                   amount: amount,
-                                  booking_key : bookingKey
+                                  booking_key : bookingKey,
+                                  country : country 
                                 });
 
             

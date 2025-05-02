@@ -34,6 +34,11 @@ module.exports = {
         onUpdate : 'CASCADE',
         onDelete: 'CASCADE'
       },
+      status : {
+        type : Sequelize.DataTypes.INTEGER,
+        allowNull : false,
+        defaultValue: 0
+      },
       is_applied_code : {
         type : Sequelize.DataTypes.BOOLEAN,
         defaultValue: 0
@@ -52,6 +57,10 @@ module.exports = {
       },
       to : {
         type : Sequelize.DataTypes.DATE,
+        allowNull: false
+      },
+      country : {
+        type : Sequelize.DataTypes.STRING,
         allowNull: false
       },
       amount : {
