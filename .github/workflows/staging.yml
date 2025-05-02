@@ -1,0 +1,31 @@
+name: Deploy to stage-server-1
+
+on:
+  push:
+    branches:
+      - staging  
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_GITHUB_AWS }}
+
+      - name: SSH to stage-server-1 
+        run: |
+          ssh -o StrictHostKeyChecking=no githubactions@${{ secrets.AWS_STAGE_SERVER_1_IP }} << 'EOF'
+            cd /var/www/Project1/halasky
+            eval $(ssh-agent -s)
+            ssh-add ~/.ssh/SSH_AWS_GITHUB
+            git stash
+            git pull origin staging
+            pm2 restart halasky-staging --update-env || pm2 start index.js --name halasky-staging
+          EOF
+
+          
