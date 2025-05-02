@@ -18,6 +18,9 @@ const appConst = {
     highPriority : 2,
     criticalPriority : 3,
     sabreFlights: 'SABRE_FLIGHT',
+    bookingPending : 0,
+    bookingCompleted: 1,
+    bookingCanceled : 2,
 }
 
 module.exports = appConst;

@@ -8,7 +8,7 @@ function generateRandomToken(){
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     
     // Loop to generate characters for the specified length
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 6; i++) {
         const randomInd = Math.floor(Math.random() * characters.length);
         token += characters.charAt(randomInd);
     }
@@ -33,11 +33,12 @@ module.exports = {
             let hashedPassword = await bcrypt.hash( password , saltcount);
             const token = generateRandomToken();
             const tokenExpiryTime = moment().add( 10 , 'minutes').format('YYYY-MM-DD HH:mm:ss');
-
+            const imageName = request.file ? request.file.filename : null;
             let createdUser = await User.create({
                 name : name,
                 email : email,
                 password : hashedPassword,
+                platform_image : imageName,
                 number : number,
                 token : token,
                 expires_at : tokenExpiryTime
@@ -194,7 +195,7 @@ module.exports = {
     },
 
 
-    updatePassword : async ( request , response ) => {
+    updateForgotPassword : async ( request , response ) => {
         try {
 
             const { token , email , password } = request.body;
@@ -249,5 +250,7 @@ module.exports = {
             })
         }
     },
+
+   
 
 }

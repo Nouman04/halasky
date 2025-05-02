@@ -11,60 +11,53 @@ module.exports = (sequelize, DataTypes) => {
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
-        model: 'users', 
-        key: 'id',  
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
     },
     is_applied_code: {
       type: DataTypes.BOOLEAN,
-      defaultValue: 0,  
+      defaultValue: 0,
     },
     code_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
-        model: 'promotions', 
-        key: 'id',           
-      },
-      onUpdate: 'CASCADE',
-      onDelete: 'CASCADE',
     },
     status: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 0,
     },
-    payment_id: {
+    pnr: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    from: {
-      type: DataTypes.DATE,
+    amount: {
+      type: DataTypes.DOUBLE(10, 2),
       allowNull: false,
     },
-    to: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
     },
   }, {
-    tableName: 'flight_bookings', 
-    timestamps: false,           
+    tableName: 'flight_bookings',
+    timestamps: true,
+    underscored: true, // important so Sequelize maps created_at and updated_at correctly
   });
 
-
   FlightBooking.associate = function (models) {
-  
     FlightBooking.belongsTo(models.User, {
       foreignKey: 'user_id',
-      as: 'user', 
+      as: 'user',
     });
 
-  
     FlightBooking.belongsTo(models.Promotion, {
       foreignKey: 'code_id',
-      as: 'promotion', 
+      as: 'promotion',
     });
   };
 

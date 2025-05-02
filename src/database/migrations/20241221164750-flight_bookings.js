@@ -36,22 +36,19 @@ module.exports = {
       },
       status : {
         type : Sequelize.DataTypes.INTEGER,
-        allowNull : false
+        allowNull : false,
+        defaultValue: 0
       },
       is_applied_code : {
         type : Sequelize.DataTypes.BOOLEAN,
         defaultValue: 0
       },
-      payment_id : {
+      pnr : {
         type : Sequelize.DataTypes.STRING,
         allowNull: false
       },
-      from : {
-        type : Sequelize.DataTypes.DATE,
-        allowNull: false
-      },
-      to : {
-        type : Sequelize.DataTypes.DATE,
+      amount : {
+        type : Sequelize.DataTypes.DOUBLE(10 , 2),
         allowNull: false
       },
       created_at : {

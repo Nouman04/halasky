@@ -81,20 +81,22 @@ module.exports = {
 
     ]);
 
+    
     let adminPermissionList = adminPermissions.map( permission => {
       return { role_id : adminRole.id , permission_id : permission.id};
     })
-
+    
     let supportPermissionList = supportPermissions.map( permission => {
       return { role_id : supportRole.id , permission_id : permission.id};
     })
-
+    
     let userPermissionList = userPermissions.map( permission => {
       return { role_id : userRole.id , permission_id : permission.id};
     });
-
+    
     
     await RolePermission.bulkCreate([...adminPermissionList , ...supportPermissionList , ...userPermissionList]);
+   
      
   },
 

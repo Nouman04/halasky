@@ -2,6 +2,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const { User , Role } = require("../database/models");
 const bcrypt = require("bcrypt");
+const moment = require('moment');
 
 module.exports = {
   login: async (request, response) => {
@@ -46,7 +47,6 @@ module.exports = {
         user: userData,
       });
     } catch (error) {
-      console.error("Error in login:", error);
       return response.status(500).json({
         status: false,
         message: "Something Went Wrong",
@@ -54,4 +54,81 @@ module.exports = {
       });
     }
   },
+
+  verifyNativeToken : async (request, response) => {
+    try {
+      const { email, token } = request.body;
+
+      const user = await User.findOne({ where : {email : email}});
+
+        if(!user){
+            return response.status(200).json({
+                status: false,
+                message: 'User does not found with this email',
+            }); 
+        }
+
+        if(user.is_email_verified){
+            return response.status(200).json({
+                status: false,
+                message: 'User already verified',
+            }); 
+        }
+
+       let addedTokenTime  = moment(user.expires_at);
+       let currentTime = moment();
+
+       if(addedTokenTime.isBefore(currentTime) ){
+          return response.status(200).json({
+              status: false,
+              message: 'Your verification token is expired'
+          })
+      }
+
+
+      if(user.token == token){
+          await User.update(
+              { is_email_verified : 1},
+              {where : {email : email}}
+          );
+
+
+        const userDetail = await User.findOne({ 
+          include : {
+            model : Role
+          },
+          where: { email: email } 
+        });
+
+        let userData = userDetail.get();
+
+        delete userData.password;
+
+        let token = jwt.sign(userData, process.env.NODE_SECRET_KEY, {
+          expiresIn: "4h",
+        });
+
+
+      return response.status(200).json({
+        status: true,
+        message: "Login Successful",
+        token: token,
+        user: userData,
+      });
+
+      }else{
+          return response.status(200).json({
+              status: false,
+              message: 'Your token does not match'
+          })
+      }
+
+    } catch (error) {
+      return response.status(500).json({
+        status: false,
+        message: "Something Went Wrong",
+        error: error.message,
+      });
+    }
+  }
 };

@@ -8,6 +8,11 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false,
     },
+    status: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
     user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -48,8 +53,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    to: {
-      type: DataTypes.DOUBLE(10 , 2),
+    amount: {
+      type: DataTypes.DOUBLE(10, 2),
+      allowNull: false,
+    },
+    country: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
     booking_key: {
@@ -62,6 +71,7 @@ module.exports = (sequelize, DataTypes) => {
     createdAt : "created_at",
     updatedAt : "updated_at",   
   });
+  
 
   // Associations
   HotelBooking.associate = function (models) {

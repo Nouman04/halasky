@@ -42,12 +42,15 @@ module.exports = {
     }
 
     
-    let users = await processUsers()
-    
+    let users = await processUsers();
+
     queryInterface.bulkInsert('users', users);
+
+    // console.log(1232132132);
 
     let roles = await Role.findAll();
     let activeStatusUser = await User.findAll({ where: {status : 1 }});
+
     //mapping role to active user
     let userWithRole = activeStatusUser.map( (user , index)=>{ return {user_id : user.id , role_id : roles[index].id} });
     RolePermission.bulkCreate(userWithRole);

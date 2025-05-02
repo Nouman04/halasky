@@ -565,10 +565,44 @@ module.exports = {
                 message : error.message
             })
         } 
-    }
+    },
 
 
-    
+    updateProfilePassword : async ( request , response ) => {
+        try {
+
+            const { previousPassword , password , confirmPassword } = request.body;
+            const userDetail = request.user;
+            let user = await User.findOne({ where : { id : userDetail.id}});
+            
+            const match = await bcrypt.compare(previousPassword, user.password);
+
+            if (!match) {
+            return response
+                .status(200)
+                .json({ status: false, error: "Your password doesn't match" });
+            }
+
+            let saltcount  = 10;
+            let hashedPassword = await bcrypt.hash( password , saltcount);
+
+            await User.update(
+                {password : hashedPassword},
+                {where : {id : userDetail.id} }
+            )
+
+
+            return response.status(200).json({
+                status: true,
+                message: 'Password Updated',
+            })
+        } catch (error){
+            return response.status(500).json({
+                status : false,
+                message : error.message
+            })
+        }
+    },
 
 
      

@@ -23,5 +23,6 @@ router.post('/add-recovery-request' , UserController.userRecoveryRequest);
 router.post('/recovery-request-list' , UserController.getRecoveryRequests);
 router.get('/roles-list' , UserController.getRoles);
 router.put('/update-recovery-request' , UserController.updateRecoveryRequest);
+router.put('/update-profile-password' , UserController.updateProfilePassword);
 
 module.exports = router;

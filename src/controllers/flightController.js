@@ -1,6 +1,7 @@
-const { JsonHandler } = require('../database/models');
+const { JsonHandler , FlightBooking, Flight, Segment, Passenger  } = require('../database/models');
 const AppConst = require('../appConst');
 const airports = require('../public/files/locations.json');
+const locationHelper = require('../Helpers/LocationHelper');
 
 
 module.exports = {
@@ -768,7 +769,6 @@ module.exports = {
 
             return response.status(200).json({
               status: true,
-              msg : "hre2",
               data: result,
           });
         })
@@ -788,14 +788,57 @@ module.exports = {
           const tokenDetail = await JsonHandler.findOne({
             where : {type : AppConst.sabreFlights}
           });
+          let userId = request.user.id;
           const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
-
+          const {passengers , passengerCounts , flights } = request.body;
           let endpoint = 'https://api.cert.sabre.com/v2.5.0/passenger/records?mode=create';
           const myHeaders = new Headers();
           myHeaders.append("Authorization", `Bearer ${accessToken}`);
           myHeaders.append("Content-Type", "application/json");
           
-	
+          let passengerList = passengers.map( (passenger , index) =>{
+              return {
+                "GivenName": passenger.firstname,
+                "Surname": passenger.lastname,
+                "PassengerType": passenger.type,
+              }
+          })
+
+          //required for adult persons
+          let contactList = passengers.filter( passenger =>{
+            return passenger.type === 'ADT';
+          }).map( (passenger , index) => {
+            return {
+              "NameNumber": `${index+1}.1`,
+              "Phone": passenger.phone,
+              "PhoneUseType": "H"
+            }
+          })
+
+          let countList = passengerCounts.map( (passenger) => {
+            return {
+              "Code": passenger.type,
+              "Quantity": String(passenger.total)  // Matches the two passengers and NumberInParty
+            }
+          })
+          let segmentList = [];
+
+          flights.forEach( (flight) => {
+            flight.segments.forEach(segment => {
+              let thisSegment =  {
+                "DepartureDateTime": segment.departureDate,
+                "ArrivalDateTime": segment.arrivalDate,
+                "ResBookDesigCode": "Y",
+                "FlightNumber": String(segment.number),
+                "Status": "HK",
+                "NumberInParty": String(segment.totalPassenger),
+                "OriginLocation": {"LocationCode": segment.origin},
+                "DestinationLocation": {"LocationCode":segment.destination},
+                "MarketingAirline": {"Code": segment.code, "FlightNumber": String(segment.number)}
+              }
+              segmentList.push(thisSegment);
+            })
+          })
 
 
           let searchRequest = {
@@ -803,22 +846,9 @@ module.exports = {
               "version": "2.5.0",
               "TravelItineraryAddInfo": {
                 "CustomerInfo": {
-                  "PersonName": [
-                    {
-                      "GivenName": "John",
-                      "Surname": "Aflen",
-                      "PassengerType": "ADT",
-                      "NameNumber": "1.1"
-                    }
-                  ],
+                  "PersonName": passengerList,
                   "ContactNumbers": {
-                    "ContactNumber": [
-                      {
-                        "NameNumber": "1.1",
-                        "Phone": "3545642324324",
-                        "PhoneUseType": "H"
-                      },
-                    ]
+                    "ContactNumber": contactList
                   }
                 },
                 "AgencyInfo": {
@@ -834,30 +864,7 @@ module.exports = {
               },
               "AirBook": {
                 "OriginDestinationInformation": {
-                  "FlightSegment": [
-                    {
-                      "DepartureDateTime": "2025-04-01T10:00:00",
-                      "ArrivalDateTime": "2025-04-01T11:55:00",
-                      "ResBookDesigCode": "Y",
-                      "FlightNumber": "301",
-                      "Status": "HK",
-                      "NumberInParty": "1",
-                      "OriginLocation": {"LocationCode": "ISB"},
-                      "DestinationLocation": {"LocationCode": "KHI"},
-                      "MarketingAirline": {"Code": "PK", "FlightNumber": "301"}
-                    },
-                    {
-                      "DepartureDateTime": "2025-04-06T07:00:00",
-                      "ArrivalDateTime": "2025-04-06T08:55:00",
-                      "ResBookDesigCode": "Y",
-                      "FlightNumber": "300",
-                      "Status": "HK",
-                      "NumberInParty": "1",
-                      "OriginLocation": {"LocationCode": "KHI"},
-                      "DestinationLocation": {"LocationCode": "ISB"},
-                      "MarketingAirline": {"Code": "PK", "FlightNumber": "300"}
-                    }
-                  ]
+                  "FlightSegment": segmentList
                 }
               },
               "AirPrice": [
@@ -866,12 +873,7 @@ module.exports = {
                     "Retain": true,
                     "OptionalQualifiers": {
                       "PricingQualifiers": {
-                        "PassengerType": [
-                          {
-                            "Code": "ADT",
-                            "Quantity": "1"  // Matches the two passengers and NumberInParty
-                          }
-                        ]
+                        "PassengerType": countList
                       }
                     }
                   }
@@ -886,10 +888,103 @@ module.exports = {
               }
             }
           };
+
+
+           // let searchRequest = {
+          //   "CreatePassengerNameRecordRQ": {
+          //     "version": "2.5.0",
+          //     "TravelItineraryAddInfo": {
+          //       "CustomerInfo": {
+          //         "PersonName": [
+          //           {
+          //             "GivenName": "John",
+          //             "Surname": "Aflen",
+          //             "PassengerType": "ADT",
+          //             "NameNumber": "1.1"
+          //           }
+          //         ],
+          //         "ContactNumbers": {
+          //           "ContactNumber": [
+          //             {
+          //               "NameNumber": "1.1",
+          //               "Phone": "3545642324324",
+          //               "PhoneUseType": "H"
+          //             },
+          //           ]
+          //         }
+          //       },
+          //       "AgencyInfo": {
+          //         "Address": {
+          //           "AddressLine": "Test Agency",
+          //           "CityName": "Jeddah",
+          //           "CountryCode": "SA"
+          //         },
+          //         "Ticketing": {
+          //           "TicketType": "7TAW"
+          //         }
+          //       }
+          //     },
+          //     "AirBook": {
+          //       "OriginDestinationInformation": {
+          //         "FlightSegment": [
+          //           {
+          //             "DepartureDateTime": "2025-04-01T10:00:00",
+          //             "ArrivalDateTime": "2025-04-01T11:55:00",
+          //             "ResBookDesigCode": "Y",
+          //             "FlightNumber": "301",
+          //             "Status": "HK",
+          //             "NumberInParty": "1",
+          //             "OriginLocation": {"LocationCode": "ISB"},
+          //             "DestinationLocation": {"LocationCode": "KHI"},
+          //             "MarketingAirline": {"Code": "PK", "FlightNumber": "301"}
+          //           },
+          //           {
+          //             "DepartureDateTime": "2025-04-06T07:00:00",
+          //             "ArrivalDateTime": "2025-04-06T08:55:00",
+          //             "ResBookDesigCode": "Y",
+          //             "FlightNumber": "300",
+          //             "Status": "HK",
+          //             "NumberInParty": "1",
+          //             "OriginLocation": {"LocationCode": "KHI"},
+          //             "DestinationLocation": {"LocationCode": "ISB"},
+          //             "MarketingAirline": {"Code": "PK", "FlightNumber": "300"}
+          //           }
+          //         ]
+          //       }
+          //     },
+          //     "AirPrice": [
+          //       {
+          //         "PriceRequestInformation": {
+          //           "Retain": true,
+          //           "OptionalQualifiers": {
+          //             "PricingQualifiers": {
+          //               "PassengerType": [
+          //                 {
+          //                   "Code": "ADT",
+          //                   "Quantity": "1"  // Matches the two passengers and NumberInParty
+          //                 }
+          //               ]
+          //             }
+          //           }
+          //         }
+          //       }
+          //     ],
+          //     "PostProcessing": {
+          //       "EndTransaction": {
+          //         "Source": {
+          //           "ReceivedFrom": "Test User"
+          //         }
+          //       }
+          //     }
+          //   }
+          // };
+
+
+        
         
         
 
-          const requestOptions = {
+        const requestOptions = {
             method: "POST",
             headers: myHeaders,
             body: JSON.stringify(searchRequest),
@@ -899,14 +994,70 @@ module.exports = {
         fetch( endpoint , requestOptions)
         .then((response) => response.json()) 
         .then(async (result) => {
-            // console.log(result)
 
-          //   return response.status(200).json({
-          //     status: true,
-          //     msg : "hre2",
-          //     data: result,
-          // });
-          return response.status(200).json( result );
+          if(
+            result.CreatePassengerNameRecordRS && 
+            result.CreatePassengerNameRecordRS.ApplicationResults &&
+            result.CreatePassengerNameRecordRS.ApplicationResults.status == "Complete"
+          ){
+            let PNR = result.CreatePassengerNameRecordRS.ItineraryRef.ID;
+            let totalAmount =result.CreatePassengerNameRecordRS.AirPrice[0].PriceQuote.PricedItinerary.TotalAmount;
+            let bookingDetail =await FlightBooking.create({
+                                                  user_id : userId,
+                                                  is_applied_code	: 0,
+                                                  status : 1,
+                                                  pnr : PNR,
+                                                  amount : totalAmount
+                                                })
+
+            let flightBookingId = bookingDetail.id;
+            await Promise.all(
+              passengers.map(passenger => {
+                return Passenger.create({
+                  flight_booking_id: flightBookingId,
+                  firstname: passenger.firstname,
+                  lastname: passenger.lastname,
+                  phone: passenger.phone || null,
+                  type: passenger.type
+                });
+              })
+            );
+                                            
+                                                
+          await Promise.all(
+            flights.map(async (flight) => {
+              const createdFlight = await Flight.create({
+                booking_id: flightBookingId,
+                origin: flight.description.departure_location,
+                destination: flight.description.arrival_location,
+                country :locationHelper.locationDetail(flight.description.arrival_location).country,
+                date: flight.description.departure_date
+              });
+      
+              await Promise.all(
+                flight.segments.map(segment => {
+                  return Segment.create({
+                    flight_id: createdFlight.id,
+                    departure_date: segment.departureDate,
+                    arrival_date: segment.arrivalDate,
+                    flight_number: segment.number,
+                    flight_code: segment.code
+                  });
+                })
+              );
+            })
+          );
+
+          return response.status(200).json({
+            status : true,
+            message : "Booking created successfully"
+          });
+  
+        } else {
+          return response.status(200).json({ status : false , data : result});
+        }
+
+
         })
 
         } catch (error){

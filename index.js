@@ -19,6 +19,7 @@ const suspiciousActivityRoutes = require("./src/routes/suspiciousActivityRoutes"
 const flightRoutes = require("./src/routes/flightRoutes");
 const hotelRoutes = require("./src/routes/hotelRoutes");
 const chatRoutes = require("./src/routes/chatRoutes");
+const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const testRoutes = require("./src/routes/testRoutes");
 const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
 
@@ -52,6 +53,7 @@ app.use("/flight", flightRoutes);
 app.use("/hotel", hotelRoutes);
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
+app.use("/dashboard", dashboardRoutes);
 app.use("/test", testRoutes);
 
 //socket code starts here
