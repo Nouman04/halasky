@@ -26,6 +26,6 @@ jobs:
             git stash
             git pull origin development
             pm2 restart halasky --update-env || pm2 start index.js --name halasky
-            EOF
+          EOF
 
           
