@@ -6,6 +6,7 @@ let moment = require("moment");
 module.exports = {
     
     getDashboardInformation : async (request, response) => {
+        try{
         let currentDate = moment();
         let previousDate = moment().subtract(1, 'months');
         const [ 
@@ -169,7 +170,7 @@ module.exports = {
             FlightBooking.findAll({
                 attributes: [
                     [fn('DATE_FORMAT', col('created_at'), '%Y-%m'), 'month'],
-                    [fn('COUNT', col('id')), 'hotel_count']
+                    [fn('COUNT', col('id')), 'flight_count']
                 ],
                 where: {
                     created_at: {
@@ -194,29 +195,46 @@ module.exports = {
             }),
 
 
-        ])
+        ]);
 
-        console.log(userCount)
-        console.log(activeUser.length)
-        console.log(nonActiveUser.length)
-        console.log(hotelsBookingCount.length)
-        console.log(FlightBookingCount.length)
-        console.log(flightDR)
-        console.log(flightWR)
-        console.log(flightMR)
-        console.log(hotelDR)
-        console.log(hotelWR)
-        console.log(hotelMR)
-        console.log('completedFlightBooking:', completedFlightBooking);
-        console.log('pendingFlightBooking:', pendingFlightBooking);
-        console.log('cancelledFlightBooking:', cancelledFlightBooking);
-        console.log('completedHotelBooking:', completedHotelBooking);
-        console.log('pendingHotelBooking:', pendingHotelBooking);
-        console.log('cancelledHotelBooking:', cancelledHotelBooking);
-        console.log('hotelCountryCount:', countriesFlightBooking);
-        console.log('flightCountryCount:', countriesHotelBooking);
-        console.log('flightYearlyReport:', flightYearlyReport);
-        console.log('hotelYearlyReport:', hotelYearlyReport);
+        return response.status(200).json({
+            status: false,
+            data: {
+                totalUser : userCount,
+                activeUser : activeUser,
+                nonActiveUser : nonActiveUser,
+                totalHotelBookings : hotelsBookingCount.length,
+                totalFlightBookings : FlightBookingCount.length,
+                flightDailyRevenue : flightDR,
+                flightWeeklyRevenue : flightWR,
+                flightMonthlyRevenue : flightMR,
+                hotelDailyRevenue : hotelDR,
+                hotelWeeklyRevenue : hotelWR,
+                hotelMonthlyRevenue : hotelMR,
+                completedFlightBooking: completedFlightBooking,
+                pendingFlightBooking : pendingFlightBooking,
+                cancelledFlightBooking: cancelledFlightBooking,
+                completedHotelBooking: completedHotelBooking,
+                pendingHotelBooking: pendingHotelBooking,
+                cancelledHotelBooking: cancelledHotelBooking,
+                hotelBookingEachCountry: countriesFlightBooking,
+                flightBookingEachCountry: countriesHotelBooking,
+                flightYearlyReport: flightYearlyReport,
+                hotelYearlyReport: hotelYearlyReport
+            }
+        });
+
+     } catch (error){
+        return response.status(500).json({
+            status: false,
+            message: 'Something Went Wrong',
+            error: error.message
+        });
+    }
+
+        return 
+
+        
         
     }
 

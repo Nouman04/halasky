@@ -18,7 +18,6 @@ const authRoutes = require("./src/routes/authRoutes");
 const suspiciousActivityRoutes = require("./src/routes/suspiciousActivityRoutes");
 const flightRoutes = require("./src/routes/flightRoutes");
 const hotelRoutes = require("./src/routes/hotelRoutes");
-const chatRoutes = require("./src/routes/chatRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const testRoutes = require("./src/routes/testRoutes");
 const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
@@ -41,6 +40,19 @@ app.use( (req , res , next ) => {
 app.use(passport.initialize());
 // app.use(passport.session());
 
+//socket code starts here
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
+const chatRoutes = require("./src/routes/chatRoutes")(io);
+
+
 app.use("/user", userRoutes);
 app.use("/blog", blogRoutes);
 app.use("/faq", faqRoutes);
@@ -56,18 +68,17 @@ app.use("/chat", chatRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/test", testRoutes);
 
-//socket code starts here
-const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
 
 io.on('connection' ,(socket)=>{
     console.log(`socket connection connected, connection id:${socket.id}`)
 })
 
-app.listen( PORT , () => {
+// app.listen( PORT , () => {
+//     cronJobs();
+//     console.log(`App is listening at port: ${PORT}`)
+// })
+server.listen(PORT, () => {
     cronJobs();
-    console.log(`App is listening at port: ${PORT}`)
-})
+    console.log(`App is listening at port: ${PORT}`);
+  });
 

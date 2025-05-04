@@ -15,14 +15,49 @@
     </style>
   </head>
   <body>
-    <ul id="messages"></ul>
     <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
+    <ul id="messages"></ul>
+    <div>
+      <input id="sendTo" autocomplete="off" placeholder="Send To"/>
+      <input id="sendBy" autocomplete="off" placeholder="Send By"/>
+    </div>
+      <input id="messageInput" autocomplete="off" placeholder="Add Message"/><button onclick="sendMessage()">Send</button>
     </form>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.js" integrity="sha512-8BHxHDLsOHx+flIrQ0DrZcea7MkHqRU5GbTHmbdzMRnAaoCIkZ97PqZcXJkKZckMMhqfoeaJE+DNUVuyoQsO3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
-  var socket = io();
-  console.log(socket);
+  var senderTo = null;
+  var sendBy = null;
+  var socket = io("http://localhost:3005");
+
+  socket.on("connect", function () {
+    console.log("Connected to backend with socket id:", socket.id);
+  });
+
+  socket.on("public_message" , function(data){
+    console.log(data);
+  })
+
+
+  function sendMessage() {
+    
+    const message = document.getElementById("messageInput").value;
+
+    fetch("http://localhost:3005/test/send-message", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log("Server response:", data);
+    })
+    .catch(error => {
+      console.error("Error sending message:", error);
+    });
+  }
+
 </script>
   </body>
 </html>

@@ -1,68 +1,46 @@
 require('dotenv').config();
-
+const OpenAI  = require('openai');
 
 module.exports = {
 
     askQuestion : async (request , response ) =>{
         try{
+            const {question} = request.body;
+            const openAiKey = process.env.OPEN_AI_KEY;
             
-            const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
-            const API_KEY = process.env.DEEPSEEK_KEY;
+            const openai = new OpenAI({
+                apiKey: openAiKey,
+            });
 
-            // { role: 'system', content: 'You are a helpful assistant.' },
-            const requestData = {
-                model: 'deepseek-chat',
+            const chatResponse = await openai.chat.completions.create({
+                model: "gpt-3.5-turbo",
                 messages: [
-                    { role: 'user', content: 'Hello!' }
+                  { role: "system", content: "You are a helpful chatbot." },
+                  { role: "user", content: question },
                 ],
-                stream: false
-            };
+              });
 
-            const response = await fetch(DEEPSEEK_API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${API_KEY}`
-                },
-                body: JSON.stringify(requestData) // Convert data to JSON
+            return response.status(200).json({
+                status: true,
+                message: chatResponse.choices[0].message.content,
             })
-            .then((res) => res.json()) 
-            .then(async (result) => {
-                console.log(result);
-                // return response.status(200).json({
-                //     status: true,
-                //     message: result,
-                // })
-            })
-            .catch( err =>{
-                console.log(err);
-                // return response.status(500).json({
-                //     status: false,
-                //     message: 'Something Went Wrong',
-                //     error: err
-                // });
-            })
-
-
-            
-            // console.log(response);
-
-            // return response.status(200).json({
-            //     status: true,
-            //     message: 'Blog added successfully',
-            // })
 
         } catch (error){
-            // return response.status(500).json({
-            //     status: false,
-            //     message: 'Something Went Wrong',
-            //     error: error.message
-            // });
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
         }
     },
 
-    sendMessage : (request ,response ) => {
+    sendMessage : (request ,response , io ) => {
+
+        const { message } = request.body;
+
 
     }
+
+    
 
 }
