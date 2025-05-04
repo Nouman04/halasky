@@ -50,7 +50,8 @@ const io = new Server(server, {
       methods: ["GET", "POST"]
     }
   });
-const chatRoutes = require("./src/routes/chatRoutes")(io);
+let socketConnectedUser = new Map();
+const chatRoutes = require("./src/routes/chatRoutes")(io , socketConnectedUser);
 
 
 app.use("/user", userRoutes);
@@ -70,6 +71,23 @@ app.use("/test", testRoutes);
 
 
 io.on('connection' ,(socket)=>{
+
+    socket.on('connectUser' , (user)=>{
+        let username = user.username;
+        let userId = user.id;
+        let socketId = socket.id;
+        socketConnectedUser.set( userId , { username , socketId} )
+        socketConnectedUser.set( socketId , userId);
+    })
+
+    socket.on('disconnect' , ()=>{
+      
+      userId = socketConnectedUser.get(socket.id);   
+      socketConnectedUser.delete(socket.id)
+      socketConnectedUser.delete(userId)
+      console.log(`user disconnected successfully ${socket.id}`);
+    })
+    
     console.log(`socket connection connected, connection id:${socket.id}`)
 })
 
