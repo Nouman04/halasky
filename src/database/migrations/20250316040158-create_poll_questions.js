@@ -10,6 +10,16 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
+      community_activity_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "community_activities",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
       question_text: {
         type: Sequelize.STRING,
         allowNull: false,

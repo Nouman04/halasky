@@ -1,3 +1,4 @@
+require("dotenv").config();
 const { User , Role , UserRole } = require('../database/models');
 const transport = require('../config/mailConfig');
 const bcrypt = require('bcrypt');
@@ -52,7 +53,7 @@ module.exports = {
             });
 
             const mailOptions= {
-                from : 'test@gmail.com',
+                from : process.env.EMAIL_FROM,
                 to : email,
                 subject : 'Verification Token',
                 text : `Here is your verification token: ${token}`
@@ -166,7 +167,7 @@ module.exports = {
             )
 
             const mailOptions = {
-                from : 'test@gmail.com',
+                from : process.env.EMAIL_FROM,
                 to : email,
                 subject : 'Verification Token',
                 text : `Here is your verification token: ${token}`

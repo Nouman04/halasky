@@ -86,6 +86,11 @@ module.exports = (sequelize, DataTypes) => {
       as: 'promotion', 
     });
 
+    HotelBooking.hasOne(models.PaymentDetail , {
+      foreignKey: 'booking_id',
+      as: 'paymentDetail', 
+    })
+
     HotelBooking.hasMany(models.Guest, {
       foreignKey: 'hotel_booking_id',
       as: 'guests', 

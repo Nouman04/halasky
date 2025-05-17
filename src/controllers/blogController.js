@@ -276,4 +276,39 @@ module.exports = {
         }
     },
 
+    detail : async (request, response) =>{
+        try{
+            let blogId = request.body.blogId;
+            
+            let blog = await Blog.findOne({
+                where: { id: blogId },
+                include: [
+                  {
+                    association: 'tags',
+                  },
+                  {
+                    association: 'comments',
+                  },
+                  {
+                    association: 'category',
+                  }
+                ]
+              });
+
+
+            return response.status(200).json({
+                status: true,
+                data: blog,
+            })
+
+
+        } catch (error){
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
+    }
+
 }

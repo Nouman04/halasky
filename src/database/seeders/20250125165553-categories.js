@@ -9,7 +9,7 @@ module.exports = {
       {title : 'Other'},
     ]
 
-    queryInterface.bulkInsert( 'categories' , categories);
+    await queryInterface.bulkInsert( 'categories' , categories);
   },
 
   async down (queryInterface, Sequelize) {

@@ -21,6 +21,7 @@ const hotelRoutes = require("./src/routes/hotelRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const testRoutes = require("./src/routes/testRoutes");
 const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
+const paymentRoutes = require("./src/routes/paymentRoutes");
 
 const cors = require("cors");
 const app = express();
@@ -57,7 +58,7 @@ const chatRoutes = require("./src/routes/chatRoutes")(io , socketConnectedUser);
 app.use("/user", userRoutes);
 app.use("/blog", blogRoutes);
 app.use("/faq", faqRoutes);
-app.use("/activity", activityRoutes);
+app.use("/community-activity", activityRoutes);
 app.use("/query", customerQueryRoutes);
 app.use("/common", commonRoutes);
 app.use("/settings", settingsRoutes);
@@ -67,6 +68,7 @@ app.use("/hotel", hotelRoutes);
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
 app.use("/dashboard", dashboardRoutes);
+app.use("/payment", paymentRoutes);
 app.use("/test", testRoutes);
 
 

@@ -1,4 +1,4 @@
-const { JsonHandler , FlightBooking, Flight, Segment, Passenger  } = require('../database/models');
+const { JsonHandler , FlightBooking, Flight, Segment, Passenger , User , Promotion  } = require('../database/models');
 const AppConst = require('../appConst');
 const airports = require('../public/files/locations.json');
 const locationHelper = require('../Helpers/LocationHelper');
@@ -77,19 +77,6 @@ module.exports = {
             myHeaders.append("Authorization", `Bearer ${accessToken}`);
             myHeaders.append("Content-Type", "application/json");
             myHeaders.append("Accept", "application/json");
-
-            // const urlencoded = new URLSearchParams();
-            // urlencoded.append("grant_type", "client_credentials");
-
-            // {
-            //     "DepartureDateTime": "2024-04-18T00:00:00",
-            //     "OriginLocation": {
-            //       "LocationCode": "SPU"
-            //     },
-            //     "DestinationLocation": {
-            //       "LocationCode": "WAW"
-            //     }
-            //   }
 
             const searchRequest = {
                 "OTA_AirLowFareSearchRQ": {
@@ -396,9 +383,15 @@ module.exports = {
           })
 
        });
+
        //new code ends here
        minimumAmount = Math.min(...amounts);
        maximumAmount = Math.max(...amounts);
+
+       const simplifiedItineraries = itineraryGroupDetail.map((group) => ({
+          groupDescription: group.description,
+          itineraries: simplifyFlightResponse(group.itinerariesList), // Call here
+        }));
 
 
                 // let token = await JsonHandler.findOne({
@@ -408,12 +401,14 @@ module.exports = {
               //return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
               
               // );
-
+                // ItineraryList  = itineraryGroupDetail[0].itinerariesList[0];
+                // { ItineraryList }
+                // { itineraryGroupDetail , minimumAmount , maximumAmount },
                 return response.status(200).json({
                     status: true,
                     // data : result
                     // data : itineraryGroupDetail
-                    data: { itineraryGroupDetail , minimumAmount , maximumAmount },
+                    data: { simplifiedItineraries },
                 });
             })
             .catch((error) => {
@@ -1067,5 +1062,209 @@ module.exports = {
               error: error.message,
           });
       }
+    },
+
+    userBookings : async (request , response)=>{
+      try{
+        const userId = request.user.id;
+        const flightBookings = await FlightBooking.findAll({
+                                                where: {
+                                                  user_id: userId,
+                                                },
+                                                include: [
+                                                  {
+                                                    model: User,
+                                                    as: 'user',
+                                                  },
+                                                  {
+                                                    model: Promotion,
+                                                    as: 'promotion',
+                                                    attributes: ['id', 'code'],
+                                                    required: false,
+                                                  },
+                                                  {
+                                                    model: Passenger,
+                                                    as: 'passengers',
+                                                  },
+                                                  {
+                                                    model: Flight,
+                                                    as: 'flights',
+                                                    attributes: ['id', 'origin', 'destination', 'country', 'date'],
+                                                    include: [
+                                                      {
+                                                        model: Segment,
+                                                        as: 'segments',
+                                                        attributes: ['id', 'departure_date', 'arrival_date', 'flight_number', 'flight_code'],
+                                                      },
+                                                    ],
+                                                  },
+                                                ],
+                                              });
+          return response.status(200).json({ status : true , data : flightBookings});
+     } catch (error){
+          return response.status(500).json({
+              status: false,
+              message: 'Something Went Wrong',
+              error: error.message,
+          });
+      }
+  }
+}
+
+
+function simplifyFlightResponse(itinerariesList) {
+  // Validate input
+  if (!Array.isArray(itinerariesList) || !itinerariesList.length) {
+    return { error: 'Invalid or empty itineraries list' };
+  }
+
+  // Helper function to safely parse and format dates
+  const formatDate = (dateString, timeZone = 'Asia/Karachi') => {
+    // Handle null, undefined, or non-string inputs
+    if (!dateString || typeof dateString !== 'string') {
+      console.warn(`Invalid date input: ${dateString}`);
+      return 'N/A';
     }
+
+    // Clean date string (remove offsets like +05:00 or Z, trim whitespace)
+    const cleanedDateString = dateString.replace(/Z|[+-]\d{2}:\d{2}$/, '').trim();
+    const date = new Date(cleanedDateString);
+
+    // Check if the date is valid
+    if (isNaN(date.getTime())) {
+      console.warn(`Failed to parse date: ${cleanedDateString}`);
+      return 'N/A';
+    }
+
+    // Format date to PKT (Asia/Karachi, UTC+5)
+    return date.toLocaleString('en-US', {
+      timeZone,
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  };
+
+  // Process each itinerary
+  return itinerariesList.map((itinerary, index) => {
+    // Validate itinerary structure
+    if (!itinerary?.priceSource || !itinerary?.legList?.length || !itinerary?.passengerPriceDetail?.length) {
+      return { error: `Invalid itinerary data at index ${index}` };
+    }
+
+    // Extract flight details for each leg
+    const flights = itinerary.legList.flatMap((leg) =>
+      leg.schedule.map((schedule) => {
+        // Get segment for matching amenities (e.g., "ISB-KHI")
+        const segment = `${schedule.departure.airport}-${schedule.arrival.airport}`;
+
+        // Find matching amenities for this segment from amenities1
+        const segmentAmenities = itinerary.amenities1
+          ?.flatMap((passenger) =>
+            passenger.scheduleDetail
+              ?.filter((detail) => `${detail.beginAirport}-${detail.endAirport}` === segment)
+              .flatMap((detail) => detail.segments[0]?.amenitiesList?.map((amenity) => amenity.key) || [])
+          )
+          .filter(Boolean) || [];
+
+        return {
+          flightNumber: `${schedule.carrier.marketing}-${schedule.carrier.marketingFlightNumber}`,
+          airline: schedule.carrier.marketing,
+          aircraft: schedule.carrier.marketingFlightNumber|| 'Unknown',
+          departure: {
+            airport: schedule.departure.airport,
+            city: schedule.departure.city,
+            country: schedule.departure.country,
+            time: schedule.departure.time,
+          },
+          arrival: {
+            airport: schedule.arrival.airport,
+            city: schedule.arrival.city,
+            country: schedule.arrival.country,
+            time: schedule.arrival.time,
+          },
+          duration: `${Math.floor(schedule.elapsedTime / 60)}h ${schedule.elapsedTime % 60}m`,
+          distance: `${schedule.totalMilesFlown} miles`,
+          stops: schedule.stopCount || 0,
+          cabin:
+            itinerary.passengerPriceDetail[0]?.passengerList?.[0]?.FareComponents?.[0]?.segments?.[0]?.segment
+              ?.cabinCode || 'Economy',
+          bookingClass:
+            itinerary.passengerPriceDetail[0]?.passengerList?.[0]?.FareComponents?.[0]?.segments?.[0]?.segment
+              ?.bookingCode || 'N/A',
+          seatsAvailable:
+            itinerary.passengerPriceDetail[0]?.passengerList?.[0]?.FareComponents?.[0]?.segments?.[0]?.segment
+              ?.seatsAvailable || 0,
+          amenities: segmentAmenities, // Separate amenities for this flight
+        };
+      })
+    );
+
+    // Extract passenger and pricing details
+    const passengers = itinerary.passengerPriceDetail[0].passengerList.map((passenger) => ({
+      type: passenger.type === 'ADT' ? 'Adult' : passenger.type === 'C06' ? 'Child' : passenger.type,
+      code: passenger.type,
+      count: passenger.total || 0,
+      fare: {
+        baseFare: `${passenger.passengerTotalFare?.baseFareAmount || 0} ${
+          passenger.passengerTotalFare?.baseFareCurrency || 'N/A'
+        }`,
+        equivalentFare: `${passenger.passengerTotalFare?.equivalentAmount || 0} ${
+          passenger.passengerTotalFare?.equivalentCurrency || 'N/A'
+        }`,
+        totalTaxes: `${passenger.passengerTotalFare?.totalTaxAmount || 0} ${
+          passenger.passengerTotalFare?.currency || 'N/A'
+        }`,
+        totalFare: `${passenger.passengerTotalFare?.totalFare || 0} ${
+          passenger.passengerTotalFare?.currency || 'N/A'
+        }`,
+      },
+      taxes: passenger.taxSummary?.map((tax) => ({
+        code: tax.code,
+        description: tax.description,
+        amount: `${tax.amount} ${tax.currency}`,
+        station: tax.station || 'N/A',
+      })) || [],
+      baggage: passenger.baggageInformation?.map((bag) => ({
+        allowance: bag.detail ? `${bag.detail.weight} ${bag.detail.unit}` : 'N/A',
+        airline: bag.airlineCode || 'N/A',
+        segment:
+          bag.segments[0]?.id >= 0 && itinerary.legList[bag.segments[0].id]?.schedule[0]
+            ? `${itinerary.legList[bag.segments[0].id].schedule[0].departure.airport}-${
+                itinerary.legList[bag.segments[0].id].schedule[0].arrival.airport
+              }`
+            : 'Unknown',
+      })) || [],
+      fareBasis: passenger.FareComponents?.map((fc) => fc.fareComponentDetail?.fareBasisCode).join(', ') || 'N/A',
+      nonRefundable: passenger.nonRefundable || false,
+    }));
+
+    // Extract total pricing
+    const totalFare = {
+      baseFare: `${itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareAmount || 0} ${
+        itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareCurrency || 'N/A'
+      }`,
+      equivalentFare: `${itinerary.passengerPriceDetail[0].totalFareDetail?.equivalentAmount || 0} ${
+        itinerary.passengerPriceDetail[0].totalFareDetail?.equivalentCurrency || 'N/A'
+      }`,
+      totalTaxes: `${itinerary.passengerPriceDetail[0].totalFareDetail?.totalTaxAmount || 0} ${
+        itinerary.passengerPriceDetail[0].totalFareDetail?.currency || 'N/A'
+      }`,
+      totalPrice: `${itinerary.passengerPriceDetail[0].totalFareDetail?.totalPrice || 0} ${
+        itinerary.passengerPriceDetail[0].totalFareDetail?.currency || 'N/A'
+      }`,
+      lastTicketDate: formatDate(
+        `${itinerary.passengerPriceDetail[0].lastTicketDate}T${itinerary.passengerPriceDetail[0].lastTicketTime}`
+      ),
+    };
+
+    // Combine simplified data for this itinerary
+    return {
+      itineraryId: index,
+      flights,
+      passengers,
+      totalFare,
+      priceSource: itinerary.priceSource || 'N/A',
+      currencyConversion: itinerary.passengerPriceDetail[0].passengerList[0]?.currencyConversion || {},
+    };
+  });
 }

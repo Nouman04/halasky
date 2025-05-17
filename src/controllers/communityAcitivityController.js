@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { Sequelize } = require('sequelize');
 const {
   CommunityActivity,
   Tag,
@@ -345,20 +346,12 @@ module.exports = {
 
   createPoll: async (request, response) => {
     try {
-      const { userId, categoryId, title, description, questions } =
-        request.body;
-
-      //   const communityActivity = await CommunityActivity.create({
-      //     category_id: categoryId,
-      //     added_by: userId,
-      //     title: title,
-      //     description: description,
-      //     is_poll: true,
-      //   });
+      const { activityId, questions } = request.body;
+      const userId = request.user.id;
 
       for (const question of questions) {
         const pollQuestion = await PollQuestion.create({
-          community_activity_id: communityActivity.id,
+          community_activity_id: activityId,
           question_text: question.text,
         });
 
@@ -392,22 +385,56 @@ module.exports = {
 
   submitPollAnswer: async (request, response) => {
     try {
-      const { userId, answers } = request.body;
+      const { answerId, questionId  } = request.body;
+      const userId = request.user.id;
+      const existingPollAnswer = await PollAnswer.findOne({
+        include : {
+          model : PollOption,
+          as: 'pollOption',
+          where : {poll_question_id : questionId }
+        },
+        where: { user_id : userId}
+      });
 
-      for (const answer of answers) {
-        const existingAnswer = await PollAnswer.findOne({
-          where: { user_id: userId, poll_option_id: answer.optionId },
+      if (existingPollAnswer) {
+        await PollAnswer.update(
+          { poll_option_id: answerId },
+          { where: { id: existingPollAnswer.id } }
+        );
+      } else {
+        await PollAnswer.create({
+          user_id: userId, 
+          poll_option_id: answerId
         });
-
-        if (existingAnswer) {
-          await existingAnswer.update({ poll_option_id: answer.optionId });
-        } else {
-          await PollAnswer.create({
-            poll_option_id: answer.optionId,
-            user_id: userId,
-          });
-        }
       }
+
+
+      const pollDetail = await PollQuestion.findOne({
+                                              where: { id: questionId },
+                                              include: {
+                                                model: PollOption,
+                                                as: 'options',
+                                                include: [
+                                                  {
+                                                    model: PollAnswer,
+                                                    as: 'answers',
+                                                    attributes: []
+                                                  }
+                                                ],
+                                                attributes: {
+                                                  include: [
+                                                    [
+                                                      Sequelize.fn("COUNT", Sequelize.col("options.answers.id")),
+                                                      "answerCount"
+                                                    ]
+                                                  ]
+                                                },
+                                                required: false,
+                                                subQuery: false
+                                              },
+                                              group: ['PollQuestion.id', 'options.id']
+                                            });
+
 
       await LogActivityHandler(
         userId,
@@ -418,6 +445,7 @@ module.exports = {
 
       return response.status(200).json({
         status: true,
+        data : pollDetail,
         message: "Poll answer submitted successfully",
       });
     } catch (error) {
@@ -431,31 +459,34 @@ module.exports = {
 
   getPollResults: async (request, response) => {
     try {
-      const { pollId } = request.params;
+     const { questionId } = request.params;
 
-      const questions = await PollQuestion.findAll({
-        where: { community_activity_id: pollId },
-        include: [
-          {
-            model: PollOption,
-            as: "options",
-            include: [
-              {
-                model: PollAnswer,
-                as: "answers",
-              },
-            ],
-          },
-        ],
-      });
+      const results = await PollQuestion.findOne({
+                                              where: { id: questionId },
+                                              include: {
+                                                model: PollOption,
+                                                as: 'options',
+                                                include: [
+                                                  {
+                                                    model: PollAnswer,
+                                                    as: 'answers',
+                                                    attributes: []
+                                                  }
+                                                ],
+                                                attributes: {
+                                                  include: [
+                                                    [
+                                                      Sequelize.fn("COUNT", Sequelize.col("options.answers.id")),
+                                                      "answerCount"
+                                                    ]
+                                                  ]
+                                                },
+                                                required: false,
+                                                subQuery: false
+                                              },
+                                              group: ['PollQuestion.id', 'options.id']
+                                            });
 
-      const results = questions.map((question) => ({
-        question: question.question_text,
-        options: question.options.map((option) => ({
-          text: option.option_text,
-          votes: option.answers.length,
-        })),
-      }));
 
       return response.status(200).json({
         status: true,
@@ -474,42 +505,40 @@ module.exports = {
     try {
       const { postId } = req.params;
 
-      const activity = await CommunityActivity.findOne({
-        where: { id: postId },
-        include: [
-          {
-            model: PollQuestion,
-            as: "pollQuestions",
-            include: [
-              {
-                model: PollOption,
-                as: "options",
-                include: [
-                  {
-                    model: PollAnswer,
-                    as: "answers",
-                    include: [
-                      {
-                        model: User,
-                        as: "user",
-                        attributes: ["id", "name", "email"],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      });
+      const results = await CommunityActivity.findOne({
+                                            where: { id: postId },
+                                            include: [
+                                              {
+                                                model: PollQuestion,
+                                                as: 'pollQuestions',
+                                                include: [
+                                                  {
+                                                    model: PollOption,
+                                                    as: 'options',
+                                                    include: [
+                                                      {
+                                                        model: PollAnswer,
+                                                        as: 'answers',
+                                                        attributes: []
+                                                      }
+                                                    ],
+                                                    attributes: {
+                                                      include: [
+                                                        [
+                                                          Sequelize.fn("COUNT", Sequelize.col("pollQuestions.options.answers.id")),
+                                                          "answerCount"
+                                                        ]
+                                                      ]
+                                                    },
+                                                    required: false
+                                                  }
+                                                ]
+                                              }
+                                            ],
+                                            group: ['CommunityActivity.id', 'pollQuestions.id', 'pollQuestions.options.id'],
+                                          });
 
-      if (!activity) {
-        return res
-          .status(404)
-          .json({ message: "Community Activity not found" });
-      }
-
-      res.status(200).json({ activity });
+      res.status(200).json({ status: true , data : results });
     } catch (error) {
       console.error("Error fetching community activity:", error);
       res.status(500).json({ message: "Server error", error: error.message });
