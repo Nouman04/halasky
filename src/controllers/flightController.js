@@ -127,6 +127,10 @@ module.exports = {
             fetch( endpoint , requestOptions)
             .then((response) => response.json()) 
             .then(async (result) => {
+              console.log("-------------------------------------------------")
+              console.log("nouman")
+              console.log("-----------------------------------------------")
+              console.log(result);
               //new code starts here
               // return response.status(200).json(result);
               if(result.status == "NotProcessed")
