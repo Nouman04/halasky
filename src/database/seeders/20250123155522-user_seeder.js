@@ -44,7 +44,7 @@ module.exports = {
     
     let users = await processUsers();
 
-    queryInterface.bulkInsert('users', users);
+    await queryInterface.bulkInsert('users', users);
 
     // console.log(1232132132);
 
@@ -53,7 +53,7 @@ module.exports = {
 
     //mapping role to active user
     let userWithRole = activeStatusUser.map( (user , index)=>{ return {user_id : user.id , role_id : roles[index].id} });
-    RolePermission.bulkCreate(userWithRole);
+    await RolePermission.bulkCreate(userWithRole);
   },
 
   async down (queryInterface, Sequelize) {

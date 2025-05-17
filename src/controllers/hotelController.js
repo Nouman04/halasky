@@ -1,4 +1,4 @@
-const { JsonHandler , HotelBooking , Guest , PaymentDetail } = require("../database/models");
+const { JsonHandler , HotelBooking , Guest , PaymentDetail , User , Promotion } = require("../database/models");
 const AppConst = require("../appConst");
 const locations = require('../public/files/destinations.json');
 const locationHelper = require('../Helpers/LocationHelper');
@@ -143,13 +143,25 @@ module.exports = {
             return response.status(200).json({
               status: false,
               message: result.errorCode,
+              error: error.message
+            });
+          }
+
+        
+          const appResults = result?.GetHotelAvailRS?.ApplicationResults;
+
+          if (appResults?.Error && Array.isArray(appResults.Error)) {
+            return response.status(200).json({
+              status: false,
+              message: 'Something went wrong',
+              error: appResults.Error
             });
           }
 
           if(detail.ApplicationResults.status != "Complete"){
               return response.status(200).json({
                 status: false,
-                message: 'Something went wrong',
+                message: 'Something went wrong'
               });
           }
 
@@ -770,8 +782,45 @@ module.exports = {
         error: error.message,
       });
     }
+  },
+
+  userBookings : async (request , response ) => {
+    try{
+    const userId = request.user.id;
+    const bookings = await HotelBooking.findAll({
+                        where: { user_id: userId },
+                        include: [
+                          {
+                            model: User,
+                            as: 'user',
+                          },
+                          {
+                            model: Promotion,
+                            as: 'promotion',
+                          },
+                          {
+                            model: PaymentDetail,
+                            as: 'paymentDetail',
+                          },
+                          {
+                            model: Guest,
+                            as: 'guests',
+                          },
+                        ],
+                        order: [['created_at', 'DESC']],
+                      });
+
+        return response.status(200).json({
+          status : true,
+          data : { bookings }
+        });
+     } catch (error) {
+      return response.status(500).json({
+        status: false,
+        message: "Something Went Wrong",
+        error: error.message,
+      });
+    }
   }
-
-
 
 };

@@ -594,7 +594,7 @@ module.exports = {
 
             return response.status(200).json({
                 status: true,
-                message: 'Password Updated',
+                message: 'Password Updated Successfully',
             })
         } catch (error){
             return response.status(500).json({
@@ -603,6 +603,32 @@ module.exports = {
             })
         }
     },
+
+    updateProfileDetail : async (request , response ) => {
+        try {
+
+            const { username , phone } = request.body;
+            const user = request.user;
+
+            await User.update(
+                {name : username , number : phone},
+                {where : {id : user.id} }
+            )
+
+
+            return response.status(200).json({
+                status: true,
+                message: 'Profile Updated Successfully',
+            })
+
+
+        } catch (error){
+            return response.status(500).json({
+                status : false,
+                message : error.message
+            })
+        }
+    }
 
 
      

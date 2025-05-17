@@ -17,5 +17,6 @@ router.post('/get' ,   flightController.list );
 router.post('/availability' ,   flightController.findAvailability );
 router.post('/generate-pnr' ,   flightController.generatePnr );
 router.post('/airports' ,   flightController.airportList );
+router.get("/bookings", flightController.userBookings);
 
 module.exports = router;

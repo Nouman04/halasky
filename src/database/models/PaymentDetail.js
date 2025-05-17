@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
 
   PaymentDetail.associate = function(models) {
     
-    PaymentDetail.belongsTo(models.PaymentDetail, {
+    PaymentDetail.belongsTo(models.HotelBooking, {
       foreignKey: 'booking_id',
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',

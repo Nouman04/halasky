@@ -18,10 +18,10 @@ const authRoutes = require("./src/routes/authRoutes");
 const suspiciousActivityRoutes = require("./src/routes/suspiciousActivityRoutes");
 const flightRoutes = require("./src/routes/flightRoutes");
 const hotelRoutes = require("./src/routes/hotelRoutes");
-const chatRoutes = require("./src/routes/chatRoutes");
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const testRoutes = require("./src/routes/testRoutes");
 const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
+const paymentRoutes = require("./src/routes/paymentRoutes");
 
 const cors = require("cors");
 const app = express();
@@ -41,10 +41,24 @@ app.use( (req , res , next ) => {
 app.use(passport.initialize());
 // app.use(passport.session());
 
+//socket code starts here
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
+let socketConnectedUser = new Map();
+const chatRoutes = require("./src/routes/chatRoutes")(io , socketConnectedUser);
+
+
 app.use("/user", userRoutes);
 app.use("/blog", blogRoutes);
 app.use("/faq", faqRoutes);
-app.use("/activity", activityRoutes);
+app.use("/community-activity", activityRoutes);
 app.use("/query", customerQueryRoutes);
 app.use("/common", commonRoutes);
 app.use("/settings", settingsRoutes);
@@ -54,20 +68,37 @@ app.use("/hotel", hotelRoutes);
 app.use("/auth", authRoutes);
 app.use("/chat", chatRoutes);
 app.use("/dashboard", dashboardRoutes);
+app.use("/payment", paymentRoutes);
 app.use("/test", testRoutes);
 
-//socket code starts here
-const http = require('http');
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const io = new Server(server);
 
 io.on('connection' ,(socket)=>{
+
+    socket.on('connectUser' , (user)=>{
+        let username = user.username;
+        let userId = user.id;
+        let socketId = socket.id;
+        socketConnectedUser.set( userId , { username , socketId} )
+        socketConnectedUser.set( socketId , userId);
+    })
+
+    socket.on('disconnect' , ()=>{
+      
+      userId = socketConnectedUser.get(socket.id);   
+      socketConnectedUser.delete(socket.id)
+      socketConnectedUser.delete(userId)
+      console.log(`user disconnected successfully ${socket.id}`);
+    })
+    
     console.log(`socket connection connected, connection id:${socket.id}`)
 })
 
-app.listen( PORT , () => {
+// app.listen( PORT , () => {
+//     cronJobs();
+//     console.log(`App is listening at port: ${PORT}`)
+// })
+server.listen(PORT, () => {
     cronJobs();
-    console.log(`App is listening at port: ${PORT}`)
-})
+    console.log(`App is listening at port: ${PORT}`);
+  });
 
