@@ -64,33 +64,34 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   CommunityActivity.associate = function (models) {
-    CommunityActivity.hasMany(sequelize.define("Tag"), {
-      foreignKey: "tagable_id",
-      as: "tags",
-      scope: {
-        tagable_type: "CommunityActivity",
-      },
-    });
+  CommunityActivity.hasMany(models.Tag, {
+    foreignKey: "tagable_id",
+    as: "tags",
+    scope: {
+      tagable_type: "CommunityActivity",
+    },
+  });
 
-    CommunityActivity.hasMany(sequelize.define("Comment"), {
-      foreignKey: "commentable_id",
-      as: "comments",
-      scope: {
-        commentable_type: "CommunityActivity",
-      },
-    });
+  CommunityActivity.hasMany(models.Comment, {
+    foreignKey: "commentable_id",
+    as: "comments",
+    scope: {
+      commentable_type: "CommunityActivity",
+    },
+  });
 
-    CommunityActivity.belongsTo(models.Category, {
-      foreignKey: "category_id",
-      as: "category",
-    });
+  CommunityActivity.belongsTo(models.Category, {
+    foreignKey: "category_id",
+    as: "category",
+  });
 
-    CommunityActivity.hasMany(models.PollQuestion, {
-      foreignKey: "community_activity_id",
-      as: "pollQuestions",
-      onDelete: "CASCADE",
-    });
-  };
+  CommunityActivity.hasMany(models.PollQuestion, {
+    foreignKey: "community_activity_id",
+    as: "pollQuestions",
+    onDelete: "CASCADE",
+  });
+};
+
 
   return CommunityActivity;
 };

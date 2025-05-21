@@ -12,7 +12,8 @@ module.exports = {
         filteredAirports = airports.filter( airport => {
           let airportCode = airport.code.toLowerCase();
           let airportName = airport.name.toLowerCase();
-          return airportCode.includes(searchQuery.toLowerCase()) || airportName.includes(searchQuery.toLowerCase());
+          let airportCity = airport.city.toLowerCase();
+          return airportCode.includes(searchQuery.toLowerCase()) || airportName.includes(searchQuery.toLowerCase()) || airportCity.includes(searchQuery.toLowerCase());
         }).slice(0 , 20);
 
         return response.status(200).json({
@@ -127,10 +128,6 @@ module.exports = {
             fetch( endpoint , requestOptions)
             .then((response) => response.json()) 
             .then(async (result) => {
-              console.log("-------------------------------------------------")
-              console.log("nouman")
-              console.log("-----------------------------------------------")
-              console.log(result);
               //new code starts here
               // return response.status(200).json(result);
               if(result.status == "NotProcessed")
@@ -1124,9 +1121,9 @@ function simplifyFlightResponse(itinerariesList) {
 
   // Helper function to safely parse and format dates
   const formatDate = (dateString, timeZone = 'Asia/Karachi') => {
+    
     // Handle null, undefined, or non-string inputs
     if (!dateString || typeof dateString !== 'string') {
-      console.warn(`Invalid date input: ${dateString}`);
       return 'N/A';
     }
 
@@ -1136,7 +1133,6 @@ function simplifyFlightResponse(itinerariesList) {
 
     // Check if the date is valid
     if (isNaN(date.getTime())) {
-      console.warn(`Failed to parse date: ${cleanedDateString}`);
       return 'N/A';
     }
 
@@ -1155,25 +1151,30 @@ function simplifyFlightResponse(itinerariesList) {
       return { error: `Invalid itinerary data at index ${index}` };
     }
 
-    // Extract flight details for each leg
-    const flights = itinerary.legList.flatMap((leg) =>
+    // Extract flight details for each leg, keeping legs separate
+    const flights = itinerary.legList.map((leg) =>
       leg.schedule.map((schedule) => {
         // Get segment for matching amenities (e.g., "ISB-KHI")
         const segment = `${schedule.departure.airport}-${schedule.arrival.airport}`;
 
         // Find matching amenities for this segment from amenities1
-        const segmentAmenities = itinerary.amenities1
-          ?.flatMap((passenger) =>
-            passenger.scheduleDetail
-              ?.filter((detail) => `${detail.beginAirport}-${detail.endAirport}` === segment)
-              .flatMap((detail) => detail.segments[0]?.amenitiesList?.map((amenity) => amenity.key) || [])
-          )
-          .filter(Boolean) || [];
+        const segmentAmenities = Array.from(
+                                        new Set(
+                                          itinerary.amenities1
+                                            ?.flatMap((passenger) =>
+                                              passenger.scheduleDetail
+                                                ?.filter((detail) => `${detail.beginAirport}-${detail.endAirport}` === segment)
+                                                .flatMap((detail) => detail.segments[0]?.amenitiesList?.map((amenity) => amenity.key) || [])
+                                            )
+                                            .filter(Boolean) || []
+                                        )
+                                      );
 
         return {
           flightNumber: `${schedule.carrier.marketing}-${schedule.carrier.marketingFlightNumber}`,
           airline: schedule.carrier.marketing,
-          aircraft: schedule.carrier.marketingFlightNumber|| 'Unknown',
+          marketingNumber : schedule.carrier.marketingFlightNumber,
+          aircraft: schedule.carrier.equipment?.code || 'Unknown',
           departure: {
             airport: schedule.departure.airport,
             city: schedule.departure.city,
@@ -1223,10 +1224,7 @@ function simplifyFlightResponse(itinerariesList) {
         }`,
       },
       taxes: passenger.taxSummary?.map((tax) => ({
-        code: tax.code,
-        description: tax.description,
-        amount: `${tax.amount} ${tax.currency}`,
-        station: tax.station || 'N/A',
+        [tax.code] : `${tax.amount} ${tax.currency}, ${tax.description}`,
       })) || [],
       baggage: passenger.baggageInformation?.map((bag) => ({
         allowance: bag.detail ? `${bag.detail.weight} ${bag.detail.unit}` : 'N/A',

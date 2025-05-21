@@ -208,28 +208,77 @@ module.exports = {
         whereCondition.status = status;
       }
       let skip = (parseInt(request.body.pageNo) - 1) * 10;
+      // const posts = await CommunityActivity.findAll({
+      //   include: [
+      //     {
+      //       model: Tag,
+      //       required: false,
+      //       as: "tags",
+      //     },
+      //     {
+      //       model: Comment,
+      //       required: false,
+      //       as: "comments",
+      //     },
+      //     {
+      //       model: Category,
+      //       required: false,
+      //       as: "category",
+      //     },
+      //   ],
+      //   where: whereCondition,
+      //   offset: skip,
+      //   limit: 10,
+      // });
+
+
       const posts = await CommunityActivity.findAll({
-        include: [
-          {
-            model: Tag,
-            required: false,
-            as: "tags",
-          },
-          {
-            model: Comment,
-            required: false,
-            as: "comments",
-          },
-          {
-            model: Category,
-            required: false,
-            as: "category",
-          },
-        ],
-        where: whereCondition,
-        offset: skip,
-        limit: 10,
-      });
+  include: [
+    {
+      model: Tag,
+      as: 'tags',
+      where: { tagable_type: 'CommunityActivity' },
+      required: false,
+    },
+    {
+      model: Comment,
+      as: 'comments',
+      where: { commentable_type: 'CommunityActivity' },
+      required: false,
+    },
+    {
+      model: Category,
+      as: 'category',
+    },
+    {
+      model: PollQuestion,
+      as: 'pollQuestions',
+      include: [
+        {
+          model: PollOption,
+          as: 'options',
+          attributes: [
+            'id',
+            'poll_question_id',
+            'option_text',
+            [
+              Sequelize.literal(`(
+                SELECT COUNT(*) 
+                FROM poll_answers 
+                WHERE poll_answers.poll_option_id = \`pollQuestions->options\`.id
+              )`),
+              'answerCount'
+            ]
+          ],
+          required: false
+        }
+      ]
+    }
+  ],
+  where: whereCondition,
+  offset: skip,
+  limit: 10
+});
 
       return response.status(200).json({
         status: true,
@@ -242,6 +291,7 @@ module.exports = {
         error: error.message,
       });
     }
+    
   },
 
   changeStatus: async (request, response) => {

@@ -377,9 +377,31 @@ module.exports = {
       fetch(endpoint, requestOptions)
         .then((response) => response.json())
         .then(async (result) => {
+
+          let apiResposneStatus = result.GetHotelDetailsRS.ApplicationResults.status;
+
+          if(apiResposneStatus == "Incomplete"){
+            return response.status(200).json({
+              status: false,
+              error: result.GetHotelDetailsRS.ApplicationResults.Error,
+            });
+          }
+
+          if(!result.GetHotelDetailsRS.HotelDetailsInfo)
+          {
+            return response.status(200).json({
+                status: false,
+                data: result,
+              });
+          }
+
+
+          let simplifiedHotelDetail = processHotelDetails(result);
+
+
           return response.status(200).json({
             status: true,
-            data: result,
+            data: simplifiedHotelDetail,
           });
         });
 
@@ -824,3 +846,86 @@ module.exports = {
   }
 
 };
+
+
+const processHotelDetails = (apiResponse) => {
+  const { HotelDetailsInfo } = apiResponse.GetHotelDetailsRS;
+  const { HotelInfo, HotelRateInfo } = HotelDetailsInfo;
+  const rooms = HotelRateInfo.Rooms.Room;
+
+  // Extract common hotel information
+  const hotelInfo = {
+    hotelCode: HotelInfo.HotelCode,
+    hotelName: HotelInfo.HotelName,
+    chainName: HotelInfo.ChainName,
+    sabreRating: HotelInfo.SabreRating,
+  };
+
+  // Transform rooms into a linear array
+  const simplifiedRooms = rooms.map((room) => {
+    const { RoomType, RoomDescription, RoomViewDescription, BedTypeOptions, RatePlans } = room;
+
+    return RatePlans.RatePlan.map((ratePlan) => ({
+      roomType: RoomType,
+      roomDescription: RoomDescription.Text[0] || RoomDescription.Name,
+      roomView: RoomViewDescription,
+      bedType: BedTypeOptions.BedTypes[0].BedType[0].Description,
+      bedCount: BedTypeOptions.BedTypes[0].BedType[0].Count,
+      ratePlanName: ratePlan.RatePlanName,
+      ratePlanCode: ratePlan.RatePlanCode,
+      productCode: ratePlan.ProductCode,
+      mealPlan: ratePlan.MealsIncluded
+        ? {
+            breakfast: ratePlan.MealsIncluded.Breakfast || false,
+            lunch: ratePlan.MealsIncluded.Lunch || false,
+            dinner: ratePlan.MealsIncluded.Dinner || false,
+            description: ratePlan.MealsIncluded.MealPlanDescription || 'None'
+          }
+        : { description: 'None' },
+      pricing: {
+        startDate: ratePlan.ConvertedRateInfo.StartDate,
+        endDate: ratePlan.ConvertedRateInfo.EndDate,
+        amountBeforeTax: parseFloat(ratePlan.ConvertedRateInfo.AmountBeforeTax),
+        amountAfterTax: parseFloat(ratePlan.ConvertedRateInfo.AmountAfterTax),
+        averageNightlyRate: parseFloat(ratePlan.ConvertedRateInfo.AverageNightlyRate),
+        currencyCode: ratePlan.ConvertedRateInfo.CurrencyCode,
+        taxes: parseFloat(ratePlan.ConvertedRateInfo.Taxes.Amount),
+      },
+      cancellationPolicy: ratePlan.ConvertedRateInfo.CancelPenalties.CancelPenalty[0].Refundable
+        ? {
+            refundable: true,
+            deadline: ratePlan.ConvertedRateInfo.CancelPenalties.CancelPenalty[0].Deadline
+          }
+        : { refundable: false },
+      guarantee: {
+        type: ratePlan.ConvertedRateInfo.Guarantee.GuaranteeType,
+        acceptedPayments: ratePlan.ConvertedRateInfo.Guarantee.GuaranteesAccepted.GuaranteeAccepted.map((g) => ({
+          type: g.GuaranteeTypeDescription,
+          code: g.GuaranteeTypeCode,
+          paymentCards: g.PaymentCards ? g.PaymentCards.PaymentCard.map((card) => card.value) : []
+        })),
+        depositDeadline: ratePlan.ConvertedRateInfo.Guarantee.DepositPolicies
+          ? ratePlan.ConvertedRateInfo.Guarantee.DepositPolicies.DepositPolicy[0].Deadline.AbsoluteDeadline
+          : null
+      },
+      commission: {
+        percent: ratePlan.ConvertedRateInfo.Commission?.Percent || 0,
+        type: ratePlan.ConvertedRateInfo.Commission?.Type || 'None',
+        description: ratePlan.ConvertedRateInfo.Commission?.CommissionDescription.Text[0] || ''
+      },
+      additionalDetails: ratePlan.ConvertedRateInfo.AdditionalDetails.AdditionalDetail.map((detail) => ({
+        description: detail.Description,
+        text: detail.Text
+      })),
+      rateKey: ratePlan.RateKey,
+      prepaidIndicator: ratePlan.PrepaidIndicator,
+      limitedAvailability: ratePlan.LimitedAvailability === 'true'
+    }));
+  }).flat();
+
+  return {
+    hotelInfo,
+    rooms: simplifiedRooms
+  };
+};
+
