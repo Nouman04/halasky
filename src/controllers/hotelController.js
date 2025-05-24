@@ -396,6 +396,10 @@ module.exports = {
           }
 
 
+          // return response.status(200).json({
+          //       status: false,
+          //       data: result,
+          //     });
           let simplifiedHotelDetail = processHotelDetails(result);
 
 
@@ -869,8 +873,8 @@ const processHotelDetails = (apiResponse) => {
       roomType: RoomType,
       roomDescription: RoomDescription.Text[0] || RoomDescription.Name,
       roomView: RoomViewDescription,
-      bedType: BedTypeOptions.BedTypes[0].BedType[0].Description,
-      bedCount: BedTypeOptions.BedTypes[0].BedType[0].Count,
+      bedType: BedTypeOptions?.BedTypes[0].BedType[0].Description,
+      bedCount: BedTypeOptions?.BedTypes[0].BedType[0].Count,
       ratePlanName: ratePlan.RatePlanName,
       ratePlanCode: ratePlan.RatePlanCode,
       productCode: ratePlan.ProductCode,
@@ -902,7 +906,7 @@ const processHotelDetails = (apiResponse) => {
         acceptedPayments: ratePlan.ConvertedRateInfo.Guarantee.GuaranteesAccepted.GuaranteeAccepted.map((g) => ({
           type: g.GuaranteeTypeDescription,
           code: g.GuaranteeTypeCode,
-          paymentCards: g.PaymentCards ? g.PaymentCards.PaymentCard.map((card) => card.value) : []
+          paymentCards: g.PaymentCards ? g.PaymentCards.PaymentCard.reduce((acc, card) => { acc[card.value] = card.CardCode; return acc; }, {}) : {}
         })),
         depositDeadline: ratePlan.ConvertedRateInfo.Guarantee.DepositPolicies
           ? ratePlan.ConvertedRateInfo.Guarantee.DepositPolicies.DepositPolicy[0].Deadline.AbsoluteDeadline
