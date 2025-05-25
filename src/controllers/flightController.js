@@ -33,7 +33,7 @@ module.exports = {
 
 
     list : async (request ,response)=>{
-        const { destinationList , passengerList } = request.body;
+        const { destinationList , passengerList , travelClass } = request.body;
 
         const travelJson = destinationList.map( detail => {
           return {
@@ -103,6 +103,15 @@ module.exports = {
                         "PassengerTypeQuantity": passengerJson
                       }
                     ]
+                  },
+                  "TravelPreferences": {
+                    "CabinPref": [
+                      {
+                        "Cabin": travelClass, // Y=Economy, C=Business, F=First
+                        "PreferLevel": "Preferred"
+                      }
+                    ],
+                    "TPA_Extensions": {}
                   },
                   "TPA_Extensions": {
                     "IntelliSellTransaction": {
