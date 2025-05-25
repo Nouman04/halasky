@@ -5,6 +5,7 @@ const CommunityActivityController = require("../controllers/communityAcitivityCo
 const passport = require("passport");
 
 const { dynamicUploader } = require("../Helpers/fileUploadHelper");
+const { route } = require("./userRoutes");
 const upload = dynamicUploader("thumbnail");
 
 router.use(passport.authenticate("jwt", { session: false }));
@@ -16,6 +17,9 @@ router.post("/list", CommunityActivityController.list);
 router.put("/change-status", CommunityActivityController.changeStatus);
 router.put("/approval-status", CommunityActivityController.changeApproval);
 router.put( "/change-restriction", CommunityActivityController.updateRestriction);
+router.put( "/update-activity-action", CommunityActivityController.toggleActivityAction);
+router.post("/get-activity-action", CommunityActivityController.getUserActivities);
+
 
 router.post("/create-poll", CommunityActivityController.createPoll);
 router.put("/add-poll-answer", CommunityActivityController.submitPollAnswer);

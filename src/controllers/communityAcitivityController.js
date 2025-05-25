@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { Sequelize } = require('sequelize');
+const { Sequelize , QueryTypes } = require('sequelize');
 const {
   CommunityActivity,
   Tag,
@@ -9,6 +9,8 @@ const {
   PollQuestion,
   PollOption,
   PollAnswer,
+  ActivityAction,
+  sequelize
 } = require("../database/models");
 const LogActivityHandler = require("../Helpers/logActivityHandler");
 const appConst = require("../appConst");
@@ -208,28 +210,77 @@ module.exports = {
         whereCondition.status = status;
       }
       let skip = (parseInt(request.body.pageNo) - 1) * 10;
+      // const posts = await CommunityActivity.findAll({
+      //   include: [
+      //     {
+      //       model: Tag,
+      //       required: false,
+      //       as: "tags",
+      //     },
+      //     {
+      //       model: Comment,
+      //       required: false,
+      //       as: "comments",
+      //     },
+      //     {
+      //       model: Category,
+      //       required: false,
+      //       as: "category",
+      //     },
+      //   ],
+      //   where: whereCondition,
+      //   offset: skip,
+      //   limit: 10,
+      // });
+
+
       const posts = await CommunityActivity.findAll({
-        include: [
-          {
-            model: Tag,
-            required: false,
-            as: "tags",
-          },
-          {
-            model: Comment,
-            required: false,
-            as: "comments",
-          },
-          {
-            model: Category,
-            required: false,
-            as: "category",
-          },
-        ],
-        where: whereCondition,
-        offset: skip,
-        limit: 10,
-      });
+  include: [
+    {
+      model: Tag,
+      as: 'tags',
+      where: { tagable_type: 'CommunityActivity' },
+      required: false,
+    },
+    {
+      model: Comment,
+      as: 'comments',
+      where: { commentable_type: 'CommunityActivity' },
+      required: false,
+    },
+    {
+      model: Category,
+      as: 'category',
+    },
+    {
+      model: PollQuestion,
+      as: 'pollQuestions',
+      include: [
+        {
+          model: PollOption,
+          as: 'options',
+          attributes: [
+            'id',
+            'poll_question_id',
+            'option_text',
+            [
+              Sequelize.literal(`(
+                SELECT COUNT(*) 
+                FROM poll_answers 
+                WHERE poll_answers.poll_option_id = \`pollQuestions->options\`.id
+              )`),
+              'answerCount'
+            ]
+          ],
+          required: false
+        }
+      ]
+    }
+  ],
+  where: whereCondition,
+  offset: skip,
+  limit: 10
+});
 
       return response.status(200).json({
         status: true,
@@ -242,6 +293,7 @@ module.exports = {
         error: error.message,
       });
     }
+    
   },
 
   changeStatus: async (request, response) => {
@@ -541,9 +593,140 @@ module.exports = {
       res.status(200).json({ status: true , data : results });
     } catch (error) {
       console.error("Error fetching community activity:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
+      return res.status(500).json({ message: "Server error", error: error.message });
     }
   },
+
+
+toggleActivityAction: async (request, response) => {
+  try {
+    const userId = request.user.id;
+    const { activityId, activityType, value } = request.body;
+    console.log(request.body);
+    // Validate actionType
+    const validActions = ['spam', 'saved', 'liked'];
+    if (!validActions.includes(activityType)) {
+      return response.status(400).json({ message: "Invalid action type" });
+    }
+
+    // Build where clause
+    const whereClause = {
+      user_id: userId,
+      activity_id: activityId,
+      activity_type: activityType,
+      is_spam: activityType == 'spam' ? 1 : null,
+      is_saved: activityType == 'saved' ? 1 : null,
+    };
+
+    if (value == 1) {
+      const alreadyExists = await ActivityAction.findOne({ where: whereClause });
+
+      if (alreadyExists) {
+        return response.status(200).json({ message: `${activityType} already added` });
+      }
+
+      // Create new action
+      const actionData = {
+        user_id: userId,
+        activity_type: activityType,
+        activity_id: activityId,
+        is_spam: activityType == 'spam' ? 1 : null,
+        is_saved: activityType == 'saved' ? 1 : null,
+      };
+
+      await ActivityAction.create(actionData);
+      return response.status(200).json({ message: `${activityType} added` });
+
+    } else {
+      await ActivityAction.destroy({ where: whereClause });
+      return response.status(200).json({ message: `${activityType} removed` });
+    }
+
+  } catch (error) {
+    return response.status(500).json({ message: "Server error", error: error.message });
+  }
+},
+
+// getUserActivities: async (request, response) => {
+//   try {
+//       const userId = request.user.id;
+//       let skip = (parseInt(request.body.pageNo) - 1) * 10;
+//       const activities = await ActivityAction.findAll({
+//         where: { user_id: userId },
+//         order: [['id', 'DESC']],
+//         offset: skip,
+//         limit: 10
+//       });
+
+//       return response.status(200).json({ status : true , data : activities });
+//     } catch (error) {
+//       return response.status(500).json({ message: 'Server error', error: error.message });
+//     }
+//   },
+
+getUserActivities : async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const page = parseInt(req.body.pageNo) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    // First query: activity actions
+    const activityActions = await sequelize.query(`
+      SELECT 
+        aa.id,
+        'activity_action' AS type,
+        aa.created_at,
+        aa.is_spam,
+        aa.is_saved,
+        ca.id AS community_activity_id,
+        ca.title,
+        ca.image,
+        ca.description,
+        NULL AS comment
+      FROM activity_actions aa
+      JOIN community_activities ca ON ca.id = aa.activity_id
+      WHERE aa.user_id = :userId
+    `, {
+      replacements: { userId },
+      type: QueryTypes.SELECT
+    });
+
+    // Second query: comments
+    const comments = await sequelize.query(`
+      SELECT 
+        c.id,
+        'comment' AS type,
+        c.created_at,
+        NULL AS is_spam,
+        NULL AS is_saved,
+        ca.id AS community_activity_id,
+        ca.title,
+        ca.image,
+        ca.description,
+        c.comment
+      FROM comments c
+      JOIN community_activities ca ON ca.id = c.commentable_id
+      WHERE c.added_by = :userId AND c.commentable_type = 'CommunityActivity'
+    `, {
+      replacements: { userId },
+      type: QueryTypes.SELECT
+    });
+
+    // Merge and sort by created_at DESC
+    const combined = [...activityActions, ...comments].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    // Paginate combined result
+    const paginated = combined.slice(offset, offset + limit);
+
+    return res.status(200).json({ status: true, data: paginated });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+},
+
 
   updateTemplate: async (request, response) => {},
 };

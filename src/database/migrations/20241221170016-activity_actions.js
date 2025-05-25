@@ -25,8 +25,14 @@ module.exports = {
         allowNull: false
       },
       activity_id : {
-        type: Sequelize.DataTypes.INTEGER,
-        allowNull: false
+        type : Sequelize.DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model : 'community_activities',
+          key: 'id'
+        },
+        onUpdate : 'CASCADE',
+        onDelete: 'CASCADE'
       },
       is_spam: {
         type : Sequelize.DataTypes.BOOLEAN,
