@@ -688,7 +688,7 @@ module.exports = {
               "Room": roomDetail
             },
             "PaymentInformation": {
-              "Type": "GUARANTEE",
+              "Type": paymentDetail.guaranteeType,
               "FormOfPayment": {
                 "PaymentCard": {
                   "PaymentType": paymentDetail.type,
