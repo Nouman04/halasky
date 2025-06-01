@@ -34,7 +34,7 @@ module.exports = {
 
     list : async (request ,response)=>{
         const { destinationList , passengerList , travelClass } = request.body;
-
+        console.log(travelClass);
         const travelJson = destinationList.map( detail => {
           return {
                   "DepartureDateTime": detail.travelDate,
