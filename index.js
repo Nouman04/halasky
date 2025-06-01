@@ -22,6 +22,7 @@ const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const testRoutes = require("./src/routes/testRoutes");
 const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
+const path = require('path');
 
 const cors = require("cors");
 const app = express();
@@ -39,7 +40,7 @@ app.use( (req , res , next ) => {
     limiter(req , res , next);
 })
 app.use(passport.initialize());
-// app.use(passport.session());
+app.use('/uploads', express.static(path.join(__dirname, 'src/public/uploads')));
 
 //socket code starts here
 const http = require('http');

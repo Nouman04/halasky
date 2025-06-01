@@ -195,6 +195,190 @@ module.exports = {
     }
   },
 
+
+specificList: async (request, response) => {
+  const { checkIn, checkOut, cityCode, countryCode, rooms, hotelCodes } = request.body;
+
+  // Validate hotelCodes
+  if (!hotelCodes || !Array.isArray(hotelCodes) || hotelCodes.length === 0) {
+    return response.status(400).json({
+      status: false,
+      message: "hotelCodes must be a non-empty array",
+    });
+  }
+
+  const tokenDetail = await JsonHandler.findOne({
+    where: { type: AppConst.sabreFlights },
+  });
+
+  const accessToken =
+    typeof tokenDetail.information === "string"
+      ? JSON.parse(tokenDetail.information).access_token
+      : tokenDetail.information.access_token;
+
+  let mappedRooms = rooms.map((room, index) => {
+    let roomDetail = {
+      Index: index + 1,
+      Adults: room.Adults,
+    };
+    if (room.Children) {
+      roomDetail.Children = room.Children;
+      roomDetail.ChildAges = room.ChildAges;
+    }
+    return roomDetail;
+  });
+
+  try {
+    let endpoint = "https://api.cert.sabre.com/v3.0.0/get/hotelavail";
+
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${accessToken}`);
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Accept", "application/json");
+
+    let searchRequest = {
+      GetHotelAvailRQ: {
+        POS: {
+          Source: {
+            PseudoCityCode: "3GML",
+          },
+        },
+        SearchCriteria: {
+          OffSet: 1,
+          SortBy: "TotalRate",
+          SortOrder: "ASC",
+          TierLabels: true,
+          GeoSearch: {
+            GeoRef: {
+              Radius: 50,
+              UOM: "KM",
+              RefPoint: {
+                Value: cityCode,
+                ValueContext: "CODE",
+                RefPointType: "6",
+                CountryCode: countryCode,
+              },
+            },
+          },
+          RateInfoRef: {
+            CurrencyCode: "SAR",
+            BestOnly: "2",
+            PrepaidQualifier: "IncludePrepaid",
+            RefundableOnly: false,
+            ConvertedRateInfoOnly: true,
+            StayDateRange: {
+              StartDate: checkIn,
+              EndDate: checkOut,
+            },
+            Rooms: {
+              Room: mappedRooms,
+            },
+          },
+          ImageRef: {
+            Type: "LARGE",
+            LanguageCode: "en",
+          },
+        },
+      },
+    };
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(searchRequest),
+      redirect: "follow",
+    };
+
+    const result = await fetch(endpoint, requestOptions).then((res) => res.json());
+    let detail = result.GetHotelAvailRS;
+
+    if (result.status && result.status === "NotProcessed") {
+      return response.status(200).json({
+        status: false,
+        message: result.errorCode,
+        error: result.errorCode,
+      });
+    }
+
+    const appResults = result?.GetHotelAvailRS?.ApplicationResults;
+
+    if (appResults?.Error && Array.isArray(appResults.Error)) {
+      return response.status(200).json({
+        status: false,
+        message: "Something went wrong",
+        error: appResults.Error,
+      });
+    }
+
+    if (detail.ApplicationResults.status !== "Complete") {
+      return response.status(200).json({
+        status: false,
+        message: "Something went wrong",
+      });
+    }
+
+    // Filter hotels based on provided hotelCodes
+    const filteredHotels = detail.HotelAvailInfos.HotelAvailInfo.filter((hotel) =>
+      hotelCodes.includes(hotel.HotelInfo.HotelCode)
+    );
+
+    // If no hotels match the provided codes
+    if (filteredHotels.length === 0) {
+      return response.status(200).json({
+        status: false,
+        message: "No hotels found for the provided hotel codes",
+      });
+    }
+
+    // Map the filtered hotels to the required format
+    const hotelsData = filteredHotels.map((hotel) => {
+      const hotelInfo = hotel.HotelInfo;
+      const locationInfo = hotelInfo.LocationInfo;
+      const imageInfo = hotel.HotelImageInfo?.ImageItem;
+      const rateInfos = hotel.HotelRateInfo.RateInfos.ConvertedRateInfo;
+      // Get the minimum AverageNightlyRate for the hotel
+      const amount = Math.min(
+        ...rateInfos
+          .filter((rate) => rate.AverageNightlyRate)
+          .map((rate) => rate.AverageNightlyRate)
+      );
+
+      return {
+        hotelTitle: hotelInfo.HotelName,
+        location: {
+          address: locationInfo.Address.AddressLine1,
+          city: locationInfo.Address.CityName.value,
+          country: locationInfo.Address.CountryName.value,
+          latitude: locationInfo.Latitude,
+          longitude: locationInfo.Longitude,
+          cityCode: locationInfo.Address.CityName.CityCode,
+          countryCode: locationInfo.Address.CountryName.Code,
+          distance: hotelInfo.Distance,
+          direction: hotelInfo.Direction,
+        },
+        amenities: hotelInfo.Amenities.Amenity.map((amenity) => amenity.Description),
+        logo: hotelInfo.Logo,
+        imageUrl: imageInfo ? imageInfo.Image.Url : null,
+        amount: isFinite(amount) ? amount : null, // Handle cases where no valid rates are found
+      };
+    });
+
+    return response.status(200).json({
+      status: true,
+      data: {
+        hotels: hotelsData,
+      },
+    });
+  } catch (error) {
+    return response.status(500).json({
+      status: false,
+      message: "Something Went Wrong",
+      error: error.message,
+    });
+  }
+},
+
+
   trending: async (request, response) => {
     const { checkIn, checkOut, cityCode, countryCode, rooms } = request.body;
     const tokenDetail = await JsonHandler.findOne({

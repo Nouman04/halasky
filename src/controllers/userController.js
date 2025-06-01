@@ -3,6 +3,8 @@ const { Role , User , UserRole , RecoveryRequest } = require('../database/models
 const bcrypt = require('bcrypt');
 const appConst = require('../appConst');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
+const path = require('path');
+require('dotenv').config();
 
 module.exports = {
 
@@ -256,9 +258,12 @@ module.exports = {
             const user = await User.findOne({
                 where : { id : userId}
             });
+            const imageUrl =  `${process.env.APP_URL}/uploads/image`;
+            
             return response.status(200).json({
                 status : true,
-                userDetail : user
+                userDetail : user,
+                imageUrl : imageUrl
             });
         } catch (error) {
             return response.status(500).json({

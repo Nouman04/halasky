@@ -38,13 +38,15 @@ module.exports = {
         expiresIn: "4h",
       });
 
-      console.log("Generated Token:", token);
+
+      const imageUrl =  `${process.env.APP_URL}/uploads/image`;
 
       return response.status(200).json({
         status: true,
         message: "Login Successful",
         token: token,
         user: userData,
+        imageUrl: imageUrl
       });
     } catch (error) {
       return response.status(500).json({
@@ -108,12 +110,14 @@ module.exports = {
           expiresIn: "4h",
         });
 
+        const imageUrl =  `${process.env.APP_URL}/uploads/image`;
 
       return response.status(200).json({
         status: true,
-        message: "Login Successful",
+        message: "Login Successfull",
         token: token,
         user: userData,
+        imageUrl: imageUrl
       });
 
       }else{
