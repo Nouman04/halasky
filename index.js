@@ -7,8 +7,7 @@ const initializePassport = require("./src/config/passportConfig");
 const cronJobs = require("./src/jobs/index");
 initializePassport(passport);
 //routest starts here
-const userRoutes = require("./src/routes/userRoutes");
-const blogRoutes = require("./src/routes/blogRoutes");
+
 const faqRoutes = require("./src/routes/faqRoutes");
 const activityRoutes = require("./src/routes/communityActivityRoutes");
 const customerQueryRoutes = require("./src/routes/customerQueryRoutes");
@@ -22,6 +21,8 @@ const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const testRoutes = require("./src/routes/testRoutes");
 const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
+const userRoutes = require("./src/routes/userRoutes");
+const blogRoutes = require("./src/routes/blogRoutes");
 const path = require('path');
 
 const cors = require("cors");

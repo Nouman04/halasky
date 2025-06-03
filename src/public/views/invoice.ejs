@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Flight Booking Invoice - <%= pnr %></title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      color: #333;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    .header, .section {
+      margin-bottom: 30px;
+    }
+    .section-title {
+      border-bottom: 2px solid #2c3e50;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #f4f4f4;
+    }
+    .total {
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 10px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Flight Booking Invoice</h1>
+    <p><strong>PNR:</strong> <%= pnr %></p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Passengers</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Phone</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% passengers.forEach(p => { %>
+          <tr>
+            <td><%= p.firstname %></td>
+            <td><%= p.lastname %></td>
+            <td><%= p.phone || '-' %></td>
+            <td><%= p.type %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Flights</h2>
+    <% flights.forEach(flight => { %>
+      <div style="margin-bottom: 20px;">
+        <p><strong>Route:</strong> <%= flight.origin %> (<%= flight.origin_country %>)  ➝ <%= flight.destination %> (<%= flight.destination_country %>)</p>
+        <p><strong>Date:</strong> <%= flight.date %></p>
+        <table>
+          <thead>
+            <tr>
+              <th>Flight Code</th>
+              <th>Flight Number</th>
+              <th>Departure</th>
+              <th>Arrival</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% flight.segments.forEach(segment => { %>
+              <tr>
+                <td><%= segment.flight_code %></td>
+                <td><%= segment.flight_number %></td>
+                <td><%= segment.departure_date %></td>
+                <td><%= segment.arrival_date %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% }) %>
+  </div>
+
+  <div class="total">
+    Total Amount: <%= totalAmount %>
+  </div>
+
+</body>
+</html>

@@ -2,7 +2,10 @@ const { JsonHandler , FlightBooking, Flight, Segment, Passenger , User , Promoti
 const AppConst = require('../appConst');
 const airports = require('../public/files/locations.json');
 const locationHelper = require('../Helpers/LocationHelper');
-
+const ejs = require('ejs');
+const puppeteer = require('puppeteer');
+const path = require('path');
+const moment = require('moment')
 
 module.exports = {
 
@@ -397,7 +400,7 @@ module.exports = {
        //new code ends here
        minimumAmount = Math.min(...amounts);
        maximumAmount = Math.max(...amounts);
-
+      //return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
        const simplifiedItineraries = itineraryGroupDetail.map((group) => ({
           groupDescription: group.description,
           itineraries: simplifyFlightResponse(group.itinerariesList), // Call here
@@ -893,99 +896,6 @@ module.exports = {
               }
             }
           };
-
-
-           // let searchRequest = {
-          //   "CreatePassengerNameRecordRQ": {
-          //     "version": "2.5.0",
-          //     "TravelItineraryAddInfo": {
-          //       "CustomerInfo": {
-          //         "PersonName": [
-          //           {
-          //             "GivenName": "John",
-          //             "Surname": "Aflen",
-          //             "PassengerType": "ADT",
-          //             "NameNumber": "1.1"
-          //           }
-          //         ],
-          //         "ContactNumbers": {
-          //           "ContactNumber": [
-          //             {
-          //               "NameNumber": "1.1",
-          //               "Phone": "3545642324324",
-          //               "PhoneUseType": "H"
-          //             },
-          //           ]
-          //         }
-          //       },
-          //       "AgencyInfo": {
-          //         "Address": {
-          //           "AddressLine": "Test Agency",
-          //           "CityName": "Jeddah",
-          //           "CountryCode": "SA"
-          //         },
-          //         "Ticketing": {
-          //           "TicketType": "7TAW"
-          //         }
-          //       }
-          //     },
-          //     "AirBook": {
-          //       "OriginDestinationInformation": {
-          //         "FlightSegment": [
-          //           {
-          //             "DepartureDateTime": "2025-04-01T10:00:00",
-          //             "ArrivalDateTime": "2025-04-01T11:55:00",
-          //             "ResBookDesigCode": "Y",
-          //             "FlightNumber": "301",
-          //             "Status": "HK",
-          //             "NumberInParty": "1",
-          //             "OriginLocation": {"LocationCode": "ISB"},
-          //             "DestinationLocation": {"LocationCode": "KHI"},
-          //             "MarketingAirline": {"Code": "PK", "FlightNumber": "301"}
-          //           },
-          //           {
-          //             "DepartureDateTime": "2025-04-06T07:00:00",
-          //             "ArrivalDateTime": "2025-04-06T08:55:00",
-          //             "ResBookDesigCode": "Y",
-          //             "FlightNumber": "300",
-          //             "Status": "HK",
-          //             "NumberInParty": "1",
-          //             "OriginLocation": {"LocationCode": "KHI"},
-          //             "DestinationLocation": {"LocationCode": "ISB"},
-          //             "MarketingAirline": {"Code": "PK", "FlightNumber": "300"}
-          //           }
-          //         ]
-          //       }
-          //     },
-          //     "AirPrice": [
-          //       {
-          //         "PriceRequestInformation": {
-          //           "Retain": true,
-          //           "OptionalQualifiers": {
-          //             "PricingQualifiers": {
-          //               "PassengerType": [
-          //                 {
-          //                   "Code": "ADT",
-          //                   "Quantity": "1"  // Matches the two passengers and NumberInParty
-          //                 }
-          //               ]
-          //             }
-          //           }
-          //         }
-          //       }
-          //     ],
-          //     "PostProcessing": {
-          //       "EndTransaction": {
-          //         "Source": {
-          //           "ReceivedFrom": "Test User"
-          //         }
-          //       }
-          //     }
-          //   }
-          // };
-
-
-        
         
         
 
@@ -1053,9 +963,47 @@ module.exports = {
             })
           );
 
+
+          flightsDetail = flights.map( flight => {
+              return {
+                origin: flight.description.departure_location,
+                destination: flight.description.arrival_location,
+                origin_country:locationHelper.locationDetail(flight.description.departure_location).country,
+                destination_country :locationHelper.locationDetail(flight.description.arrival_location).country,
+                date: flight.description.departure_date,
+                segments: flight.segments.map( segment => {
+                    return {
+                            departure_date: segment.departureDate,
+                            arrival_date: segment.arrivalDate,
+                            flight_number: segment.number,
+                            flight_code: segment.code
+                          }
+                })
+              }
+          })
+
+          const invoiceTemplate =  path.join(__dirname, '../public/views/invoice.ejs');
+          const pdfData = {
+                            pnr : PNR,
+                            totalAmount :totalAmount,
+                            passengers : passengers,
+                            flights: flightsDetail
+                          } 
+          const html = await ejs.renderFile(invoiceTemplate, pdfData);
+          const browser = await puppeteer.launch();
+          const page = await browser.newPage();
+          await page.setContent(html, { waitUntil: 'load' });
+          const fileName = moment().unix()+"-"+request.user.name+"-"+PNR+".pdf";
+          const pdfPath = path.join(__dirname, `../public/uploads/invoices/${fileName}`);
+          await page.pdf({ path: pdfPath, format: 'A4' });
+          await browser.close();
+
+          const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
+
           return response.status(200).json({
             status : true,
-            message : "Booking created successfully"
+            message : "Booking created successfully",
+            downloadUrl : pdfUrl
           });
   
         } else {
@@ -1167,17 +1115,29 @@ function simplifyFlightResponse(itinerariesList) {
         const segment = `${schedule.departure.airport}-${schedule.arrival.airport}`;
 
         // Find matching amenities for this segment from amenities1
+        // console.log(itinerary);
+        // return;
+        const firstLeg = itinerary.legList[0].schedule[0];
+        const lastLeg = itinerary.legList[itinerary.legList.length - 1].schedule.slice(-1)[0];
+        const fullSegment = `${firstLeg.departure.airport}-${lastLeg.arrival.airport}`;
         const segmentAmenities = Array.from(
-                                        new Set(
+                                      new Set(
                                           itinerary.amenities1
-                                            ?.flatMap((passenger) =>
-                                              passenger.scheduleDetail
-                                                ?.filter((detail) => `${detail.beginAirport}-${detail.endAirport}` === segment)
-                                                .flatMap((detail) => detail.segments[0]?.amenitiesList?.map((amenity) => amenity.key) || [])
-                                            )
-                                            .filter(Boolean) || []
-                                        )
-                                      );
+                                              ?.flatMap((passenger) =>
+                                                  passenger.scheduleDetail
+                                                      ?.filter((detail) => {
+                                                          const segmentKey = `${detail.beginAirport}-${detail.endAirport}`;
+                                                          return segmentKey === fullSegment;
+                                                      })
+                                                      .flatMap((detail) =>
+                                                          detail.segments?.flatMap((segment) =>
+                                                              segment.amenitiesList?.map((amenity) => amenity.key) || []
+                                                          ) || []
+                                                      )
+                                                      .filter(Boolean) || []
+                                              ) || []
+                                      )
+                                  );
 
         return {
           flightNumber: `${schedule.carrier.marketing}-${schedule.carrier.marketingFlightNumber}`,

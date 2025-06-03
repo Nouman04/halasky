@@ -1,5 +1,7 @@
 const { response } = require("express");
 const path = require('path')
+const ejs = require('ejs');
+const puppeteer = require('puppeteer');
 
 module.exports = {
     flight : (request ,response)=>{
@@ -13822,5 +13824,21 @@ module.exports = {
         
         filePath = path.join(__dirname,'..','public', 'views' , 'index.html' );
         response.sendFile(filePath);
+    },
+    createPDF : async (request , response)=> {
+        const invoiceTemplate =  path.join(__dirname, '../public/views/invoice.ejs');
+        const data = {
+            username : "nouman",
+            email : "mnoumanb@gmail.com"
+        }
+        const html = await ejs.renderFile(invoiceTemplate, data);
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'load' });
+        const pdfPath = path.join(__dirname, '../public/uploads/invoices/test.pdf');
+        await page.pdf({ path: pdfPath, format: 'A4' });
+        await browser.close();
+
+        return response.status(200).json({ status : true , data : invoiceTemplate});
     }
 }

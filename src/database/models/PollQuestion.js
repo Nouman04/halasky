@@ -21,7 +21,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
     },
-    { tableName: "poll_questions" }
+    { 
+      tableName: "poll_questions",
+      timestamps: true, 
+      createdAt: 'created_at',
+      updatedAt: 'updated_at', 
+    }
   );
 
   PollQuestion.associate = function (models) {

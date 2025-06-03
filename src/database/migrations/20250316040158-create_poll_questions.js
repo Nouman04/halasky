@@ -24,14 +24,16 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      createdAt: {
-        type: Sequelize.DATE,
-        allowNull: false,
+      created_at : {
+        type : Sequelize.DATE,
+        allowNull : false,
+        defaultValue : Sequelize.fn('NOW')
       },
-      updatedAt: {
-        type: Sequelize.DATE,
-        allowNull: false,
-      },
+      updated_at : {
+        type : Sequelize.DATE,
+        allowNull : false,
+        defaultValue : Sequelize.fn('NOW')
+      }
     });
   },
 
