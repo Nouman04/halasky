@@ -1003,9 +1003,9 @@ specificList: async (request, response) => {
 
         const mailOptions = {
                           from: process.env.EMAIL_FROM,
-                          to: email,
+                          to: request.user.email,
                           subject: `Hotel Booking Invoice - PNR ${PNR}`,
-                          text: `Dear Customer,\n\nYour hotel booking has been confirmed. Please find the invoice attached.\n\nPNR: ${pnr}\nCheck-in: ${from}\nCheck-out: ${to}\nTotal Amount: ${amount}\n\nThank you for booking with us!\nBest regards,\nHalasky`,
+                          text: `Dear Customer,\n\nYour hotel booking has been confirmed. Please find the invoice attached.\n\nPNR: ${PNR}\nCheck-in: ${from}\nCheck-out: ${to}\nTotal Amount: ${amount}\n\nThank you for booking with us!\nBest regards,\nHalasky`,
                           attachments: [
                             {
                               filename: `invoice-${PNR}.pdf`,
@@ -1022,7 +1022,6 @@ specificList: async (request, response) => {
             console.log('Email sent successfully:', info.response);
           }
         });
-
         return response.status(200).json({
           status : true,
           message : "Booking created successfully",

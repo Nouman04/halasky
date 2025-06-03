@@ -1004,7 +1004,7 @@ module.exports = {
 
           const mailOptions = {
                                     from: process.env.EMAIL_FROM,
-                                    to: email,
+                                    to: request.user.email,
                                     subject: `Flight Booking Invoice - PNR ${PNR}`,
                                     text: `Dear Customer,\n\nYour flight booking has been confirmed. Please find the invoice attached.\n\nPNR\nBest regards,\nHalasky`,
                                     attachments: [
