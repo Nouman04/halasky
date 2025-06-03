@@ -6,6 +6,8 @@ const ejs = require('ejs');
 const puppeteer = require('puppeteer');
 const path = require('path');
 const moment = require('moment')
+const transport = require('../config/mailConfig');
+require("dotenv").config();
 
 module.exports = {
 
@@ -999,6 +1001,28 @@ module.exports = {
           await browser.close();
 
           const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
+
+          const mailOptions = {
+                                    from: process.env.EMAIL_FROM,
+                                    to: email,
+                                    subject: `Flight Booking Invoice - PNR ${PNR}`,
+                                    text: `Dear Customer,\n\nYour flight booking has been confirmed. Please find the invoice attached.\n\nPNR\nBest regards,\nHalasky`,
+                                    attachments: [
+                                      {
+                                        filename: `invoice-${PNR}.pdf`,
+                                        path: pdfPath,
+                                        contentType: 'application/pdf'
+                                      }
+                                    ]
+                                  };
+          
+            transport.sendMail(mailOptions, (error, info) => {
+              if (error) {
+                console.error('Error sending email:', error);
+              } else {
+                console.log('Email sent successfully:', info.response);
+              }
+            });
 
           return response.status(200).json({
             status : true,

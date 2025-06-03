@@ -2,6 +2,8 @@ const { response } = require("express");
 const path = require('path')
 const ejs = require('ejs');
 const puppeteer = require('puppeteer');
+const transport = require('../config/mailConfig');
+require("dotenv").config();
 
 module.exports = {
     flight : (request ,response)=>{
@@ -13840,5 +13842,86 @@ module.exports = {
         await browser.close();
 
         return response.status(200).json({ status : true , data : invoiceTemplate});
+    },
+
+     createHotelPDF : async (request , response)=> {
+        const invoiceTemplate =  path.join(__dirname, '../public/views/hotel-invoice.ejs');
+       const pdfData = {
+                pnr: "ABC123",
+                totalAmount: "2423342.22",
+                from: "2025-06-02",
+                to: "2025-06-05",
+                roomList: [
+                    {
+                    guests: [
+                        {
+                            type: "ADT",
+                            leadGuest: true,
+                            firstName: "DOE",
+                            lastName: "JOHN",
+                            phone: "20255501372",
+                            email: "sabre.test@sabre.com"
+                        },
+                        {
+                            type: "CHD",
+                            firstName: "Sara",
+                            lastName: "James",
+                            age: 3
+                        },
+                        {
+                            type: "CHD",
+                            firstName: "William",
+                            lastName: "Shakespear",
+                            age: 2
+                        }
+                    ]
+                    }
+                ],
+                paymentDetail: {
+                    guaranteeType: "GURANTEE",
+                    type: "CC",
+                    cardCode: "CA",
+                    firstName: "Jhon",
+                    lastName: "Doe",
+                    cardNumber: "5105105105105100",
+                    expiryMonth: 10,
+                    expiryYear: "2025"
+                },
+                hotelName: "Burj Al Arab",
+                hotelRoom: "LuxuryRoom"
+                };
+        const html = await ejs.renderFile(invoiceTemplate, pdfData);
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'load' });
+        const pdfPath = path.join(__dirname, '../public/uploads/invoices/test.pdf');
+        await page.pdf({ path: pdfPath, format: 'A4' });
+        await browser.close();
+
+        const pdfUrl = `${process.env.APP_URL}/uploads/invoices/test.pdf`;
+        const mailOptions = {
+                          from: process.env.EMAIL_FROM,
+                          to: "hello@gmail.com",
+                          subject: `Hotel Booking Invoice - PNR ${pdfData.pnr}`,
+                          text: `Dear Customer,\n\nYour hotel booking has been confirmed. Please find the invoice attached.\n\nPNR: ${pdfData.pnr}\nCheck-in: ${pdfData.from}\nCheck-out: ${pdfData.to}\nTotal Amount: ${pdfData.amount}\n\nThank you for booking with us!\nBest regards,\nYour App Team`,
+                          attachments: [
+                            {
+                              filename: `test.pdf`,
+                              path: pdfPath,
+                              contentType: 'application/pdf'
+                            }
+                          ]
+                        };
+
+
+        transport.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error('Error sending email:', error);
+          } else {
+            console.log('Email sent successfully:', info.response);
+          }
+        });
+
+        return response.status(200).json({ status : true , data : pdfUrl});
     }
 }

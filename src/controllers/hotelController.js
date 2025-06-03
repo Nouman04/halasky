@@ -2,6 +2,12 @@ const { JsonHandler , HotelBooking , Guest , PaymentDetail , User , Promotion } 
 const AppConst = require("../appConst");
 const locations = require('../public/files/destinations.json');
 const locationHelper = require('../Helpers/LocationHelper');
+const ejs = require('ejs');
+const puppeteer = require('puppeteer');
+const path = require('path');
+const moment = require('moment');
+const transport = require('../config/mailConfig');
+require("dotenv").config();
 
 module.exports = {
 
@@ -972,9 +978,55 @@ specificList: async (request, response) => {
                                 card_expiry_year: paymentDetail.expiryYear
                             });
 
+
+        const invoiceTemplate =  path.join(__dirname, '../public/views/hotel-invoice.ejs');
+        const pdfData = {
+                          pnr : PNR,
+                          totalAmount :amount,
+                          from : from,
+                          to : to,
+                          roomList : roomList,
+                          paymentDetail : paymentDetail,
+                          hotelName: request.body.hotelName,
+                          hotelRoom: request.body.hotelRoom,
+                        } 
+        const html = await ejs.renderFile(invoiceTemplate, pdfData);
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'load' });
+        const fileName = moment().unix()+"-"+request.user.name+"-"+PNR+".pdf";
+        const pdfPath = path.join(__dirname, `../public/uploads/invoices/${fileName}`);
+        await page.pdf({ path: pdfPath, format: 'A4' });
+        await browser.close();
+
+        const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
+
+        const mailOptions = {
+                          from: process.env.EMAIL_FROM,
+                          to: email,
+                          subject: `Hotel Booking Invoice - PNR ${PNR}`,
+                          text: `Dear Customer,\n\nYour hotel booking has been confirmed. Please find the invoice attached.\n\nPNR: ${pnr}\nCheck-in: ${from}\nCheck-out: ${to}\nTotal Amount: ${amount}\n\nThank you for booking with us!\nBest regards,\nHalasky`,
+                          attachments: [
+                            {
+                              filename: `invoice-${PNR}.pdf`,
+                              path: pdfPath,
+                              contentType: 'application/pdf'
+                            }
+                          ]
+                        };
+
+        transport.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error('Error sending email:', error);
+          } else {
+            console.log('Email sent successfully:', info.response);
+          }
+        });
+
         return response.status(200).json({
           status : true,
-          message : "Booking created successfully"
+          message : "Booking created successfully",
+          downloadUrl : pdfUrl
         });
 
       } else {
