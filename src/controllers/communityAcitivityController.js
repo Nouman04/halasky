@@ -235,56 +235,58 @@ module.exports = {
 
 
       const posts = await CommunityActivity.findAll({
-  include: [
-    {
-      model: Tag,
-      as: 'tags',
-      where: { tagable_type: 'CommunityActivity' },
-      required: false,
-    },
-    {
-      model: Comment,
-      as: 'comments',
-      where: { commentable_type: 'CommunityActivity' },
-      required: false,
-    },
-    {
-      model: Category,
-      as: 'category',
-    },
-    {
-      model: PollQuestion,
-      as: 'pollQuestions',
-      include: [
-        {
-          model: PollOption,
-          as: 'options',
-          attributes: [
-            'id',
-            'poll_question_id',
-            'option_text',
-            [
-              Sequelize.literal(`(
-                SELECT COUNT(*) 
-                FROM poll_answers 
-                WHERE poll_answers.poll_option_id = \`pollQuestions->options\`.id
-              )`),
-              'answerCount'
-            ]
-          ],
-          required: false
-        }
-      ]
-    }
-  ],
-  where: whereCondition,
-  offset: skip,
-  limit: 10
-});
+                                        include: [
+                                          {
+                                            model: Tag,
+                                            as: 'tags',
+                                            where: { tagable_type: 'CommunityActivity' },
+                                            required: false,
+                                          },
+                                          {
+                                            model: Comment,
+                                            as: 'comments',
+                                            where: { commentable_type: 'CommunityActivity' },
+                                            required: false,
+                                          },
+                                          {
+                                            model: Category,
+                                            as: 'category',
+                                          },
+                                          {
+                                            model: PollQuestion,
+                                            as: 'pollQuestions',
+                                            include: [
+                                              {
+                                                model: PollOption,
+                                                as: 'options',
+                                                attributes: [
+                                                  'id',
+                                                  'poll_question_id',
+                                                  'option_text',
+                                                  [
+                                                    Sequelize.literal(`(
+                                                      SELECT COUNT(*) 
+                                                      FROM poll_answers 
+                                                      WHERE poll_answers.poll_option_id = \`pollQuestions->options\`.id
+                                                    )`),
+                                                    'answerCount'
+                                                  ]
+                                                ],
+                                                required: false
+                                              }
+                                            ]
+                                          }
+                                        ],
+                                        where: whereCondition,
+                                        offset: skip,
+                                        limit: 10
+                                      });
+      const imageUrl =  `${process.env.APP_URL}/uploads/blogs`;
 
       return response.status(200).json({
         status: true,
         data: posts,
+        imageUrl : imageUrl
       });
     } catch (error) {
       return response.status(500).json({
