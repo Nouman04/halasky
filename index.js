@@ -21,7 +21,7 @@ const dashboardRoutes = require("./src/routes/dashboardRoutes");
 const testRoutes = require("./src/routes/testRoutes");
 const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
-const userRoutes = require("./src/routes/userRoutes");
+const userRoutes = require("./src/routes/UserRoutes");
 const blogRoutes = require("./src/routes/blogRoutes");
 const path = require('path');
 

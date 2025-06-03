@@ -5,7 +5,7 @@ const CommunityActivityController = require("../controllers/communityAcitivityCo
 const passport = require("passport");
 
 const { dynamicUploader } = require("../Helpers/fileUploadHelper");
-const { route } = require("./userRoutes");
+const { route } = require("./UserRoutes");
 const upload = dynamicUploader("thumbnail");
 
 router.use(passport.authenticate("jwt", { session: false }));
