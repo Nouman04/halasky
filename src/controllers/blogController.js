@@ -9,7 +9,7 @@ module.exports = {
     add : async (request , response ) =>{
         try{
             const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
-            let content = mutateHtmlContent(request.body.content , blogImagesPath);
+            let content = mutateHtmlContent(request.body.content , blogImagesPath , 'uploads/blogs');
             
             let thumbnailFileName = request.file.filename;
             let categoryId = request.body.categoryId;
@@ -224,12 +224,12 @@ module.exports = {
                 limit: 10,
             });
 
-            const thumbnail =  `${process.env.APP_URL}/uploads/thumbnail`;
+            const image =  `${process.env.APP_URL}/uploads/blogs`;
 
             return response.status(200).json({
                 status : true,
                 data : blogs,
-                thumbnail: thumbnail
+                image: image
             })
 
         } catch (error){
