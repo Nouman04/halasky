@@ -89,6 +89,7 @@ module.exports = {
             const { email , token } = request.body;
             const user = await User.findOne({ where : {email : email}});
 
+            
             if(!user){
                 return response.status(200).json({
                     status: false,
@@ -96,7 +97,8 @@ module.exports = {
                 }); 
             }
 
-            if(user.is_email_verified){
+            
+            if(request.url.includes('verify-token') && user.is_email_verified ){
                 return response.status(200).json({
                     status: false,
                     message: 'User already verified',
@@ -121,7 +123,7 @@ module.exports = {
 
                 return response.status(200).json({
                     status: true,
-                    message: 'Your email verified successfully'
+                    message: 'Your email verified successfully',
                 })
 
             }else{

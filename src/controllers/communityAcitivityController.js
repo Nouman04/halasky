@@ -22,7 +22,7 @@ module.exports = {
       let thumbnailFileName = thumbnailDetail.filename;
       let categoryId = request.body.categoryId;
       let title = request.body.title;
-      let userId = request.body.userId;
+      let userId = request.user.id;
       let tags = request.body.tags;
       let description = request.body.description;
       let communityActivity = await CommunityActivity.create({
@@ -53,6 +53,7 @@ module.exports = {
       return response.status(200).json({
         status: true,
         message: "Post added successfully",
+        postId : communityActivity.id
       });
     } catch (error) {
       return response.status(500).json({
