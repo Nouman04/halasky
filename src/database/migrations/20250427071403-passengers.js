@@ -32,6 +32,10 @@ module.exports = {
         type: Sequelize.DataTypes.STRING,
         allowNull: true,
       },
+      passport: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: true,
+      },
       type: {
         type: Sequelize.DataTypes.STRING,
         allowNull: false,

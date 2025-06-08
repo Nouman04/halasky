@@ -918,7 +918,13 @@ module.exports = {
             result.CreatePassengerNameRecordRS.ApplicationResults.status == "Complete"
           ){
             let PNR = result.CreatePassengerNameRecordRS.ItineraryRef.ID;
-            let totalAmount =result.CreatePassengerNameRecordRS.AirPrice[0].PriceQuote.PricedItinerary.TotalAmount;
+            let priceInformation = result.CreatePassengerNameRecordRS.AirPrice[0].PriceQuote.MiscInformation.SolutionInformation[0];
+            let totalBaseFare = priceInformation.GrandTotalBaseFareAmount;
+            let totalTaxAmount = priceInformation.GrandTotalTaxes;
+            let totalAmount =priceInformation.TotalAmount;
+
+
+
             let bookingDetail =await FlightBooking.create({
                                                   user_id : userId,
                                                   is_applied_code	: 0,
@@ -935,7 +941,8 @@ module.exports = {
                   firstname: passenger.firstname,
                   lastname: passenger.lastname,
                   phone: passenger.phone || null,
-                  type: passenger.type
+                  type: passenger.type,
+                  passport: passenger.passport
                 });
               })
             );
@@ -987,11 +994,14 @@ module.exports = {
           const invoiceTemplate =  path.join(__dirname, '../public/views/invoice.ejs');
           const pdfData = {
                             pnr : PNR,
+                            totalBaseFare: totalBaseFare,
+                            totalTaxAmount: totalTaxAmount,
                             totalAmount :totalAmount,
                             passengers : passengers,
                             flights: flightsDetail
                           } 
           const html = await ejs.renderFile(invoiceTemplate, pdfData);
+          // const browser = await puppeteer.launch();
           const browser = await puppeteer.launch({
                                         headless: true,
                                         args: [

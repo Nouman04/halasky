@@ -1,109 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Flight Booking Invoice - <%= pnr %></title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
-      color: #333;
-    }
-    h1, h2 {
-      color: #2c3e50;
-    }
-    .header, .section {
-      margin-bottom: 30px;
-    }
-    .section-title {
-      border-bottom: 2px solid #2c3e50;
-      padding-bottom: 5px;
-      margin-bottom: 10px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
-    }
-    th {
-      background-color: #f4f4f4;
-    }
-    .total {
-      font-weight: bold;
-      font-size: 18px;
-      margin-top: 10px;
-      text-align: right;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Booking Invoice - <%= pnr %></title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1e3a8a',
+                        secondary: '#fbbf24'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
+        }
+    </style>
 </head>
 <body>
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <div class="flex items-center">
+                    <img src="https://readdy.ai/api/search-image?query=Halasky%20travel%20logo%20with%20blue%20text%20and%20yellow%20accent%2C%20professional%20travel%20company%20logo%2C%20minimalist%20design%2C%20white%20background&width=200&height=60&seq=1&orientation=landscape" alt="Halasky Logo" class="h-10">
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button class="flex items-center text-gray-600 hover:text-primary transition-colors">
+                        <div class="w-6 h-6 flex items-center justify-center mr-1">
+                            <i class="ri-customer-service-2-line"></i>
+                        </div>
+                        <span>Help</span>
+                    </button>
+                    <button class="flex items-center text-gray-600 hover:text-primary transition-colors">
+                        <div class="w-6 h-6 flex items-center justify-center mr-1">
+                            <i class="ri-user-line"></i>
+                        </div>
+                        <span>Account</span>
+                    </button>
+                </div>
+            </div>
+        </header>
 
-  <div class="header">
-    <h1>Flight Booking Invoice</h1>
-    <p><strong>PNR:</strong> <%= pnr %></p>
-  </div>
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Invoice Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Flight Booking Invoice</h1>
+                    <div class="flex items-center mt-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <div class="w-4 h-4 flex items-center justify-center mr-1">
+                                <i class="ri-check-line"></i>
+                            </div>
+                            Confirmed
+                        </span>
+                        <span class="ml-3 text-gray-600">PNR: <span class="font-medium text-gray-900"><%= pnr %></span></span>
+                    </div>
+                </div>
+            </div>
 
-  <div class="section">
-    <h2 class="section-title">Passengers</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>Phone</th>
-          <th>Type</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% passengers.forEach(p => { %>
-          <tr>
-            <td><%= p.firstname %></td>
-            <td><%= p.lastname %></td>
-            <td><%= p.phone || '-' %></td>
-            <td><%= p.type %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
+            <!-- Passenger Details -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Passenger Details</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <% passengers.forEach(p => { %>
+                        <div>
+                            <span class="text-sm text-gray-500">Passenger</span>
+                            <p class="font-medium text-gray-900"><%= p.firstname %> <%= p.lastname %></p>
+                            <span class="text-sm text-gray-500">Phone</span>
+                            <p class="font-medium text-gray-900"><%= p.phone || '-' %></p>
+                            <span class="inline-block mt-1 text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded"><%= p.type %></span>
+                        </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
 
-  <div class="section">
-    <h2 class="section-title">Flights</h2>
-    <% flights.forEach(flight => { %>
-      <div style="margin-bottom: 20px;">
-        <p><strong>Route:</strong> <%= flight.origin %> (<%= flight.origin_country %>)  ➝ <%= flight.destination %> (<%= flight.destination_country %>)</p>
-        <p><strong>Date:</strong> <%= flight.date %></p>
-        <table>
-          <thead>
-            <tr>
-              <th>Flight Code</th>
-              <th>Flight Number</th>
-              <th>Departure</th>
-              <th>Arrival</th>
-            </tr>
-          </thead>
-          <tbody>
-            <% flight.segments.forEach(segment => { %>
-              <tr>
-                <td><%= segment.flight_code %></td>
-                <td><%= segment.flight_number %></td>
-                <td><%= segment.departure_date %></td>
-                <td><%= segment.arrival_date %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
-    <% }) %>
-  </div>
+            <!-- Flight Information -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Flight Information</h2>
+                    <% flights.forEach(flight => { %>
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <span class="text-sm text-gray-500">Route</span>
+                                <p class="font-medium text-gray-900"><%= flight.origin %> (<%= flight.origin_country %>) → <%= flight.destination %> (<%= flight.destination_country %>)</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-sm text-gray-500">Date</span>
+                                <p class="font-medium text-gray-900"><%= flight.date %></p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-4">
+                            <% flight.segments.forEach(segment => { %>
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-t border-gray-200 pt-4">
+                                <div>
+                                    <span class="text-sm text-gray-500">Flight Code</span>
+                                    <p class="font-medium text-gray-900"><%= segment.flight_code %></p>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Flight Number</span>
+                                    <p class="font-medium text-gray-900"><%= segment.flight_number %></p>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Departure</span>
+                                    <p class="font-medium text-gray-900"><%= segment.departure_date %></p>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Arrival</span>
+                                    <p class="font-medium text-gray-900"><%= segment.arrival_date %></p>
+                                </div>
+                            </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                    <% }) %>
+                </div>
+            </div>
 
-  <div class="total">
-    Total Amount: <%= totalAmount %>
-  </div>
+            <!-- Payment Summary -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                <div class="p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment Summary</h2>
+                    <div class="space-y-3">
 
+                      <div class="space-y-3 mb-4">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Base Fare</span>
+                            <span class="text-gray-900"><%= totalBaseFare %></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Taxes &amp; Fees</span>
+                            <span class="text-gray-900"><%= totalTaxAmount %></span>
+                        </div>
+                    </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Total Amount</span>
+                            <span class="font-medium text-gray-900"><%= totalAmount %></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Need Help Section -->
+            <div class="bg-gray-50 rounded-lg p-6 text-center">
+                <h2 class="text-lg font-semibold text-gray-900 mb-2">Need Help with Your Booking?</h2>
+                <p class="text-gray-600 mb-4">Our customer service team is available 24/7 to assist you with any questions or concerns.</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="tel:+18005551234" class="flex items-center px-4 py-2 text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
+                        <div class="w-5 h-5 flex items-center justify-center mr-2">
+                            <i class="ri-phone-line"></i>
+                        </div>
+                        +1 (800) 555-1234
+                    </a>
+                    <a href="mailto:support@halasky.com" class="flex items-center px-4 py-2 text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
+                        <div class="w-5 h-5 flex items-center justify-center mr-2">
+                            <i class="ri-mail-line"></i>
+                        </div>
+                        support@halasky.com
+                    </a>
+                    <button class="flex items-center px-4 py-2 text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
+                        <div class="w-5 h-5 flex items-center justify-center mr-2">
+                            <i class="ri-chat-1-line"></i>
+                        </div>
+                        Live Chat
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

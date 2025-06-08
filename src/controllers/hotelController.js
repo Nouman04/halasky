@@ -921,6 +921,8 @@ specificList: async (request, response) => {
         result.CreatePassengerNameRecordRS.ApplicationResults.status === "Complete"
       ){
 
+        // return response.status(200).json({ status : false , data : result});
+
         let PNR = result.CreatePassengerNameRecordRS.ItineraryRef.ID;
         let user_id = request.user.id;
         let is_applied_code = request.body.appliedCode ? request.body.appliedCode : false;
@@ -991,7 +993,8 @@ specificList: async (request, response) => {
                           hotelRoom: request.body.hotelRoom,
                         } 
         const html = await ejs.renderFile(invoiceTemplate, pdfData);
-        const browser = await puppeteer.launch({
+        // const browser = await puppeteer.launch();
+         const browser = await puppeteer.launch({
                                             headless: true,
                                             args: [
                                               '--no-sandbox',
