@@ -165,8 +165,6 @@ module.exports = {
               }
 
 
-
-
         let flightAmenities = result.groupedItineraryResponse.flightAmenities;
         let itineraryGroups = result.groupedItineraryResponse.itineraryGroups;
         let legsInformation = result.groupedItineraryResponse.legDescs;
@@ -192,7 +190,6 @@ module.exports = {
 
         let itineraryGroupDetail = [];
        
-    //    console.log(itineraryGroups);
     //     return;
        itineraryGroups.forEach( group => {
 
@@ -263,8 +260,7 @@ module.exports = {
                             let segmentAmenities = []; 
                             segmentList.forEach( (segment , index) => {
 
-                              let amenitiesList = segment.segment.flightAmenities;
-                              
+                              let amenitiesList = segment.segment?.flightAmenities;
                               if(amenitiesList){
                                 amenitiesList.forEach( eachAmenity => {
 
@@ -1664,14 +1660,20 @@ function simplifyFlightResponse(itinerariesList) {
       nonRefundable: passenger.nonRefundable || false,
     }));
 
+    currencyConversion = itinerary.passengerPriceDetail[0].passengerList[0]?.currencyConversion || {}
+
     // Extract total pricing
     const totalFare = {
-      baseFare: `${itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareAmount || 0} ${
-        itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareCurrency || 'N/A'
-      }`,
-      equivalentFare: `${itinerary.passengerPriceDetail[0].totalFareDetail?.equivalentAmount || 0} ${
-        itinerary.passengerPriceDetail[0].totalFareDetail?.equivalentCurrency || 'N/A'
-      }`,
+      baseFare: `  ${convertToSAR( 
+                      itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareAmount, 
+                      itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareCurrency, 
+                      currencyConversion
+                    ) || 0} SAR`,
+      equivalentFare: `${convertToSAR( 
+                      itinerary.passengerPriceDetail[0].totalFareDetail?.equivalentAmount, 
+                      itinerary.passengerPriceDetail[0].totalFareDetail?.equivalentCurrency, 
+                      currencyConversion
+                    ) || 0} SAR`,          
       totalTaxes: `${itinerary.passengerPriceDetail[0].totalFareDetail?.totalTaxAmount || 0} ${
         itinerary.passengerPriceDetail[0].totalFareDetail?.currency || 'N/A'
       }`,
@@ -1690,7 +1692,17 @@ function simplifyFlightResponse(itinerariesList) {
       passengers,
       totalFare,
       priceSource: itinerary.priceSource || 'N/A',
-      currencyConversion: itinerary.passengerPriceDetail[0].passengerList[0]?.currencyConversion || {},
+      currencyConversion,
     };
   });
+}
+
+function convertToSAR( amount , currency , convertionDetail )
+{
+  if(currency != "SAR"){
+      let convertedAmount = convertionDetail.exchangeRateUsed * amount
+    return convertedAmount;
+  }
+
+  return amount;
 }
