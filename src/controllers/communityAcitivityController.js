@@ -10,7 +10,8 @@ const {
   PollOption,
   PollAnswer,
   ActivityAction,
-  sequelize
+  sequelize,
+  User
 } = require("../database/models");
 const LogActivityHandler = require("../Helpers/logActivityHandler");
 const appConst = require("../appConst");
@@ -211,28 +212,7 @@ module.exports = {
         whereCondition.status = status;
       }
       let skip = (parseInt(request.body.pageNo) - 1) * 10;
-      // const posts = await CommunityActivity.findAll({
-      //   include: [
-      //     {
-      //       model: Tag,
-      //       required: false,
-      //       as: "tags",
-      //     },
-      //     {
-      //       model: Comment,
-      //       required: false,
-      //       as: "comments",
-      //     },
-      //     {
-      //       model: Category,
-      //       required: false,
-      //       as: "category",
-      //     },
-      //   ],
-      //   where: whereCondition,
-      //   offset: skip,
-      //   limit: 10,
-      // });
+      
 
 
       const posts = await CommunityActivity.findAll({
@@ -242,6 +222,10 @@ module.exports = {
                                             as: 'tags',
                                             where: { tagable_type: 'CommunityActivity' },
                                             required: false,
+                                          },
+                                          {
+                                            model: User,
+                                            as: 'user',
                                           },
                                           {
                                             model: Comment,
@@ -297,6 +281,33 @@ module.exports = {
       });
     }
     
+  },
+
+  popularTags : async (request ,response)=>{
+    try {
+      const tags = await Tag.findAll({
+                          attributes: [
+                            [Sequelize.fn('LOWER', Sequelize.col('title')), 'title'],
+                            [Sequelize.fn('COUNT', '*'), 'count'],
+                          ],
+                          group: [Sequelize.literal('LOWER(title)')],
+                          order: [[Sequelize.literal('count'), 'DESC']],
+                          limit: 5,
+                          raw: true,
+                        });
+
+      return response.status(200).json({
+        status: true,
+        data: tags,
+      });
+
+    } catch (error) {
+      return response.status(500).json({
+        status: false,
+        message: "Something Went Wrong",
+        error: error.message,
+      });
+    }
   },
 
   changeStatus: async (request, response) => {
@@ -588,7 +599,11 @@ module.exports = {
                                                     required: false
                                                   }
                                                 ]
-                                              }
+                                              },
+                                              {
+                                                  model: User,
+                                                  as: 'user',
+                                              },
                                             ],
                                             group: ['CommunityActivity.id', 'pollQuestions.id', 'pollQuestions.options.id'],
                                           });

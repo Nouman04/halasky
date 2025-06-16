@@ -1505,6 +1505,122 @@ testFlightList : async (request ,response)=>{
 //////////////////////////////////////////////////////////////////////////////
 
 
+ searchAlternateDatesFlights: async (request , response) => {
+  try {
+    // Get authentication token
+    const {originLocation, destinationLocation, departureDate, returnDate} = request.body;
+
+    const tokenDetail = await JsonHandler.findOne({
+            where : {type : AppConst.sabreFlights}
+        });
+    const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
+    let endpoint = 'https://api.cert.sabre.com/v6.1.0/shop/altdates/flights?mode=live';
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${accessToken}`);
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Accept", "application/json");
+
+    
+    // Prepare request payload
+    const payload = {
+      "OTA_AirLowFareSearchRQ": {
+        "OriginDestinationInformation": [
+          {
+            "DepartureDateTime": `${departureDate}T00:00:00`,
+            "DestinationLocation": {
+              "LocationCode": destinationLocation
+            },
+            "OriginLocation": {
+              "LocationCode": originLocation
+            },
+            "RPH": "0"
+          },
+          {
+            "DepartureDateTime": `${returnDate}T00:00:00`,
+            "DestinationLocation": {
+              "LocationCode": originLocation
+            },
+            "OriginLocation": {
+              "LocationCode": destinationLocation
+            },
+            "RPH": "1"
+          }
+        ],
+        "POS": {
+            "Source": [
+              {
+                "PseudoCityCode": "3GML",
+                "RequestorID": {
+                  "Type": "1",
+                  "ID": "1",
+                  "CompanyName": {
+                    "Code": "TN"
+                  }
+                }
+              }
+            ]
+          },
+        "TPA_Extensions": {
+          "IntelliSellTransaction": {
+            "RequestType": {
+              "Name": "200ITINS"
+            }
+          }
+        },
+        "TravelPreferences": {
+          "TPA_Extensions": {
+            "DataSources": {
+              "ATPCO": "Enable",
+              "LCC": "Disable",
+              "NDC": "Disable"
+            },
+            "NumTrips": {}
+          }
+        },
+        "TravelerInfoSummary": {
+          "AirTravelerAvail": [
+            {
+              "PassengerTypeQuantity": [
+                {
+                  "Code": "ADT",
+                  "Quantity": 1
+                }
+              ]
+            }
+          ],
+          "SeatsRequested": [
+            1
+          ]
+        },
+        "Version": "1"
+      }
+    };
+    
+    const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(payload),
+        redirect: "follow"
+    };
+
+
+    fetch( endpoint , requestOptions)
+    .then((response) => response.json()) 
+    .then(async (result) => {
+        return response.status(200).json({
+                    status: true,
+                     data : result
+                });
+    })
+    
+  } catch (error) {
+    return response.status(500).json({
+                    status: false,
+                    message: 'Something Went Wrong',
+                    error: error,
+                });
+  }
+}
 
 
 

@@ -85,6 +85,11 @@ module.exports = (sequelize, DataTypes) => {
     as: "category",
   });
 
+  CommunityActivity.belongsTo(models.User, {
+    foreignKey: "added_by",
+    as: "user",
+  });
+
   CommunityActivity.hasMany(models.PollQuestion, {
     foreignKey: "community_activity_id",
     as: "pollQuestions",
