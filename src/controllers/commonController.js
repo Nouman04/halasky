@@ -1,4 +1,4 @@
-const {Comment , Violation , User, Category}= require('../database/models');
+const {Comment , Violation , User, Category , Promotion}= require('../database/models');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
 
 
@@ -305,6 +305,134 @@ module.exports = {
             });
         }
 
+    },
+
+    addPromotionCode : async (request ,response ) => {
+        try {
+
+            await Promotion.create({
+                promotion_name: request.body.promotion_name,
+                applicable_service : request.body.applicable_service, // 'flight' , 'hotel' , 'both'
+                promotion_type: request.body.promotion_type, // 'Fixed' or 'percentage'
+                code: request.body.code,
+                percentage: request.body.percentage || null,
+                fixed_amount: request.body.fixed_amount || null,
+                applicable_from: request.body.applicable_from,
+                applicable_to: request.body.applicable_to,
+                condition: request.body.condition, // minimum or none
+                amount: request.body.amount || null,
+                total_promo: request.body.total_promo,
+                used_promo: 0,
+                created_by : request.user.id
+            });
+
+            return response.status(200).json({
+                status: true,
+                message: 'Promotion created successfully',
+            });
+    
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message,
+            });
+        }
+    },
+
+
+    updatePromotionCode : async (request ,response ) => {
+        try {
+
+            const currentPromotion = await Promotion.findByPk(request.body.id);
+
+            if (
+                request.body.total_promo !== undefined &&
+                currentPromotion.used_promo !== null &&
+                Number(request.body.total_promo) < currentPromotion.used_promo
+            ) {
+            return response.status(400).json({
+                status: false,
+                message: `Total promo (${request.body.total_promo}) cannot be less than used promo (${currentPromotion.used_promo}).`,
+            });
+            }
+
+            await Promotion.update({
+                promotion_name: request.body.promotion_name,
+                applicable_service : request.body.applicable_service, // 'flight' , 'hotel' , 'both'
+                promotion_type: request.body.promotion_type, // 'Fixed' or 'percentage'
+                code: request.body.code,
+                percentage: request.body.percentage || null,
+                fixed_amount: request.body.fixed_amount || null,
+                applicable_from: request.body.applicable_from,
+                applicable_to: request.body.applicable_to,
+                condition: request.body.condition, // minimum or none
+                amount: request.body.amount || null,
+                total_promo: request.body.total_promo,
+            } , { where : {id : request.body.id}});
+
+            return response.status(200).json({
+                status: true,
+                message: 'Promotion created successfully',
+            });
+    
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message,
+            });
+        }
+    },
+
+    getPromotionCode : async (request , response ) => {
+        try {
+
+            const code = request.code;
+            const promotion = await Promotion.findOne({ where: { code : code } });
+
+            if (!promotion) {
+                return response.status(200).json({
+                    status: true,
+                    message: 'not found',
+                });
+            }
+
+            const today = new Date().toISOString().split('T')[0]; // format: YYYY-MM-DD
+
+            const isExpiredByUsage =
+                promotion.total_promo !== null &&
+                promotion.used_promo !== null &&
+                promotion.used_promo >= promotion.total_promo;
+
+           const isExpiredByDate =
+                !moment(promotion.applicable_from).isSameOrBefore(today, 'day') ||
+                !moment(promotion.applicable_to).isSameOrAfter(today, 'day');
+
+            const isExpired = isExpiredByUsage || isExpiredByDate;
+
+            promoStatus = isExpired ? 'expired' : 'active';
+
+            if(promoStatus == 'expired'){
+                return response.status(200).json({
+                    status: true,
+                    message: 'Promotion expired',
+                });
+            } else {
+                return response.status(200).json({
+                    status: true,
+                    data: promotion,
+                });
+            }
+
+    
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message,
+            });
+        }
     }
 
 

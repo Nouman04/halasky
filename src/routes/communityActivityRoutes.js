@@ -22,7 +22,6 @@ router.post("/get-activity-action", CommunityActivityController.getUserActivitie
 
 
 
-
 router.post("/create-poll", CommunityActivityController.createPoll);
 router.put("/add-poll-answer", CommunityActivityController.submitPollAnswer);
 router.get("/poll-result/:questionId", CommunityActivityController.getPollResults);

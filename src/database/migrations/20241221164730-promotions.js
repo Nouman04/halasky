@@ -20,8 +20,16 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
+      promotion_name: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: false,
+      },
+      applicable_service: {
+        type: Sequelize.DataTypes.ENUM('flight' , 'hotel' , 'both'),
+        allowNull: false,
+      },
       promotion_type: {
-        type: Sequelize.DataTypes.INTEGER,
+        type: Sequelize.DataTypes.ENUM('Fixed' , 'percentage'),
         allowNull: false,
       },
       code: {
@@ -31,7 +39,11 @@ module.exports = {
       },
       percentage: {
         type: Sequelize.DataTypes.FLOAT,
-        allowNull: false,
+        allowNull: true,
+      },
+      fixed_amount: {
+        type: Sequelize.DataTypes.FLOAT,
+        allowNull: true,
       },
       applicable_from: {
         type: Sequelize.DataTypes.DATEONLY,
@@ -42,13 +54,21 @@ module.exports = {
         allowNull: false,
       },
       condition: {
-        type: Sequelize.DataTypes.INTEGER,
-        allowNull: true,
+        type: Sequelize.DataTypes.ENUM('minimum' , 'none'),
+        allowNull: false,
       },
       amount: {
         type: Sequelize.DataTypes.DOUBLE(8, 2),
         allowNull: true,
         defaultValue: 0.0,
+      },
+      total_promo : {
+        type: Sequelize.DataTypes.INTEGER,
+        allowNull: false, 
+      },
+      used_promo: {
+        type: Sequelize.DataTypes.INTEGER,
+        allowNull: true,
       },
       created_at : {
         type : Sequelize.DATE,

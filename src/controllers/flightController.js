@@ -157,6 +157,7 @@ module.exports = {
               //return response.status(200).json(result.groupedItineraryResponse.itineraryGroups[0].itineraries[0])
               let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
 
+
               if(!foundItenararies){
                 return response.status(200).json({
                   status: false,
@@ -914,13 +915,23 @@ module.exports = {
             result.CreatePassengerNameRecordRS.ApplicationResults &&
             result.CreatePassengerNameRecordRS.ApplicationResults.status == "Complete"
           ){
+
+            
+
             let PNR = result.CreatePassengerNameRecordRS.ItineraryRef.ID;
-            let priceInformation = result.CreatePassengerNameRecordRS.AirPrice[0].PriceQuote.MiscInformation.SolutionInformation[0];
-            let totalBaseFare = priceInformation.GrandTotalBaseFareAmount;
-            let totalTaxAmount = priceInformation.GrandTotalTaxes;
-            let totalAmount =priceInformation.TotalAmount;
 
+            let totalBaseFare = "-";
+            let totalTaxAmount = "-";
+            let totalAmount = "-";
 
+            const priceInformation = result?.CreatePassengerNameRecordRS?.AirPrice?.[0]?.PriceQuote?.MiscInformation?.SolutionInformation?.[0] || null;
+
+            if (priceInformation) {
+              totalBaseFare = priceInformation.GrandTotalBaseFareAmount || request.totalBaseFare || 0;
+              totalTaxAmount = priceInformation.GrandTotalTaxes || request.totalTaxAmount || 0;
+              totalAmount = priceInformation.TotalAmount || request.totalAmount || 0;
+            }
+            
 
             let bookingDetail =await FlightBooking.create({
                                                   user_id : userId,
@@ -952,7 +963,8 @@ module.exports = {
                 origin: flight.description.departure_location,
                 destination: flight.description.arrival_location,
                 country :locationHelper.locationDetail(flight.description.arrival_location).country,
-                date: flight.description.departure_date
+                date: flight.description.departure_date,
+                transits: flight.segments.length
               });
       
               await Promise.all(
@@ -962,7 +974,8 @@ module.exports = {
                     departure_date: segment.departureDate,
                     arrival_date: segment.arrivalDate,
                     flight_number: segment.number,
-                    flight_code: segment.code
+                    flight_code: segment.code,
+                    stops: segment.stops
                   });
                 })
               );

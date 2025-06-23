@@ -95,6 +95,13 @@ module.exports = (sequelize, DataTypes) => {
     as: "pollQuestions",
     onDelete: "CASCADE",
   });
+
+  CommunityActivity.hasMany(models.ActivityAction, {
+    foreignKey: "activity_id",
+    as: "action",
+    onDelete: "CASCADE",
+  });
+
 };
 
 

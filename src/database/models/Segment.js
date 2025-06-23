@@ -25,6 +25,15 @@ module.exports = (sequelize, DataTypes) => {
     },
     flight_code: {
       type: DataTypes.STRING,
+      allowNull: false
+    },
+     stops: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
+    flight_code: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
   }, {

@@ -216,6 +216,20 @@ module.exports = {
 
 
       const posts = await CommunityActivity.findAll({
+                                        attributes: {
+                                              include: [
+                                                [
+                                                  Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.activity_type = 'liked'
+                                                  )`),
+                                                  'total_likes'
+                                                ]
+                                              ]
+                                            },
                                         include: [
                                           {
                                             model: Tag,
@@ -232,6 +246,13 @@ module.exports = {
                                             as: 'comments',
                                             where: { commentable_type: 'CommunityActivity' },
                                             required: false,
+                                            include: [
+                                                {
+                                                  model: User,
+                                                  as: 'commentedUser',
+                                                  attributes: ['name', 'platform_image']
+                                                }
+                                              ]
                                           },
                                           {
                                             model: Category,
@@ -744,6 +765,23 @@ getUserActivities : async (req, res) => {
     return res.status(500).json({ message: 'Server error', error: error.message });
   }
 },
+
+  trendingTags : async (request , response) => {
+    try {
+            const topTags = await Tag.findAll({
+                                attributes: [
+                                  'title',
+                                  [Sequelize.fn('COUNT', Sequelize.col('title')), 'usage_count']
+                                ],
+                                group: ['title'],
+                                order: [[Sequelize.literal('usage_count'), 'DESC']],
+                                limit: 10
+                              });
+             return response.status(200).json({ status: true, data: topTags });
+        } catch (error) {
+          return response.status(500).json({ message: 'Server error', error: error.message });
+        }
+    },
 
 
   updateTemplate: async (request, response) => {},

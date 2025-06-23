@@ -35,5 +35,12 @@ module.exports = (sequelize, DataTypes) => {
     timestamps: false, 
   });
 
+  Comment.associate = (models) => {
+    Comment.belongsTo(models.User, {
+      foreignKey: 'added_by',
+      as: 'commentedUser',
+    });
+  };
+
   return Comment;
 };
