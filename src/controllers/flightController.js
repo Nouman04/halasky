@@ -793,6 +793,9 @@ module.exports = {
 
     generatePnr : async (request , response ) => {
       try{
+
+          console.log("444444444444444444444444444")
+
           const tokenDetail = await JsonHandler.findOne({
             where : {type : AppConst.sabreFlights}
           });
@@ -916,13 +919,14 @@ module.exports = {
             result.CreatePassengerNameRecordRS.ApplicationResults.status == "Complete"
           ){
 
+            console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
             
 
             let PNR = result.CreatePassengerNameRecordRS.ItineraryRef.ID;
-
-            let totalBaseFare = "-";
-            let totalTaxAmount = "-";
-            let totalAmount = "-";
+            console.log("-----------------------------------------------------------------")
+            let totalBaseFare = 0;
+            let totalTaxAmount = 0;
+            let totalAmount = 0;
 
             const priceInformation = result?.CreatePassengerNameRecordRS?.AirPrice?.[0]?.PriceQuote?.MiscInformation?.SolutionInformation?.[0] || null;
 
@@ -932,7 +936,7 @@ module.exports = {
               totalAmount = priceInformation.TotalAmount || request.totalAmount || 0;
             }
             
-
+            console.log(12321321);
             let bookingDetail =await FlightBooking.create({
                                                   user_id : userId,
                                                   is_applied_code	: 0,
@@ -1011,19 +1015,19 @@ module.exports = {
                             flights: flightsDetail
                           } 
           const html = await ejs.renderFile(invoiceTemplate, pdfData);
-          // const browser = await puppeteer.launch();
-          const browser = await puppeteer.launch({
-                                        headless: true,
-                                        args: [
-                                          '--no-sandbox',
-                                          '--disable-setuid-sandbox',
-                                          '--disable-dev-shm-usage',
-                                          '--disable-accelerated-2d-canvas',
-                                          '--no-zygote',
-                                          '--single-process',
-                                          '--disable-gpu'
-                                        ]
-                                      });
+          const browser = await puppeteer.launch();
+          // const browser = await puppeteer.launch({
+          //                               headless: true,
+          //                               args: [
+          //                                 '--no-sandbox',
+          //                                 '--disable-setuid-sandbox',
+          //                                 '--disable-dev-shm-usage',
+          //                                 '--disable-accelerated-2d-canvas',
+          //                                 '--no-zygote',
+          //                                 '--single-process',
+          //                                 '--disable-gpu'
+          //                               ]
+          //                             });
           const page = await browser.newPage();
           await page.setContent(html, { waitUntil: 'load' });
           const fileName = moment().unix()+"-"+request.user.name+"-"+PNR+".pdf";
