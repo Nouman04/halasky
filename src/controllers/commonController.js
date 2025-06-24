@@ -1,6 +1,6 @@
 const {Comment , Violation , User, Category , Promotion}= require('../database/models');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
-
+const moment = require('moment');
 
 module.exports = {
 
@@ -309,7 +309,6 @@ module.exports = {
 
     addPromotionCode : async (request ,response ) => {
         try {
-
             await Promotion.create({
                 promotion_name: request.body.promotion_name,
                 applicable_service : request.body.applicable_service, // 'flight' , 'hotel' , 'both'
@@ -373,7 +372,7 @@ module.exports = {
 
             return response.status(200).json({
                 status: true,
-                message: 'Promotion created successfully',
+                message: 'Promotion updated successfully',
             });
     
         } catch (error) {
@@ -388,7 +387,7 @@ module.exports = {
     getPromotionCode : async (request , response ) => {
         try {
 
-            const code = request.code;
+            const code = request.params.code;
             const promotion = await Promotion.findOne({ where: { code : code } });
 
             if (!promotion) {
@@ -398,21 +397,21 @@ module.exports = {
                 });
             }
 
-            const today = new Date().toISOString().split('T')[0]; // format: YYYY-MM-DD
-
+            
             const isExpiredByUsage =
                 promotion.total_promo !== null &&
                 promotion.used_promo !== null &&
                 promotion.used_promo >= promotion.total_promo;
 
+           const today = moment();
            const isExpiredByDate =
                 !moment(promotion.applicable_from).isSameOrBefore(today, 'day') ||
                 !moment(promotion.applicable_to).isSameOrAfter(today, 'day');
 
+
             const isExpired = isExpiredByUsage || isExpiredByDate;
-
             promoStatus = isExpired ? 'expired' : 'active';
-
+     
             if(promoStatus == 'expired'){
                 return response.status(200).json({
                     status: true,
@@ -433,8 +432,32 @@ module.exports = {
                 error: error.message,
             });
         }
+    },
+
+    deletePromoCode : async (request , response ) => {
+        try {
+
+            const id = request.body.id;
+            await Promotion.destroy({
+                where: {
+                    id: id,
+                },
+            });
+
+            
+            return response.status(200).json({
+                status: true,
+                message: 'Promotion deleted successfully',
+            });
+
+    
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message,
+            });
+        }
     }
-
-
 
 }

@@ -13,8 +13,10 @@ router.put('/update-violation' , CommonController.updateViolation );
 router.post('/delete-violation' , CommonController.deleteViolation );
 router.post('/violation-list' , CommonController.listViolation );
 router.post('/add-promotion-code' , CommonController.addPromotionCode );
+router.put('/update-promotion-code' , CommonController.updatePromotionCode );
 router.get('/categories' , CommonController.categories);
-
+router.get('/promo-code/:code' , CommonController.getPromotionCode);
+router.post('/delete-promocode' , CommonController.deletePromoCode);
 
 
 module.exports = router;

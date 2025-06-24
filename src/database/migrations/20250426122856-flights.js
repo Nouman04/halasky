@@ -35,7 +35,12 @@ module.exports = {
       date: {
         type: Sequelize.DataTypes.DATEONLY,
         allowNull: false,
-      }
+      },
+      transits: {
+        type: Sequelize.DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0
+      },
     })
   },
 
