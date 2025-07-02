@@ -34,10 +34,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      image: {
-        type: DataTypes.TEXT("long"),
-        allowNull: true,
-      },
       description: {
         type: DataTypes.TEXT("long"),
         allowNull: false,
@@ -70,6 +66,11 @@ module.exports = (sequelize, DataTypes) => {
     scope: {
       tagable_type: "CommunityActivity",
     },
+  });
+
+  CommunityActivity.hasMany(models.CommunityActivityContent, {
+    foreignKey: 'community_activity_id',
+    as: 'content',
   });
 
   CommunityActivity.hasMany(models.Comment, {

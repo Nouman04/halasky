@@ -3,6 +3,7 @@ const path = require("path");
 const { Sequelize , QueryTypes } = require('sequelize');
 const {
   CommunityActivity,
+  CommunityActivityContent,
   Tag,
   Comment,
   Category,
@@ -19,8 +20,6 @@ let moment = require("moment");
 module.exports = {
   add: async (request, response) => {
     try {
-      let thumbnailDetail = request.file;
-      let thumbnailFileName = thumbnailDetail.filename;
       let categoryId = request.body.categoryId;
       let title = request.body.title;
       let userId = request.user.id;
@@ -30,9 +29,24 @@ module.exports = {
         category_id: categoryId,
         added_by: userId,
         title: title,
-        image: thumbnailFileName,
+        // image: thumbnailFileName,
         description: description,
       });
+
+      const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+
+      let fileInformation = request.files.map( (file) => {
+         const fileDetail = file.filename.split(".");
+         const extension = fileDetail[fileDetail.length - 1].toLowerCase();
+         return  {
+            community_activity_id: communityActivity.id,
+            content: file.filename, // Correctly extract filename
+            type : fileExtensions.includes(extension) ? 1 : 2
+          }
+        }
+      );
+
+      await CommunityActivityContent.bulkCreate(fileInformation);
 
       let tagList = tags.map((tag) => {
         return {
@@ -85,19 +99,20 @@ module.exports = {
       });
 
       let postDetail = await CommunityActivity.findOne({
+        include: { model: CommunityActivityContent, as: 'content', required: false },
         where: {
           id: postId,
         },
       });
 
-      if (request.file) {
-        if (
-          postDetail.image &&
-          fs.existsSync(`${activityThumbnailPath}/${postDetail.image}`)
-        ) {
-          fs.unlinkSync(`${activityThumbnailPath}/${postDetail.image}`);
-        }
-      }
+      // if (request.file) {
+      //   if (
+      //     postDetail.image &&
+      //     fs.existsSync(`${activityThumbnailPath}/${postDetail.image}`)
+      //   ) {
+      //     fs.unlinkSync(`${activityThumbnailPath}/${postDetail.image}`);
+      //   }
+      // }
 
       let description = request.body.description;
 
@@ -107,10 +122,31 @@ module.exports = {
         description: description,
       };
 
-      if (request.file) {
-        let thumbnailDetail = request.file;
-        dataToUpdate.image = thumbnailDetail.filename;
-      }
+     if (request.files && request.files.length > 0) {
+          postDetail.content.forEach(activity => {
+              let filePath = path.join(activityThumbnailPath, activity.content);
+              if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+              }
+          }); 
+          
+          
+          const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+
+          let fileInformation = request.files.map( (file) => {
+            const fileDetail = file.filename.split(".");
+            const extension = fileDetail[fileDetail.length - 1].toLowerCase();
+            return  {
+                community_activity_id: postDetail.id,
+                content: file.filename, // Correctly extract filename
+                type : fileExtensions.includes(extension) ? 1 : 2
+              }
+            }
+          );
+
+      await CommunityActivityContent.bulkCreate(fileInformation);
+
+     }
 
       let tags = request.body.tags;
 
@@ -235,6 +271,11 @@ module.exports = {
                                             model: Tag,
                                             as: 'tags',
                                             where: { tagable_type: 'CommunityActivity' },
+                                            required: false,
+                                          },
+                                          {
+                                            model: CommunityActivityContent,
+                                            as: 'content',
                                             required: false,
                                           },
                                           {

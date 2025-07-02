@@ -10,8 +10,8 @@ const upload = dynamicUploader("thumbnail");
 
 router.use(passport.authenticate("jwt", { session: false }));
 
-router.post("/add", upload.single("thumbnail"), CommunityActivityController.add);
-router.put( "/edit", upload.single("thumbnail"), CommunityActivityController.edit);
+router.post("/add", upload.array("thumbnail"), CommunityActivityController.add);
+router.put( "/edit", upload.array("thumbnail"), CommunityActivityController.edit);
 router.post("/delete", CommunityActivityController.delete);
 router.post("/list", CommunityActivityController.list);
 router.put("/change-status", CommunityActivityController.changeStatus);

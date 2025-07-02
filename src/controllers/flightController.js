@@ -794,8 +794,6 @@ module.exports = {
     generatePnr : async (request , response ) => {
       try{
 
-          console.log("444444444444444444444444444")
-
           const tokenDetail = await JsonHandler.findOne({
             where : {type : AppConst.sabreFlights}
           });
@@ -918,12 +916,9 @@ module.exports = {
             result.CreatePassengerNameRecordRS.ApplicationResults &&
             result.CreatePassengerNameRecordRS.ApplicationResults.status == "Complete"
           ){
-
-            console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjj")
             
 
             let PNR = result.CreatePassengerNameRecordRS.ItineraryRef.ID;
-            console.log("-----------------------------------------------------------------")
             let totalBaseFare = 0;
             let totalTaxAmount = 0;
             let totalAmount = 0;
@@ -935,12 +930,12 @@ module.exports = {
               totalTaxAmount = priceInformation.GrandTotalTaxes || request.totalTaxAmount || 0;
               totalAmount = priceInformation.TotalAmount || request.totalAmount || 0;
             }
-            
-            console.log(12321321);
+
             let bookingDetail =await FlightBooking.create({
                                                   user_id : userId,
-                                                  is_applied_code	: 0,
+                                                  is_applied_code	: request.body.codeId ? 1 : 0,
                                                   status : 1,
+                                                  codeId: request.body.codeId ? request.body.codeId : null, 
                                                   pnr : PNR,
                                                   amount : totalAmount
                                                 })
