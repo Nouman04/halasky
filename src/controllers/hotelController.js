@@ -149,7 +149,7 @@ module.exports = {
             return response.status(200).json({
               status: false,
               message: result.errorCode,
-              error: error.message
+              error: result
             });
           }
 

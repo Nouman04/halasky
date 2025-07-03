@@ -329,6 +329,7 @@ module.exports = {
                                         limit: 10
                                       });
       const imageUrl =  `${process.env.APP_URL}/uploads/thumbnail`;
+      const profileImageUrl =  `${process.env.APP_URL}/uploads/image`;
 
       return response.status(200).json({
         status: true,
