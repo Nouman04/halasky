@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const flightController = require('../controllers/flightController');
 const passport = require('passport');
-const publicRoutes = [ '/list'  ,  '/airports' , '/get' , '/test-list' , '/alternate-days'];
+const publicRoutes = [ '/list'  ,  '/airports' , '/get' , '/test-list' , '/alternate-days' , '/separate-flights'];
 
 router.use( (request ,response ,next)=>{
 
@@ -20,4 +20,9 @@ router.post('/generate-pnr' ,   flightController.generatePnr );
 router.post('/airports' ,   flightController.airportList );
 router.post("/alternate-days", flightController.searchAlternateDatesFlights);
 router.get("/bookings", flightController.userBookings);
+router.post('/generate-booking' , flightController.createBooking);
+router.post('/separate-flights' , flightController.separateFlightList);
+router.post('/cancel-booking' , flightController.cancelBooking);
+
+
 module.exports = router;

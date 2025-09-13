@@ -334,7 +334,8 @@ module.exports = {
       return response.status(200).json({
         status: true,
         data: posts,
-        imageUrl : imageUrl
+        imageUrl : imageUrl,
+        profileImageUrl: profileImageUrl
       });
     } catch (error) {
       return response.status(500).json({

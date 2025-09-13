@@ -3,6 +3,7 @@ const path = require('path')
 const ejs = require('ejs');
 const puppeteer = require('puppeteer');
 const transport = require('../config/mailConfig');
+const { v4: uuidv4 } = require('uuid');
 require("dotenv").config();
 
 module.exports = {
@@ -13923,5 +13924,10 @@ module.exports = {
         });
 
         return response.status(200).json({ status : true , data : pdfUrl});
+    },
+
+    createUuid : async (request ,response) => {
+        const uuid = uuidv4();
+         return response.status(200).json({ status : true , data : uuid});
     }
 }

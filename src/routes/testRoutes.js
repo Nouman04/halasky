@@ -6,4 +6,5 @@ router.post('/flight' , TestController.flight);
 router.get('/socket-test' , TestController.testSocketPage);
 router.get('/test-invoice' , TestController.createPDF);
 router.get('/test-hotel-invoice' , TestController.createHotelPDF);
+router.get('/create-uuid' , TestController.createUuid);
 module.exports = router;

@@ -34,7 +34,7 @@ module.exports = {
                 { information: result },
                 { where: { id: token.id } }
               );
-    
+              
               const message = `[${new Date().toISOString()}] Authentication Token Updated\n`;
               console.log("token created");
             } else {
