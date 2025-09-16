@@ -2114,38 +2114,52 @@ createBooking: async (request, response) => {
     myHeaders.append("Accept", "application/json");
 
     // Map passengers to traveler list
-    let travelerList = passengers.map((passenger, index) => ({
-      givenName: passenger.firstname,
-      surname: passenger.lastname,
-      birthDate: passenger.birthDate,
-      passengerCode: passenger.type,
-      identityDocuments: [
-        {
-          documentNumber: passenger.passport,
-          documentType: "PASSPORT",
-          expiryDate: passenger.expiryDate,
-          issuingCountryCode: passenger.issuingCountryCode || "PK",
-          residenceCountryCode: passenger.residenceCountryCode || "PK",
-          givenName: passenger.firstname,
-          surname: passenger.lastname,
-          birthDate: passenger.birthDate,
-          gender: passenger.gender || "MALE",
-        },
-        {
-          documentType: "SECURE_FLIGHT_PASSENGER_DATA",
-          givenName: passenger.firstname,
-          surname: passenger.lastname,
-          birthDate: passenger.birthDate,
-          gender: passenger.gender || "MALE",
-        },
-      ],
-      emails: [passenger.email || `${passenger.firstname.toLowerCase()}@example.com`],
-      phones: [
-        {
-          number: passenger.phone || "00966-123456789",
-        },
-      ],
-    }));
+    let travelerList = passengers.map((passenger) => {
+  let traveler = {
+    givenName: passenger.firstname,
+    surname: passenger.lastname,
+    birthDate: passenger.birthDate,
+    passengerCode: passenger.type,
+  };
+
+  // Only add identity documents for ADT and CHD (not INF)
+  if (passenger.type !== "INF") {
+    traveler.identityDocuments = [
+      {
+        documentNumber: passenger.passport,
+        documentType: "PASSPORT",
+        expiryDate: passenger.expiryDate,
+        issuingCountryCode: passenger.issuingCountryCode || "PK",
+        residenceCountryCode: passenger.residenceCountryCode || "PK",
+        givenName: passenger.firstname,
+        surname: passenger.lastname,
+        birthDate: passenger.birthDate,
+        gender: passenger.gender || "MALE",
+      },
+      {
+        documentType: "SECURE_FLIGHT_PASSENGER_DATA",
+        givenName: passenger.firstname,
+        surname: passenger.lastname,
+        birthDate: passenger.birthDate,
+        gender: passenger.gender || "MALE",
+      },
+    ];
+  }
+
+  // Only add email/phone for ADT and CHD (not INF)
+  if (passenger.type !== "INF") {
+    traveler.emails = [passenger.email || `${passenger.firstname.toLowerCase()}@example.com`];
+    traveler.phones = [
+      {
+        number: passenger.phone || "00966-123456789",
+      },
+    ];
+  }
+
+  return traveler;
+});
+
+
 
     // Map contact info for adults
     let contactList = passengers
@@ -2280,20 +2294,21 @@ createBooking: async (request, response) => {
 
       // Store passengers
       await Promise.all(
-        result.booking.travelers.map((traveler) => {
-          const passportDoc = traveler.identityDocuments.find(
-            (doc) => doc.documentType === "PASSPORT"
-          );
-          return Passenger.create({
-            flight_booking_id: flightBookingId,
-            firstname: traveler.givenName,
-            lastname: traveler.surname,
-            phone: traveler.phones[0]?.number || null,
-            type: traveler.passengerCode,
-            passport: passportDoc?.documentNumber || null,
-          });
-        })
-      );
+          result.booking.travelers.map((traveler) => {
+            const passportDoc = traveler.identityDocuments?.find(
+              (doc) => doc.documentType === "PASSPORT"
+            );
+
+            return Passenger.create({
+              flight_booking_id: flightBookingId,
+              firstname: traveler.givenName,
+              lastname: traveler.surname,
+              phone: traveler.phones?.[0]?.number || null,
+              type: traveler.passengerCode,
+              passport: passportDoc?.documentNumber || null, // null if INF
+            });
+          })
+        );
 
       // Store flights and segments
       await Promise.all(
