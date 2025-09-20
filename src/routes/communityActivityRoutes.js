@@ -19,7 +19,7 @@ router.put("/approval-status", CommunityActivityController.changeApproval);
 router.put( "/change-restriction", CommunityActivityController.updateRestriction);
 router.put( "/update-activity-action", CommunityActivityController.toggleActivityAction);
 router.post("/get-activity-action", CommunityActivityController.getUserActivities);
-
+router.post("/get-admin-activities", CommunityActivityController.getAdminActivities);
 
 
 router.post("/create-poll", CommunityActivityController.createPoll);
@@ -27,5 +27,6 @@ router.put("/add-poll-answer", CommunityActivityController.submitPollAnswer);
 router.get("/poll-result/:questionId", CommunityActivityController.getPollResults);
 router.get( "/community-activity-with-poll/:postId", CommunityActivityController.getCommunityActivityWithPoll );
 router.get( "/popular-tags", CommunityActivityController.popularTags );
+
 
 module.exports = router;

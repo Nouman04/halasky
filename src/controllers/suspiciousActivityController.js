@@ -1,4 +1,4 @@
-const { SuspiciousActivity , User } = require('../database/models');
+const { SuspiciousActivity , User , LogActivity } = require('../database/models');
 const { Op } = require('sequelize');
 
 module.exports = {
@@ -56,6 +56,38 @@ module.exports = {
             return response.status(200).json({
                 status : true,
                 message : 'Ip status updated successfully'
+            })
+
+        } catch (error){
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
+    }, 
+
+    suspiciousLogActivities : async (request , response ) => {
+         try{
+            let skip = (parseInt(request.body.pageNo) - 1) * 10;
+
+            let whereCondition = {
+                title: {
+                    [Op.in]: ["login failed", "Suspicious Activity"], 
+                },
+            };
+
+            
+            const logs = await LogActivity.findAll({
+                where: whereCondition,
+                order: [["created_at", "DESC"]],
+                offset: skip,
+                limit: 10,
+            });
+
+            return response.status(200).json({
+                status : true,
+                data : logs
             })
 
         } catch (error){

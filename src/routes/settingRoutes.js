@@ -11,5 +11,6 @@ router.put('/update-settings'  , SettingsController.updateSetting );
 router.put('/update-about-settings' , upload.array('images') ,SettingsController.updateAboutInformation );
 router.get('/get-settings' , SettingsController.getSettings);
 router.get('/get-about-settings' , SettingsController.getAboutSettings);
+router.put('/update-2fa' , SettingsController.update2fa);
 
 module.exports = router;

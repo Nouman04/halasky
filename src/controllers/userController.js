@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Role , User , UserRole , RecoveryRequest } = require('../database/models');
+const { Role , User , UserRole , RecoveryRequest , Permission } = require('../database/models');
 const bcrypt = require('bcrypt');
 const appConst = require('../appConst');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
@@ -626,6 +626,31 @@ module.exports = {
                 message: 'Profile Updated Successfully',
             })
 
+
+        } catch (error){
+            return response.status(500).json({
+                status : false,
+                message : error.message
+            })
+        }
+    },
+
+    getRolePermission : async (request , response) => {
+        try {
+
+            const rolesWithPermissions = await Role.findAll({
+                include: [
+                    {
+                    model: Permission,
+                    through: { attributes: [] },
+                    },
+                ],
+            });
+
+            return response.status(200).json({
+                status: true,
+                data: rolesWithPermissions,
+            })
 
         } catch (error){
             return response.status(500).json({

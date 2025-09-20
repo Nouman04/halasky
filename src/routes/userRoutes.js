@@ -23,5 +23,6 @@ router.get('/roles-list' , UserController.getRoles);
 router.put('/update-recovery-request' , UserController.updateRecoveryRequest);
 router.put('/update-profile-password' , UserController.updateProfilePassword);
 router.put('/update-profile' , UserController.updateProfileDetail);
+router.get('/get-role-permissions' , UserController.getRolePermission);
 
 module.exports = router;

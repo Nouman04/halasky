@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 const passport = require('passport');
 const initializePassport = require('../config/passportConfig');
@@ -14,6 +15,7 @@ router.post('/register' , upload.single('image') ,AuthController.register);
 router.post('/verify-token' , AuthController.verifyToken);
 router.post('/verify-forget-password-token' , AuthController.verifyToken);
 router.post('/verify-native-token' , JwtAuthentication.verifyNativeToken);
+router.post('/verify-login-token' , JwtAuthentication.verifyLoginToken);
 router.post('/generate-token' , AuthController.generateToken);
 router.post('/update-password' , AuthController.updateForgotPassword);
 

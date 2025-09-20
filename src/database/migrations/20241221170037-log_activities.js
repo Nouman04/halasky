@@ -22,6 +22,10 @@ module.exports = {
         type : Sequelize.DataTypes.STRING,
         allowNull: false,
       },
+      ip: {
+        type : Sequelize.DataTypes.STRING,
+        allowNull: true,
+      },
       action: {
         type : Sequelize.DataTypes.TEXT('long'),
         allowNull: false,

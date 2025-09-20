@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false
       },
+      ip : {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
       action : {
         type: DataTypes.INTEGER,
         allowNull: false

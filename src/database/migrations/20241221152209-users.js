@@ -45,6 +45,10 @@ module.exports = {
         type : Sequelize.DataTypes.TEXT('long'),
         allowNull : true
       },
+      verification_token : {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: true, 
+      },
       expires_at : {
         type : Sequelize.DATE,
         allowNull : true

@@ -1,6 +1,6 @@
-const {About , Setting , AboutImage} = require('../database/models');
+const {About , Setting , AboutImage , GeneralSetting} = require('../database/models');
 const fs = require('fs');
-const path =  require('path');
+const path =  require('path'); 
 
 module.exports = {
     updateSetting : async (request, response) => {
@@ -142,6 +142,36 @@ module.exports = {
             });
         }
     },
+
+
+    update2fa : async (request ,response )=>{
+      try{
+        const { is_enabled } = request.body;
+        let generalSetting = await GeneralSetting.findOne({where : {type : '2fa'}});
+        if(generalSetting){
+          
+                await GeneralSetting.update(
+                    {  is_enabled : is_enabled },
+                    { where : { type : '2fa'} }
+                );
+         } else {
+                await GeneralSetting.create({ type : '2fa'  ,  is_enabled : is_enabled});
+        }
+
+         return response.status(200).json({
+                status : true,
+                message: '2fa setting updated successfully',
+          });
+
+      } catch (error) {
+          return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+      }
+
+    }
 
    
 }

@@ -2268,10 +2268,10 @@ createBooking: async (request, response) => {
 
     if( result && result.confirmationId) {
 
-      // return response.status(200).json({
-      //               status: true,
-      //                data : result,
-      //           });
+      return response.status(200).json({
+                    status: true,
+                     data : result,
+                });
 
       const PNR = result.confirmationId;
       const fareInfo = result.booking.fares[0]?.totals || {};
@@ -2375,19 +2375,19 @@ createBooking: async (request, response) => {
         flights: flightsDetail,
       };
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      // const browser = await puppeteer.launch();
-      const browser = await puppeteer.launch({
-                                        headless: true,
-                                        args: [
-                                          '--no-sandbox',
-                                          '--disable-setuid-sandbox',
-                                          '--disable-dev-shm-usage',
-                                          '--disable-accelerated-2d-canvas',
-                                          '--no-zygote',
-                                          '--single-process',
-                                          '--disable-gpu'
-                                        ]
-                                      });
+      const browser = await puppeteer.launch();
+      // const browser = await puppeteer.launch({
+      //                                   headless: true,
+      //                                   args: [
+      //                                     '--no-sandbox',
+      //                                     '--disable-setuid-sandbox',
+      //                                     '--disable-dev-shm-usage',
+      //                                     '--disable-accelerated-2d-canvas',
+      //                                     '--no-zygote',
+      //                                     '--single-process',
+      //                                     '--disable-gpu'
+      //                                   ]
+      //                                 });
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: "load" });
       const fileName = `${moment().unix()}-${request.user.name}-${PNR}.pdf`;
@@ -2453,22 +2453,18 @@ cancelBooking : async (request, response) =>{
         ? JSON.parse(tokenDetail.information).access_token
         : tokenDetail.information.access_token;
 
-    const endpoint = "https://api.cert.sabre.com/v2.5.0/passenger/records/cancel";
+    const endpoint = "https://api.cert.platform.sabre.com/v1/trip/orders/cancelBooking";
     const myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${accessToken}`);
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Accept", "application/json");
 
-    
   const payload = {
-                    "confirmationId": "SUENVA",
-                    "cancelAll": true,
-                    "offerItemId": "15",
-                    "retrieveBooking": true,
-                    "voidNonElectronicTickets": false,
-                    "refundDocumentsType": "Tickets",
-                    "errorHandlingPolicy": "HALT_ON_ERROR"
-                  }
+      "confirmationId": "TOIOYG",
+      "cancelAll": true,
+      "offerItemId": "21",
+      "retrieveBooking": true
+  }
 
     const requestOptions = {
       method: "POST",

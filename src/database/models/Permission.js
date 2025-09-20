@@ -17,10 +17,16 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Permission.associate = function(models) {
-    // Define associations if any, for example:
-    // Permission.hasMany(models.RolePermission, {
-    //   foreignKey: 'permission_id',
-    // });
+     Permission.belongsToMany(models.Role, {
+      through: models.RolePermission,
+      foreignKey: 'permission_id',
+      otherKey: 'role_id',
+    });
+
+    
+    Permission.hasMany(models.RolePermission, {
+      foreignKey: 'permission_id',
+    });
   };
 
   return Permission;

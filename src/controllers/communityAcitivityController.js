@@ -12,7 +12,9 @@ const {
   PollAnswer,
   ActivityAction,
   sequelize,
-  User
+  User,
+  LogActivity,
+  Role
 } = require("../database/models");
 const LogActivityHandler = require("../Helpers/logActivityHandler");
 const appConst = require("../appConst");
@@ -825,6 +827,40 @@ getUserActivities : async (req, res) => {
           return response.status(500).json({ message: 'Server error', error: error.message });
         }
     },
+
+
+    getAdminActivities : async (request, response) => {
+    try {
+      let pageNo = parseInt(request.query.pageNo) || 1;
+      let skip = (pageNo - 1) * 10;
+
+      const logs = await LogActivity.findAll({
+        include: [
+          {
+            model: User,
+            as: "user",
+            include: [
+              {
+                model: Role,
+                through: "UserRole", 
+                where: { title: "admin" },
+                required: true,
+              },
+            ],
+          },
+        ],
+        order: [["created_at", "DESC"]],
+        offset: skip,
+        limit: 10,
+      });
+
+    response.json({ success: true, data: logs });
+  } catch (error) {
+    console.error("Error fetching admin activities:", error);
+    response.status(500).json({ success: false, message: "Server error" });
+  }
+},
+
 
 
   updateTemplate: async (request, response) => {},
