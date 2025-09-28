@@ -1775,7 +1775,7 @@ separateFlightList: async (request, response) => {
 
                     //passenger list code starts here
                     price.passengerList = pi.fare.passengerInfoList.map( passenger => {
-                        passengerDetail = {};
+                        let passengerDetail = {};
                         passengerDetail.type = passenger.passengerInfo.passengerType;
                         passengerDetail.total = passenger.passengerInfo.passengerNumber;
                         passengerDetail.refundable = passenger.passengerInfo.refundable;
@@ -2238,17 +2238,19 @@ createBooking: async (request, response) => {
           text: uuid,
         },
       ],
-      otherServices: [
-        {
-          airlineCode: "EK",
-          serviceMessage: "CTCM 00966123456789/EN",
-        },
-        {
-          airlineCode: "EK",
-          serviceMessage: `CTCE ${travelerList[0].givenName.toLowerCase()}//wakanow.com/EN`,
-        },
-      ],
+      
     };
+
+    // otherServices: [
+    //     {
+    //       airlineCode: "EK",
+    //       serviceMessage: "CTCM 00966123456789/EN",
+    //     },
+    //     {
+    //       airlineCode: "EK",
+    //       serviceMessage: `CTCE ${travelerList[0].givenName.toLowerCase()}//wakanow.com/EN`,
+    //     },
+    //   ],
 
 // text: "S*UD1 1701765172",
     // return response.status(200).json({
@@ -2374,7 +2376,7 @@ createBooking: async (request, response) => {
         flights: flightsDetail,
       };
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      //const browser = await puppeteer.launch();
+      // const browser = await puppeteer.launch();
       const browser = await puppeteer.launch({
                                         headless: true,
                                         args: [
@@ -2458,34 +2460,37 @@ cancelBooking : async (request, response) =>{
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Accept", "application/json");
 
-  const payload = {
-      "confirmationId": "TOIOYG",
-      "cancelAll": true,
-      // "offerItemId": "21",
-      "retrieveBooking": true,
-      "segments": [
-        {
-          "sequence": 1,
-          "id": "21"
-        }
-     ],
-    "targetPcc": "3GML",
-    }
+    const bookedFlight = await FlightBooking.findOne({ where : { pnr : request.body.pnr}});
 
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: JSON.stringify(payload),
-      redirect: "follow",
-    };
+    if(bookedFlight){
+      const payload = {
+        "confirmationId": request.body.pnr,
+        "cancelAll": true,
+        "retrieveBooking": true,
+        "targetPcc": "3GML",
+      }
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(payload),
+        redirect: "follow",
+      };
+
+      
 
 
-    const result = await fetch(endpoint, requestOptions).then((res) => res.json());
-
+      const result = await fetch(endpoint, requestOptions).then((res) => res.json());
       return response.status(200).json({
                     status: true,
                      data : result,
                 });
+
+    }
+
+  
+
+      
 
               } catch (error) {
     console.error("Booking Cancelation Error:", error);
