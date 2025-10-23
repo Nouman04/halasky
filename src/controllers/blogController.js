@@ -3,11 +3,23 @@ const path = require('path')
 const { Blog , Tag , Comment , Category} = require('../database/models');
 const mutateHtmlContent = require('../Helpers/mutateHtmlContent');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
+const { blogAddSchema , blogEditSchema , blogDeleteSchema , blogListSchema } = require('../validations/blogValidation');
 
 module.exports = {
 
     add : async (request , response ) =>{
         try{
+        
+          const { error } = blogAddSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
+
             const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
             let content = mutateHtmlContent(request.body.content , blogImagesPath , 'uploads/blogs');
             
@@ -61,6 +73,16 @@ module.exports = {
 
     edit : async (request , response ) =>{
         try{
+         const { error } = blogEditSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
+
             const blogImagesPath = path.join(__dirname,'..','public','uploads','thumbnail' );
 
             let blogId = request.body.id;
@@ -141,7 +163,15 @@ module.exports = {
 
     delete : async (request , response ) => {
         try{
-
+            const { error } = blogDeleteSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let blogId = request.body.id;
             const blogImagesPath = path.join(__dirname,'..','public','uploads','thumbnail' );
 
@@ -195,6 +225,17 @@ module.exports = {
 
     list : async (request , response) => {
         try{
+
+            const { error } = blogListSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
+
             let status = request.body.status;
 
             whereCondition = {}

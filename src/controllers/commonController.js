@@ -2,11 +2,34 @@ const {Comment , Violation , User, Category , Promotion}= require('../database/m
 const LogActivityHandler = require('../Helpers/logActivityHandler');
 const moment = require('moment');
 
+const {  addCommentSchema, 
+                    updateCommentSchema, 
+                    deleteCommentSchema, 
+                    addViolationSchema, 
+                    updateViolationSchema, 
+                    listViolationSchema, 
+                    deleteViolationSchema,
+                    listCategoriesSchema,
+                    addPromotionCodeSchema,
+                    updatePromotionCodeSchema,
+                    getPromotionCodeSchema,
+                    deletePromotionCodeSchema
+                } = require('../validations/commonValidation')
+
 module.exports = {
 
     addComment : async (request , response) => {
         try{
-            console.log(request.body);
+            const { error } = addCommentSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
+
             let id = request.body.id;
             let userId = request.user.id;
             let comment  = request.body.comment;
@@ -44,6 +67,15 @@ module.exports = {
 
     updateComment : async (request , response) => {
         try{
+            const { error } = updateCommentSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             let id = request.body.id;
             let comment  = request.body.comment;
             let commentDetail = await Comment.findOne({where : {id : id}});
@@ -80,6 +112,15 @@ module.exports = {
 
     deleteComment: async (request, response) => {
         try {
+            const { error } = deleteCommentSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             const commentId = request.body.commentId;
 
             const commentDetail = Comment.findOne({
@@ -114,10 +155,17 @@ module.exports = {
     },
     
 
-    
-
     addViolation : async (request , response ) =>{
         try{
+            const { error } = addViolationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             let personId = request.body.personId;
             let addedBy = request.user.id;
             let violationableType  = request.body.type;
@@ -152,10 +200,17 @@ module.exports = {
         }
     },
 
-
-
     updateViolation : async (request , response ) =>{
         try{
+            const { error } = updateViolationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             let reason = request.body.reason;
             let violationId = request.body.violationId;
             let violationDetail = await Violation.findOne({
@@ -196,6 +251,15 @@ module.exports = {
 
     listViolation : async ( request , response ) => {
         try{
+            const { error } = listViolationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
            let skip = (parseInt(request.body.pageNo) - 1) * 10;
            let userId = request.body.personId;
            let addedBy = request.body.addedBy
@@ -246,10 +310,17 @@ module.exports = {
         }
     },
 
-
-
     deleteViolation: async (request, response) => {
         try {
+            const { error } = deleteViolationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             const violationId = request.body.violationId;
             
             const violationDetail = Violation.findOne({
@@ -309,6 +380,15 @@ module.exports = {
 
     addPromotionCode : async (request ,response ) => {
         try {
+            const { error } = addPromotionCodeSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             await Promotion.create({
                 promotion_name: request.body.promotion_name,
                 applicable_service : request.body.applicable_service, // 'flight' , 'hotel' , 'both'
@@ -342,7 +422,15 @@ module.exports = {
 
     updatePromotionCode : async (request ,response ) => {
         try {
-
+            const { error } = updatePromotionCodeSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             const currentPromotion = await Promotion.findByPk(request.body.id);
 
             if (
@@ -386,7 +474,15 @@ module.exports = {
 
     getPromotionCode : async (request , response ) => {
         try {
-
+            const { error } = getPromotionCodeSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             const code = request.params.code;
             const promotion = await Promotion.findOne({ where: { code : code } });
 
@@ -436,7 +532,15 @@ module.exports = {
 
     deletePromoCode : async (request , response ) => {
         try {
-
+            const { error } = deletePromotionCodeSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
             const id = request.body.id;
             await Promotion.destroy({
                 where: {

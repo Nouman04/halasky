@@ -4,12 +4,32 @@ const bcrypt = require('bcrypt');
 const appConst = require('../appConst');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
 const path = require('path');
+const {
+  listValidationSchema,
+  listUsersValidationSchema,
+  nonActiveUserValidationSchema,
+  searchUserValidationSchema,
+  updateAccountStatusValidationSchema,
+  updateAccountPasswordValidationSchema,
+  userAccountDetailValidationSchema,
+  getMembersValidationSchema,
+  getRoleMembersValidationSchema,
+  updateUserRoleValidationSchema,
+  addMemberValidationSchema,
+  userRecoveryRequestValidationSchema,
+  getRecoveryRequestsValidationSchema,
+  updateRecoveryRequestValidationSchema,
+  updateProfilePasswordValidationSchema,
+  updateProfileDetailValidationSchema,
+} = require('../validations/userValidation');
 require('dotenv').config();
 
 module.exports = {
 
     getRoleslist : async (request, response) => {
         try {
+           
+
             let roles = await Role.findAll({
                 where: {
                   title: {
@@ -33,6 +53,15 @@ module.exports = {
 
     list : async (request , response) =>{
         try{
+             const { error } = listValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let status = request.body.status;
             let whereCondition = {};
@@ -71,6 +100,15 @@ module.exports = {
 
     listUsers: async (request, response) => {
         try {
+             const { error } = listUsersValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
           let skip = (parseInt(request.body.pageNo) - 1) * 10;
     
           let users = await User.findAll({
@@ -111,6 +149,15 @@ module.exports = {
 
     nonActiveUser : async (request , response) =>{
         try{
+             const { error } = nonActiveUserValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             const nonActiveUser = await User.findAll({
                 include : {
@@ -143,6 +190,15 @@ module.exports = {
 
     searchUser : async (request , response) => {
         try{
+             const { error } = searchUserValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             const { searchQuery } = request.body;
 
             const searchedUsers = await User.findAll({
@@ -171,7 +227,7 @@ module.exports = {
 
     statusList : async (request , response) =>{
         try{
-
+        
            let statusList = [
             {inactiveUser : appConst.inactiveUser},
             {activeUser : appConst.activeUser},
@@ -194,6 +250,15 @@ module.exports = {
 
     updateAccountStatus : async (request ,response) =>{
         try{
+             const { error } = updateAccountStatusValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             const { userId , status } = request.body;
             console.log(status);
             console.log(userId);
@@ -219,6 +284,15 @@ module.exports = {
 
     updateAccountPassword : async (request , response) =>{
         try {
+             const { error } = updateAccountPasswordValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let userId = request.body.id;
             let password = request.body.password
             let saltcount  = 10;
@@ -254,6 +328,15 @@ module.exports = {
 
     userAccountDetail : async (request , response) =>{
         try{
+             const { error } = userAccountDetailValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             const userId = request.body.id;
             const user = await User.findOne({
                 where : { id : userId}
@@ -275,6 +358,15 @@ module.exports = {
 
     getMembers : async (request , response) => {
         try{
+             const { error } = getMembersValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
            let skip = (parseInt(request.body.pageNo) - 1) * 10;
            let status = request.body.status;
            let nemberList = await  User.findAll({
@@ -307,6 +399,15 @@ module.exports = {
 
     getRoleMembers : async (request , response )=> {
         try {
+             const { error } = getRoleMembersValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let roleId  = request.body.roleId;
             let status = request.body.status;
@@ -341,6 +442,15 @@ module.exports = {
 
     updateUserRole : async (request , response) => {
         try {
+             const { error } = updateUserRoleValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let uId = request.body.uId;
             let rId = request.body.rId;
 
@@ -378,6 +488,15 @@ module.exports = {
 
     addMember : async ( request , response ) => {
         try {
+             const { error } = addMemberValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let name = request.body.name;
             let email = request.body.email;
             let roleId = request.body.roleId;
@@ -430,7 +549,15 @@ module.exports = {
 
     userRecoveryRequest : async (request , response ) => {
         try {
-
+             const { error } = userRecoveryRequestValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let email = request.body.email;
             let user = await User.findOne({
                             where: {
@@ -480,7 +607,16 @@ module.exports = {
     },
 
     getRecoveryRequests : async (request , response) =>{
-        try {   
+        try { 
+             const { error } = getRecoveryRequestsValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }  
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let requestStatus = request.body.status;
 
@@ -539,6 +675,15 @@ module.exports = {
 
     updateRecoveryRequest : async (request , response) => {
         try {   
+             const { error } = updateRecoveryRequestValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let userId = request.body.uId;
             let status  = request.body.status;
             RecoveryRequest.update(
@@ -575,7 +720,15 @@ module.exports = {
 
     updateProfilePassword : async ( request , response ) => {
         try {
-
+             const { error } = updateProfilePasswordValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             const { previousPassword , password , confirmPassword } = request.body;
             const userDetail = request.user;
             let user = await User.findOne({ where : { id : userDetail.id}});
@@ -611,7 +764,15 @@ module.exports = {
 
     updateProfileDetail : async (request , response ) => {
         try {
-
+             const { error } = updateProfileDetailValidationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             const { username , phone } = request.body;
             const user = request.user;
 
@@ -637,7 +798,15 @@ module.exports = {
 
     getRolePermission : async (request , response) => {
         try {
-
+             const { error } = update2faSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             const rolesWithPermissions = await Role.findAll({
                 include: [
                     {

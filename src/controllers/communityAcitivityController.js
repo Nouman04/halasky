@@ -19,9 +19,34 @@ const {
 const LogActivityHandler = require("../Helpers/logActivityHandler");
 const appConst = require("../appConst");
 let moment = require("moment");
+const {   
+  addCommunityActivitySchema , 
+  editValidationSchema , 
+  deleteCommunityValidationSchema , 
+  listCommunityActivityValidationSchema,
+  changeStatusValidationSchema,
+  changeApprovalValidationSchema,
+  updateRestrictionValidationSchema,
+  createPollValidationSchema,
+  submitPollAnswerValidationSchema,
+  toggleActivityActionSchema,
+  getUserActivitiesSchema,
+  adminActivitiesSchema,
+ } = require('../validations/communityActivityValidation')
 module.exports = {
   add: async (request, response) => {
     try {
+
+      const { error } = addCommunityActivitySchema.validate(request.body, { abortEarly: false });
+                          
+                            if (error) {
+                                  return response.status(400).json({
+                                  success: false,
+                                  message: "Validation failed",
+                                  details: error.details.map((d) => d.message),
+                                  });
+                              }
+
       let categoryId = request.body.categoryId;
       let title = request.body.title;
       let userId = request.user.id;
@@ -83,6 +108,16 @@ module.exports = {
 
   edit: async (request, response) => {
     try {
+      const { error } = editValidationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
+
       const activityThumbnailPath = path.join(
         __dirname,
         "..",
@@ -186,6 +221,15 @@ module.exports = {
 
   delete: async (request, response) => {
     try {
+      const { error } = deleteCommunityValidationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
       let postId = request.body.id;
       console.log(postId);
       const activityThumbnailPath = path.join(
@@ -243,6 +287,15 @@ module.exports = {
 
   list: async (request, response) => {
     try {
+      const { error } = listCommunityActivityValidationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
       let status = request.body.status;
 
       whereCondition = {};
@@ -378,6 +431,15 @@ module.exports = {
 
   changeStatus: async (request, response) => {
     try {
+      const { error } = changeStatusValidationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
       let postId = request.body.postId;
       let status = request.body.status;
       await CommunityActivity.update(
@@ -413,6 +475,15 @@ module.exports = {
 
   changeApproval: async (request, response) => {
     try {
+      const { error } = changeApprovalValidationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
       let postId = request.body.postId;
       let approvalStatus = request.body.approvalStatus;
       await CommunityActivity.update(
@@ -446,6 +517,15 @@ module.exports = {
 
   updateRestriction: async (request, response) => {
     try {
+      const { error } = updateRestrictionValidationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
       let postId = request.body.postId;
       let restrictionType = request.body.restrictionType;
       let restrictionTime = request.body.restrictionTime;
@@ -478,6 +558,15 @@ module.exports = {
 
   createPoll: async (request, response) => {
     try {
+      const { error } = createPollValidationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
       const { activityId, questions } = request.body;
       const userId = request.user.id;
 
@@ -517,6 +606,15 @@ module.exports = {
 
   submitPollAnswer: async (request, response) => {
     try {
+      const { error } = submitPollAnswerValidationSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
       const { answerId, questionId  } = request.body;
       const userId = request.user.id;
       const existingPollAnswer = await PollAnswer.findOne({
@@ -682,134 +780,135 @@ module.exports = {
   },
 
 
-toggleActivityAction: async (request, response) => {
-  try {
-    const userId = request.user.id;
-    const { activityId, activityType, value } = request.body;
-    console.log(request.body);
-    // Validate actionType
-    const validActions = ['spam', 'saved', 'liked'];
-    if (!validActions.includes(activityType)) {
-      return response.status(400).json({ message: "Invalid action type" });
-    }
+  toggleActivityAction: async (request, response) => {
+    try {
 
-    // Build where clause
-    const whereClause = {
-      user_id: userId,
-      activity_id: activityId,
-      activity_type: activityType,
-      is_spam: activityType == 'spam' ? 1 : null,
-      is_saved: activityType == 'saved' ? 1 : null,
-    };
-
-    if (value == 1) {
-      const alreadyExists = await ActivityAction.findOne({ where: whereClause });
-
-      if (alreadyExists) {
-        return response.status(200).json({ message: `${activityType} already added` });
+      const { error } = toggleActivityActionSchema.validate(request.body, { abortEarly: false });
+      if (error) {
+        return response.status(400).json({
+          status: false,
+          message: "Validation failed",
+          errors: error.details.map((err) => err.message),
+        });
       }
 
-      // Create new action
-      const actionData = {
+      const userId = request.user.id;
+      const { activityId, activityType, value } = request.body;
+     
+      const validActions = ['spam', 'saved', 'liked'];
+      if (!validActions.includes(activityType)) {
+        return response.status(400).json({ message: "Invalid action type" });
+      }
+      
+      const whereClause = {
         user_id: userId,
-        activity_type: activityType,
         activity_id: activityId,
+        activity_type: activityType,
         is_spam: activityType == 'spam' ? 1 : null,
         is_saved: activityType == 'saved' ? 1 : null,
       };
 
-      await ActivityAction.create(actionData);
-      return response.status(200).json({ message: `${activityType} added` });
+      if (value == 1) {
+        const alreadyExists = await ActivityAction.findOne({ where: whereClause });
 
-    } else {
-      await ActivityAction.destroy({ where: whereClause });
-      return response.status(200).json({ message: `${activityType} removed` });
+        if (alreadyExists) {
+          return response.status(200).json({ message: `${activityType} already added` });
+        }
+
+        // Create new action
+        const actionData = {
+          user_id: userId,
+          activity_type: activityType,
+          activity_id: activityId,
+          is_spam: activityType == 'spam' ? 1 : null,
+          is_saved: activityType == 'saved' ? 1 : null,
+        };
+
+        await ActivityAction.create(actionData);
+        return response.status(200).json({ message: `${activityType} added` });
+
+      } else {
+        await ActivityAction.destroy({ where: whereClause });
+        return response.status(200).json({ message: `${activityType} removed` });
+      }
+
+    } catch (error) {
+      return response.status(500).json({ message: "Server error", error: error.message });
     }
+  },
 
-  } catch (error) {
-    return response.status(500).json({ message: "Server error", error: error.message });
-  }
-},
+  getUserActivities : async (req, res) => {
+    try {
 
-// getUserActivities: async (request, response) => {
-//   try {
-//       const userId = request.user.id;
-//       let skip = (parseInt(request.body.pageNo) - 1) * 10;
-//       const activities = await ActivityAction.findAll({
-//         where: { user_id: userId },
-//         order: [['id', 'DESC']],
-//         offset: skip,
-//         limit: 10
-//       });
+      const { error } = getUserActivitiesSchema.validate(request.body, { abortEarly: false });
+      if (error) {
+        return response.status(400).json({
+          status: false,
+          message: "Validation failed",
+          errors: error.details.map((err) => err.message),
+        });
+      }
+      
+      const userId = req.user.id;
+      const page = parseInt(req.body.pageNo) || 1;
+      const limit = 10;
+      const offset = (page - 1) * limit;
 
-//       return response.status(200).json({ status : true , data : activities });
-//     } catch (error) {
-//       return response.status(500).json({ message: 'Server error', error: error.message });
-//     }
-//   },
+      // First query: activity actions
+      const activityActions = await sequelize.query(`
+        SELECT 
+          aa.id,
+          'activity_action' AS type,
+          aa.created_at,
+          aa.is_spam,
+          aa.is_saved,
+          ca.id AS community_activity_id,
+          ca.title,
+          ca.image,
+          ca.description,
+          NULL AS comment
+        FROM activity_actions aa
+        JOIN community_activities ca ON ca.id = aa.activity_id
+        WHERE aa.user_id = :userId
+      `, {
+        replacements: { userId },
+        type: QueryTypes.SELECT
+      });
 
-getUserActivities : async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const page = parseInt(req.body.pageNo) || 1;
-    const limit = 10;
-    const offset = (page - 1) * limit;
+      // Second query: comments
+      const comments = await sequelize.query(`
+        SELECT 
+          c.id,
+          'comment' AS type,
+          c.created_at,
+          NULL AS is_spam,
+          NULL AS is_saved,
+          ca.id AS community_activity_id,
+          ca.title,
+          ca.image,
+          ca.description,
+          c.comment
+        FROM comments c
+        JOIN community_activities ca ON ca.id = c.commentable_id
+        WHERE c.added_by = :userId AND c.commentable_type = 'CommunityActivity'
+      `, {
+        replacements: { userId },
+        type: QueryTypes.SELECT
+      });
 
-    // First query: activity actions
-    const activityActions = await sequelize.query(`
-      SELECT 
-        aa.id,
-        'activity_action' AS type,
-        aa.created_at,
-        aa.is_spam,
-        aa.is_saved,
-        ca.id AS community_activity_id,
-        ca.title,
-        ca.image,
-        ca.description,
-        NULL AS comment
-      FROM activity_actions aa
-      JOIN community_activities ca ON ca.id = aa.activity_id
-      WHERE aa.user_id = :userId
-    `, {
-      replacements: { userId },
-      type: QueryTypes.SELECT
-    });
+      // Merge and sort by created_at DESC
+      const combined = [...activityActions, ...comments].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
 
-    // Second query: comments
-    const comments = await sequelize.query(`
-      SELECT 
-        c.id,
-        'comment' AS type,
-        c.created_at,
-        NULL AS is_spam,
-        NULL AS is_saved,
-        ca.id AS community_activity_id,
-        ca.title,
-        ca.image,
-        ca.description,
-        c.comment
-      FROM comments c
-      JOIN community_activities ca ON ca.id = c.commentable_id
-      WHERE c.added_by = :userId AND c.commentable_type = 'CommunityActivity'
-    `, {
-      replacements: { userId },
-      type: QueryTypes.SELECT
-    });
+      // Paginate combined result
+      const paginated = combined.slice(offset, offset + limit);
 
-    // Merge and sort by created_at DESC
-    const combined = [...activityActions, ...comments].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
-    );
-
-    // Paginate combined result
-    const paginated = combined.slice(offset, offset + limit);
-
-    return res.status(200).json({ status: true, data: paginated });
-  } catch (error) {
-    return res.status(500).json({ message: 'Server error', error: error.message });
-  }
-},
+      return res.status(200).json({ status: true, data: paginated });
+    } catch (error) {
+      return res.status(500).json({ message: 'Server error', error: error.message });
+    }
+  },
 
   trendingTags : async (request , response) => {
     try {
@@ -826,11 +925,20 @@ getUserActivities : async (req, res) => {
         } catch (error) {
           return response.status(500).json({ message: 'Server error', error: error.message });
         }
-    },
+  },
 
 
-    getAdminActivities : async (request, response) => {
+  getAdminActivities : async (request, response) => {
     try {
+      const { error } = adminActivitiesSchema.validate(request.body, { abortEarly: false });
+      if (error) {
+        return response.status(400).json({
+          status: false,
+          message: "Validation failed",
+          errors: error.details.map((err) => err.message),
+        });
+      }
+
       let pageNo = parseInt(request.query.pageNo) || 1;
       let skip = (pageNo - 1) * 10;
 
@@ -859,7 +967,7 @@ getUserActivities : async (req, res) => {
     console.error("Error fetching admin activities:", error);
     response.status(500).json({ success: false, message: "Server error" });
   }
-},
+  },
 
 
 

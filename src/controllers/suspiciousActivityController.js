@@ -1,10 +1,20 @@
 const { SuspiciousActivity , User , LogActivity } = require('../database/models');
 const { Op } = require('sequelize');
+const {validateGetIpsSchema , validateUpdateIpSchema , validateSuspiciousLogActivitiesSchema} =require('../validations/suspiciousActivitiesValidation');
 
 module.exports = {
     getIps : async (request, response) => {
         try{
-            console.log(request.body);
+            const { error } = validateGetIpsSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
+
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let status = request.body.status;
             let ip = request.body.ip;
@@ -48,6 +58,15 @@ module.exports = {
 
     updateIp : async (request , response ) => {
         try{
+            const { error } = validateUpdateIpSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             const { id , status} = request.body;
             await SuspiciousActivity.update(
                 { status : status},
@@ -69,6 +88,15 @@ module.exports = {
 
     suspiciousLogActivities : async (request , response ) => {
          try{
+            const { error } = validateSuspiciousLogActivitiesSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
 
             let whereCondition = {

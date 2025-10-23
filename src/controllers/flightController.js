@@ -8,11 +8,22 @@ const path = require('path');
 const moment = require('moment')
 const transport = require('../config/mailConfig');
 const { v4: uuidv4 } = require('uuid');
+const { searchAirportSchema , searchFlightSchema , alternateDateFlightSchema , availabilityFlightSchema , bookingFlightSchema } = require('../validations/flightValidations')
 require("dotenv").config();
 
 module.exports = {
 
     airportList : async (request , response) => {
+      const { error } = searchAirportSchema.validate(request.body, { abortEarly: false });
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+    }
+
       const { searchQuery } = request.body;
       try{
         filteredAirports = airports.filter( airport => {
@@ -39,8 +50,19 @@ module.exports = {
 
 
     list : async (request ,response)=>{
+
+        const { error } = searchFlightSchema.validate(request.body, { abortEarly: false });
+
+        if (error) {
+          return response.status(400).json({
+            success: false,
+            message: "Validation failed",
+            details: error.details.map((d) => d.message),
+          });
+      }
+
         const { destinationList , passengerList , travelClass } = request.body;
-        console.log(travelClass);
+
         const travelJson = destinationList.map( detail => {
           return {
                   "DepartureDateTime": detail.travelDate,
@@ -117,7 +139,13 @@ module.exports = {
                         "PreferLevel": "Preferred"
                       }
                     ],
-                    "TPA_Extensions": {}
+                    "TPA_Extensions": {},
+                     "Baggage": {
+                      "Description": true,
+                      "RequestType": "A",
+                      "CarryOnInfo":true
+                      
+                  },
                   },
                   "TPA_Extensions": {
                     "IntelliSellTransaction": {
@@ -128,7 +156,8 @@ module.exports = {
                     "RichContent": {
                       "FlightAmenities": true, // Moved here to request amenities
                     }
-                  }
+                  },
+                 
                 }
               }
     
@@ -416,11 +445,23 @@ module.exports = {
     },
 
 
-    findAvailability : async ( request , response ) => {
+    checkAvailability : async ( request , response ) => {
       try{
+
+        const { error } = availabilityFlightSchema.validate(request.body, { abortEarly: false });
+
+        if (error) {
+          return response.status(400).json({
+            success: false,
+            message: "Validation failed",
+            details: error.details.map((d) => d.message),
+          });
+      }
+
         const tokenDetail = await JsonHandler.findOne({
             where : {type : AppConst.sabreFlights}
         });
+
         const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
         
         let endpoint = 'https://api.cert.sabre.com/v4/shop/flights/revalidate';
@@ -428,95 +469,6 @@ module.exports = {
         myHeaders.append("Authorization", `Bearer ${accessToken}`);
         myHeaders.append("Content-Type", "application/json");
         myHeaders.append("Accept", "application/json");
-
-
-
-
-        // let searchRequest ={
-        //   "OTA_AirLowFareSearchRQ": {
-        //     "Version": "4.0.0",
-        //     "POS": {
-        //       "Source": [
-        //         {
-        //           "PseudoCityCode": "3GML",
-        //           "RequestorID": {
-        //             "Type": "1",
-        //             "ID": "1",
-        //             "CompanyName": {
-        //               "Code": "TN"
-        //             }
-        //           }
-        //         }
-        //       ]
-        //     },
-        //     "OriginDestinationInformation": [
-        //       {
-        //         "DepartureDateTime": "2025-04-11T10:00:00",
-        //         "OriginLocation": {
-        //           "LocationCode": "ISB"
-        //         },
-        //         "DestinationLocation": {
-        //           "LocationCode": "KHI"
-        //         },
-        //         "RPH": "1",
-        //         "TPA_Extensions": {
-        //           "Flight": [
-        //             {
-        //               "Airline": {
-        //                 "Marketing": "PK",
-        //                 "Operating": "PK"
-        //               },
-        //               "ArrivalDateTime": "2025-04-11T11:55:00",
-        //               "ClassOfService": "Y",
-        //               "DepartureDateTime": "2025-04-11T10:00:00",
-        //               "DestinationLocation": {
-        //                 "LocationCode": "KHI"
-        //               },
-        //               "Number": 301,
-        //               "OriginLocation": {
-        //                 "LocationCode": "ISB"
-        //               },
-        //               "Type": "A"
-        //             }
-        //           ]
-        //         }
-        //       }
-        //     ],
-        //     "TravelPreferences": {
-        //       "CabinPref": [
-        //         {
-        //           "Cabin": "Y"
-        //         }
-        //       ]
-        //     },
-        //     "TravelerInfoSummary": {
-        //       "AirTravelerAvail": [
-        //         {
-        //           "PassengerTypeQuantity": [
-        //             {
-        //               "Code": "ADT",
-        //               "Quantity": 1
-        //             }
-        //           ]
-        //         }
-        //       ],
-        //       "PriceRequestInformation": {
-        //         "CurrencyCode": "SAR",
-        //         "FareQualifier": "ADVJR1",
-        //       }
-        //     },
-        //     "TPA_Extensions": {
-        //       "IntelliSellTransaction": {
-        //         "RequestType": {
-        //           "Name": "Revalidate"
-        //         }
-        //       }
-        //     }
-        //   }
-        // }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 
         const { priceSource , legList , passengerDetail } = request.body;
         let originDestinationDetail = [];
@@ -611,128 +563,6 @@ module.exports = {
                 }
             }
         };
-
-
-        // return response.status(200).json(searchRequest);
-
-        // let searchRequest1 = {
-        //     "OTA_AirLowFareSearchRQ": {
-        //       "Version": "4.0.0",
-        //       "POS": {
-        //         "Source": [
-        //           {
-        //             "PseudoCityCode": "3GML",
-        //             "RequestorID": {
-        //               "Type": "1",
-        //               "ID": "1",
-        //               "CompanyName": {
-        //                 "Code": "TN"
-        //               }
-        //             }
-        //           }
-        //         ]
-        //       },
-        //       "OriginDestinationInformation": [
-        //         {
-        //           "DepartureDateTime": "2025-04-11T10:00:00",
-        //           "OriginLocation": {
-        //             "LocationCode": "ISB"
-        //           },
-        //           "DestinationLocation": {
-        //             "LocationCode": "KHI"
-        //           },
-        //           "RPH": "1",
-        //           "TPA_Extensions": {
-        //             "Flight": [
-        //               {
-        //                 "Airline": {
-        //                   "Marketing": "PK",
-        //                   "Operating": "PK"
-        //                 },
-        //                 "ArrivalDateTime": "2025-04-11T11:55:00",
-        //                 "ClassOfService": "Y",
-        //                 "DepartureDateTime": "2025-04-11T10:00:00",
-        //                 "DestinationLocation": {
-        //                   "LocationCode": "KHI"
-        //                 },
-        //                 "Number": 301,
-        //                 "OriginLocation": {
-        //                   "LocationCode": "ISB"
-        //                 },
-        //                 "Type": "A"
-        //               }
-        //             ]
-        //           }
-        //         },
-        //         {
-        //           "DepartureDateTime": "2025-04-11T16:00:00",
-        //           "OriginLocation": {
-        //             "LocationCode": "KHI"
-        //           },
-        //           "DestinationLocation": {
-        //             "LocationCode": "ISB"
-        //           },
-        //           "RPH": "2",
-        //           "TPA_Extensions": {
-        //             "Flight": [
-        //               {
-        //                 "Airline": {
-        //                   "Marketing": "PK",
-        //                   "Operating": "PK"
-        //                 },
-        //                 "ArrivalDateTime": "2025-04-11T17:55:00",
-        //                 "ClassOfService": "Y",
-        //                 "DepartureDateTime": "2025-04-11T16:00:00",
-        //                 "DestinationLocation": {
-        //                   "LocationCode": "ISB"
-        //                 },
-        //                 "Number": 308,
-        //                 "OriginLocation": {
-        //                   "LocationCode": "KHI"
-        //                 },
-        //                 "Type": "A"
-        //               }
-        //             ]
-        //           }
-        //         }
-        //       ],
-        //       "TravelPreferences": {
-        //         "CabinPref": [
-        //           {
-        //             "Cabin": "Y"
-        //           }
-        //         ]
-        //       },
-        //       "TravelerInfoSummary": {
-        //         "AirTravelerAvail": [
-        //           {
-        //             "PassengerTypeQuantity": [
-        //               {
-        //                 "Code": "ADT",
-        //                 "Quantity": 1
-        //               }
-        //             ]
-        //           }
-        //         ],
-        //         "PriceRequestInformation": {
-        //           "CurrencyCode": "SAR",
-        //           "FareQualifier": "ADVJR1"
-        //         }
-        //       },
-        //       "TPA_Extensions": {
-        //         "IntelliSellTransaction": {
-        //           "RequestType": {
-        //             "Name": "Revalidate"
-        //           }
-        //         }
-        //       }
-        //     }
-        //   }
-
-
-        // return response.status(200).json(searchRequest);
-        
- 
 
         const requestOptions = {
           method: "POST",
@@ -1610,7 +1440,16 @@ separateFlightList: async (request, response) => {
 
  searchAlternateDatesFlights: async (request , response) => {
   try {
-    // Get authentication token
+    const { error } = alternateDateFlightSchema.validate(request.body, { abortEarly: false });
+
+        if (error) {
+          return response.status(400).json({
+            success: false,
+            message: "Validation failed",
+            details: error.details.map((d) => d.message),
+          });
+      }
+
     const {originLocation, destinationLocation, departureDate, passengerDetail} = request.body;
 
     const tokenDetail = await JsonHandler.findOne({
@@ -1702,10 +1541,10 @@ separateFlightList: async (request, response) => {
     .then((response) => response.json()) 
     .then(async (result) => {
 
-      // return response.status(200).json({
-      //             status: false,
-      //             message: result,
-      //           });
+      return response.status(200).json({
+                  status: false,
+                  message: result,
+                });
    
       let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
 
@@ -1912,188 +1751,19 @@ separateFlightList: async (request, response) => {
 },
 
 
-
-
-
-
-
-
-/////////////////////////////////////////////////////////////////
-// createBooking: async (request, response) => {
-//   try {
-//     const { originLocation, destinationLocation, departureDate, returnDate } = request.body;
-
-//     // Get authentication token
-//     const tokenDetail = await JsonHandler.findOne({
-//       where: { type: AppConst.sabreFlights },
-//     });
-//     const accessToken =
-//       typeof tokenDetail.information === "string"
-//         ? JSON.parse(tokenDetail.information).access_token
-//         : tokenDetail.information.access_token;
-
-//     const endpoint = "https://api.cert.sabre.com/v1/trip/orders/createBooking";
-//     const myHeaders = new Headers();
-//     myHeaders.append("Authorization", `Bearer ${accessToken}`);
-//     myHeaders.append("Content-Type", "application/json");
-//     myHeaders.append("Accept", "application/json");
-
-//     const payload = {
-//       targetPcc: "3GML",
-//       receivedFrom: "Wakanow",
-//       asynchronousUpdateWaitTime: 1000,
-//       agency: {
-//         address: {
-//           street: null,
-//           city: "Sabre",
-//           stateProvince: "Lagos",
-//           postalCode: "Sabre",
-//           countryCode: "NG",
-//           name: "Wakanow",
-//         },
-//         ticketingPolicy: "TODAY",
-//       },
-//       contactInfo: {
-//         emails: ["hello@wakanow.com"],
-//         phones: ["07059647234"],
-//       },
-//       errorHandlingPolicy: [
-//         "HALT_ON_ERROR",
-//         "HALT_ON_INVALID_MINIMUM_CONNECTING_TIME_ERROR",
-//       ],
-//       flightDetails: {
-//         haltOnFlightStatusCodes: ["NO", "NN", "US", "UN", "UU", "LL", "HL"],
-//         flights: [
-//           {
-//             flightNumber: "316",
-//             airlineCode: "XY",
-//             fromAirportCode: "ISB",
-//             toAirportCode: "RUH",
-//             departureDate: "2025-08-12",
-//             departureTime: "04:15",
-//             bookingClass: "Y", // Using T to match Sabre response
-//             flightStatusCode: "NN",
-//             isMarriageGroup: false,
-//           },
-//           {
-//             flightNumber: "219",
-//             airlineCode: "XY",
-//             fromAirportCode: "RUH",
-//             toAirportCode: "DXB",
-//             departureDate: "2025-08-12",
-//             departureTime: "11:50",
-//             bookingClass: "Y", // Using T to match Sabre response
-//             flightStatusCode: "NN",
-//             isMarriageGroup: false,
-//           },
-//         ],
-//         flightPricing: [
-//           {
-//             qualifiers: {
-//               passengersPricing: [
-//                 {
-//                   numberOfpassengers: 1,
-//                   passengerCode: "ADT",
-//                 },
-//               ],
-//             },
-//           },
-//         ],
-//       },
-//       travelers: [
-//         {
-//           givenName: "Issac",
-//           surname: "Newton",
-//           birthDate: "1990-01-01",
-//           passengerCode: "ADT",
-//           identityDocuments: [
-//             {
-//               documentNumber: "PK123456789",
-//               documentType: "PASSPORT",
-//               expiryDate: "2027-12-25",
-//               issuingCountryCode: "PK",
-//               residenceCountryCode: "PK",
-//               givenName: "Issac",
-//               surname: "Newton",
-//               birthDate: "1990-01-01",
-//               gender: "MALE",
-//             },
-//             {
-//               documentType: "SECURE_FLIGHT_PASSENGER_DATA",
-//               givenName: "Issac",
-//               surname: "Newton",
-//               birthDate: "1990-01-01",
-//               gender: "MALE",
-//             },
-//           ],
-//           emails: ["issac@wakanow.com"],
-//           phones: [
-//             {
-//               number: "00966-123456789", // Matching working payload's phone format
-//             },
-//           ],
-//         },
-//       ],
-//       payment: {
-//         formsOfPayment: [
-//           {
-//             type: "CASH",
-//           },
-//         ],
-//       },
-//       remarks: [
-//         {
-//           type: "GENERAL",
-//           alphaCode: "T",
-//           text: "GeneratedFromItinerary_14",
-//         },
-//         {
-//           type: "INVOICE",
-//           text: "S*UD1 1701765172", // Restored * to match working payload
-//         },
-//       ],
-//       otherServices: [
-//         {
-//           airlineCode: "EK",
-//           serviceMessage: "CTCM 00966123456789/EN",
-//         },
-//         {
-//           airlineCode: "EK",
-//           serviceMessage: "CTCE issac//wakanow.com/EN", // Matching working payload's CTCE
-//         },
-//       ],
-      
-//     };
-
-//     console.log("Payload:", JSON.stringify(payload, null, 2)); // Log payload for debugging
-
-//     const requestOptions = {
-//       method: "POST",
-//       headers: myHeaders,
-//       body: JSON.stringify(payload),
-//       redirect: "follow",
-//     };
-
-//     const result = await fetch(endpoint, requestOptions).then((res) => res.json());
-
-//     return response.status(200).json({
-//       status: true,
-//       data: result,
-//     });
-//   } catch (error) {
-//     console.error("Booking Error:", error);
-//     return response.status(500).json({
-//       status: false,
-//       message: "Something Went Wrong",
-//       error: error.message,
-//     });
-//   }
-// }
-
-
-
 createBooking: async (request, response) => {
   try {
+
+      const { error } = bookingFlightSchema.validate(request.body, { abortEarly: false });
+
+        if (error) {
+          return response.status(400).json({
+            success: false,
+            message: "Validation failed",
+            details: error.details.map((d) => d.message),
+          });
+      }
+
     const { passengers, passengerCounts, flights, codeId } = request.body;
     const userId = request.user.id;
     const uuid = uuidv4();

@@ -1,10 +1,20 @@
 const {About , Setting , AboutImage , GeneralSetting} = require('../database/models');
 const fs = require('fs');
 const path =  require('path'); 
+const {updateSettingSchema , updateAboutInformationSchema , update2faSchema} =require('../validations/settingsValidation');
 
 module.exports = {
     updateSetting : async (request, response) => {
         try{
+            const { error } = updateSettingSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
 
             let {primaryColor , secondaryColor , thirdColor , fourthColor , fifthColor , primaryFont , secondaryFont} = request.body
             let settingDetail = await Setting.findOne();
@@ -45,7 +55,15 @@ module.exports = {
     
     updateAboutInformation: async (request, response) => {
         try {
-          
+          const { error } = updateAboutInformationSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
           let upperContent = request.body.upperContent;
           let lowerContent = request.body.lowerContent;
           let aboutInformation = {
@@ -128,6 +146,7 @@ module.exports = {
 
     getAboutSettings : async (request , response ) => {
         try{
+          
             let settings = await About.findOne({ include : { model : AboutImage , as : 'images' , required: false}});
             
             return response.status(200).json({
@@ -146,6 +165,16 @@ module.exports = {
 
     update2fa : async (request ,response )=>{
       try{
+        const { error } = update2faSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
+            
         const { is_enabled } = request.body;
         let generalSetting = await GeneralSetting.findOne({where : {type : '2fa'}});
         if(generalSetting){

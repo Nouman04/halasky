@@ -1,11 +1,20 @@
 const SuspiciousAcitivity = require('../database/models/SuspiciousAcitivity');
 const LogActivity = require('../database/models/LogActivity');
 const Op = require('sequelize');
+const { getMiliciousActivitiesSchema , updateActivityStatusSchema , getAdminActivitiesSchema , getUserActivitiesSchema } =require('../validations/securityAndPrivacyValidation');
 
 module.exports = {
     getMiliciousActivities : async (request, response) => {
         try{
-
+            const { error } = getMiliciousActivitiesSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let userId = request.body.userId;
             let status = request.body.status;
@@ -52,6 +61,15 @@ module.exports = {
     
     updateActivityStatus : async (request , response ) => {
         try{
+            const { error } = updateActivityStatusSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let status = request.body.status;
             let id = request.body.id;
             await SuspiciousAcitivity.update(
@@ -81,6 +99,15 @@ module.exports = {
 
     getAdminActivities : async (request , response ) => {
         try{
+            const { error } = getAdminActivitiesSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let logActivities = await LogActivity.findAll({
                                         include : {
@@ -113,6 +140,15 @@ module.exports = {
 
     getUserActivities : async (request , response ) =>{
         try{
+            const { error } = getUserActivitiesSchema.validate(request.body, { abortEarly: false });
+        
+            if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let logActivities = await LogActivity.findAll({
                                         include : {

@@ -1,10 +1,19 @@
 const { FrequentlyAskQuestion , User}= require('../database/models');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
-
+const {  addFAQSchema , editFAQSchema, deleteFAQSchema } = require('../validations/faqValidation');
 module.exports = {
 
      add : async (request , response ) =>{
             try{
+                const { error} = addFAQSchema.validate(request.body, { abortEarly: false });
+                if (error) {
+                    return response.status(400).json({
+                        status: false,
+                        message: "Validation failed",
+                        errors: error.details.map((err) => err.message),
+                    });
+                }
+
                 let userId = request.body.userId;
                 let question= request.body.question;
                 let answer = request.body.answer;
@@ -34,12 +43,20 @@ module.exports = {
                     error: error.message
                 });
             }
-        },
+    },
     
 
 
     edit : async (request , response ) =>{
         try{
+             const { error} = editFAQSchema.validate(request.body, { abortEarly: false });
+                if (error) {
+                    return response.status(400).json({
+                        status: false,
+                        message: "Validation failed",
+                        errors: error.details.map((err) => err.message),
+                    });
+                }
             let userId = request.body.userId;
             let question= request.body.question;
             let answer = request.body.answer;
@@ -107,6 +124,15 @@ module.exports = {
 
     delete: async (request, response) => {
         try {
+
+            const { error} = deleteFAQSchema.validate(request.body, { abortEarly: false });
+            if (error) {
+            return response.status(400).json({
+                status: false,
+                message: "Validation failed",
+                errors: error.details.map((err) => err.message),
+            });
+            }
             const questionId = request.body.questionId;
     
             await FrequentlyAskQuestion.destroy({

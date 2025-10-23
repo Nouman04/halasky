@@ -15,7 +15,7 @@ router.use( (request ,response ,next)=>{
 
 router.post('/get' ,   flightController.list );
 router.post('/test-list' ,   flightController.testFlightList );
-router.post('/availability' ,   flightController.findAvailability );
+router.post('/availability' ,   flightController.checkAvailability );
 router.post('/generate-pnr' ,   flightController.generatePnr );
 router.post('/airports' ,   flightController.airportList );
 router.post("/alternate-days", flightController.searchAlternateDatesFlights);

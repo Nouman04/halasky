@@ -2,11 +2,22 @@ require('dotenv').config();
 const { Op } = require('sequelize');
 const OpenAI  = require('openai');
 const { AiChat , Chat , User} = require('../database/models');
-
+const { askQuestionValidation , aiMessageSchema , sendMessageSchema , chatMessageSchema } = require('../validations/chatValidation');
 module.exports = {
 
     askQuestion : async (request , response ) =>{
         try{
+            
+        const { error } = askQuestionValidation.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+                return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+                });
+            }
+
             const {question} = request.body;
             const openAiKey = process.env.OPEN_AI_KEY;
             
@@ -53,6 +64,18 @@ module.exports = {
 
     aiMessages : async ( request , response ) => {
         try{
+
+            const { error } = aiMessageSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
+
+
             let { offset } = request.body;
             offset = offset ? parseInt(offset) : 0;
             limit = 50;
@@ -78,12 +101,17 @@ module.exports = {
     },
 
     sendMessage : async (request ,response , io , socketConnectedUser ) => {
-
-        // const { message , username } = request.body;
-        // console.log("-------------------------------------------")
-        // let otherUser = socketConnectedUser.find( suser => suser.username != username );
-        // io.to(otherUser.socketId).emit('recieve-message' , { message , username});
         try {
+            const { error } = chatMessageSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
+
             const { message , send_to }  = request.body;
             const user = request.user;
             userSocketDetail = socketConnectedUser.get(send_to);
@@ -106,8 +134,17 @@ module.exports = {
     },
 
     chatMessages : async (request ,response  ) => {
-
         try{ 
+            const { error } = blogListSchema.validate(request.body, { abortEarly: false });
+                    
+                      if (error) {
+                            return response.status(400).json({
+                            success: false,
+                            message: "Validation failed",
+                            details: error.details.map((d) => d.message),
+                            });
+                        }
+
             let { offset , person_id } = request.body;
             const userId = request.user.id;
             offset = offset ? parseInt(offset) : 0;

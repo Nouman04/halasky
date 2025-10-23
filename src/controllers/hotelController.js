@@ -7,6 +7,7 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const moment = require('moment');
 const transport = require('../config/mailConfig');
+const { hotelSearchSchema , hotelCompareSchema , hotelDetailSchema, hotelImageSchema , rateKeySchema , hotelBookingSchema } =require('../validations/hotelValidation');
 require("dotenv").config();
 
 module.exports = {
@@ -49,6 +50,15 @@ module.exports = {
 
 
   list: async (request, response) => {
+    const { error } = hotelSearchSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+            return response.status(400).json({
+              success: false,
+              message: "Validation failed",
+              details: error.details.map((d) => d.message),
+            });
+        }
     const { checkIn, checkOut, cityCode, countryCode, rooms } = request.body;
     const tokenDetail = await JsonHandler.findOne({
       where: { type: AppConst.sabreFlights },
@@ -144,7 +154,7 @@ module.exports = {
           
           let detail = result.GetHotelAvailRS;
 
-          if(result.status && result.status == 'NotProcessed')
+          if(result.status && (result.status == 'NotProcessed' || result.status == 'Incomplete'))
           {
             return response.status(200).json({
               status: false,
@@ -163,6 +173,7 @@ module.exports = {
               error: appResults.Error
             });
           }
+
 
           if(detail.ApplicationResults.status != "Complete"){
               return response.status(200).json({
@@ -203,6 +214,16 @@ module.exports = {
 
 
 specificList: async (request, response) => {
+  const { error } = hotelCompareSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+            return response.status(400).json({
+              success: false,
+              message: "Validation failed",
+              details: error.details.map((d) => d.message),
+            });
+        }
+
   const { checkIn, checkOut, cityCode, countryCode, rooms, hotelCodes } = request.body;
 
   // Validate hotelCodes
@@ -493,6 +514,16 @@ specificList: async (request, response) => {
   hotelDetail : async ( request , response ) =>{
     try {
 
+      const { error } = hotelDetailSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+            return response.status(400).json({
+              success: false,
+              message: "Validation failed",
+              details: error.details.map((d) => d.message),
+            });
+        }
+
       const { hotelCode , checkIn , checkOut , rooms } = request.body;
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights },
@@ -613,6 +644,16 @@ specificList: async (request, response) => {
   images : async ( request , response ) =>{
     try {
       
+      const { error } = hotelImageSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+            return response.status(400).json({
+              success: false,
+              message: "Validation failed",
+              details: error.details.map((d) => d.message),
+            });
+        }
+
       const { hotelCode } = request.body;
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights },
@@ -686,6 +727,16 @@ specificList: async (request, response) => {
 
   confirmRate : async ( request , response ) =>{
     try {
+
+      const { error } = rateKeySchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+            return response.status(400).json({
+              success: false,
+              message: "Validation failed",
+              details: error.details.map((d) => d.message),
+            });
+        }
       
       const { rateKey , checkIn , checkOut , rooms } = request.body;
       const tokenDetail = await JsonHandler.findOne({
@@ -765,6 +816,17 @@ specificList: async (request, response) => {
 
   createBooking : async ( request , response ) => {
     try{
+
+      const { error } = hotelBookingSchema.validate(request.body, { abortEarly: false });
+        
+          if (error) {
+            return response.status(400).json({
+              success: false,
+              message: "Validation failed",
+              details: error.details.map((d) => d.message),
+            });
+        }
+
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights },
       });

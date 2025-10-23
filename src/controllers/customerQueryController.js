@@ -1,10 +1,30 @@
 const { CustomerQuery , Feedback , User } = require('../database/models')
 const appConst = require('../appConst');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
+const {
+    addCustomerQuerySchema,
+    editQueryValidation,
+    updateStatusValidation,
+    updatePriorityValidation,
+    deleteQueryValidation,
+    listQueryValidation,
+    addFeedbackValidation,
+    updateFeedbackValidation,
+    deleteFeedbackValidation,
+    feedbackListValidation
+} = require('../validations/customerQueryValidation');
 module.exports = {
 
     addQuery : async (request , response) => {
         try{
+            const { error } = addCustomerQuerySchema.validate(request.body, { abortEarly: false });
+        if (error) {
+        return response.status(400).json({
+            status: false,
+            message: "Validation failed",
+            errors: error.details.map((err) => err.message),
+        });
+        }
             let customerId = request.body.userId;
             let subject = request.body.subject;
             let query  = request.body.query;
@@ -41,9 +61,17 @@ module.exports = {
         }
     },
 
-
     editQuery : async (request , response) => {
         try{
+            const { error } = editQueryValidation.validate(request.body, { abortEarly: false });
+            if (error) {
+                return response.status(400).json({
+                    status: false,
+                    message: "Validation failed",
+                    errors: error.details.map((err) => err.message),
+                });
+            }
+
             let subject = request.body.subject;
             let query  = request.body.query;
             let queryId = request.body.queryId;
@@ -76,9 +104,16 @@ module.exports = {
         }
     },
 
-
     updateStatus: async (request , response) => {
         try{
+            const { error } = updateStatusValidation.validate(request.body, { abortEarly: false });
+            if (error) {
+            return response.status(400).json({
+                status: false,
+                message: "Validation failed",
+                errors: error.details.map((err) => err.message),
+            });
+            }
             let status = request.body.status;
             let queryId = request.body.queryId;
             await CustomerQuery.update({
@@ -112,6 +147,15 @@ module.exports = {
 
     updatePriority: async (request , response) => {
         try{
+            const { error } = updatePriorityValidation.validate(request.body, { abortEarly: false });
+        if (error) {
+        return response.status(400).json({
+            status: false,
+            message: "Validation failed",
+            errors: error.details.map((err) => err.message),
+        });
+        }
+
             let priority = request.body.priority;
             let queryId = request.body.queryId;
             await CustomerQuery.update({
@@ -143,6 +187,14 @@ module.exports = {
 
     deleteQuery: async (request, response) => {
         try {
+            const { error } = deleteQueryValidation.validate(request.body, { abortEarly: false });
+            if (error) {
+            return response.status(400).json({
+                status: false,
+                message: "Validation failed",
+                errors: error.details.map((err) => err.message),
+            });
+            }
             const queryId = request.body.queryId;
     
             await CustomerQuery.destroy({
@@ -171,11 +223,17 @@ module.exports = {
             });
         }
     },
-    
-
 
     list : async ( request , response ) => {
         try{
+            const { error } = listQueryValidation.validate(request.body, { abortEarly: false });
+            if (error) {
+            return response.status(400).json({
+                status: false,
+                message: "Validation failed",
+                errors: error.details.map((err) => err.message),
+            });
+            }
            let skip = (parseInt(request.body.pageNo) - 1) * 10;
            let priority = request.body.priority;
            let userId = request.body.userId;
@@ -246,10 +304,16 @@ module.exports = {
         }
     },
 
-
-
     addFeedback: async (request, response) => {
         try {
+            const { error } = addFeedbackValidation.validate(request.body, { abortEarly: false });
+        if (error) {
+        return response.status(400).json({
+            status: false,
+            message: "Validation failed",
+            errors: error.details.map((err) => err.message),
+        });
+        }
             const queryId = request.body.queryId;
             const rating = request.body.rating;
             const feedback = request.body.feedback;
@@ -281,11 +345,17 @@ module.exports = {
         }
     },
 
-
     updateFeedback: async (request, response) => {
         try {
+            const { error } = updateFeedbackValidation.validate(request.body, { abortEarly: false });
+            if (error) {
+            return response.status(400).json({
+                status: false,
+                message: "Validation failed",
+                errors: error.details.map((err) => err.message),
+            });
+            }
             const feedbackId = request.body.feedbackId;
-            // const queryId = request.body.queryId;
             const rating = request.body.rating;
             const feedback = request.body.feedback;
 
@@ -315,10 +385,17 @@ module.exports = {
         }
     },
 
-
-
     deleteFeedback: async (request, response) => {
         try {
+            const { error } = deleteFeedbackValidation.validate(request.body, { abortEarly: false });
+            if (error) {
+            return response.status(400).json({
+                status: false,
+                message: "Validation failed",
+                errors: error.details.map((err) => err.message),
+            });
+            }
+
             const feedbackId = request.body.feedbackId;
     
             await Feedback.destroy({
@@ -348,9 +425,17 @@ module.exports = {
         }
     },
 
-
     feedbackList: async (request, response) => {
         try {
+            const { error } = feedbackListValidation.validate(request.body, { abortEarly: false });
+            if (error) {
+            return response.status(400).json({
+                status: false,
+                message: "Validation failed",
+                errors: error.details.map((err) => err.message),
+            });
+            }
+
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let userId = request.body.userId;
             let attendedBy = request.body.attendedBy;
@@ -397,8 +482,6 @@ module.exports = {
             });
         }
     },
-
-
 
 
 }
