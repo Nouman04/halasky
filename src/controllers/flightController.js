@@ -2030,6 +2030,7 @@ createBooking: async (request, response) => {
         };
       });
 
+      
       // Generate PDF
       const invoiceTemplate = path.join(__dirname, '../public/views/invoice.ejs');
       const pdfData = {
@@ -2167,42 +2168,6 @@ cancelBooking : async (request, response) =>{
   }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   
 }
