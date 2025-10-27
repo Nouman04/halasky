@@ -1540,11 +1540,6 @@ separateFlightList: async (request, response) => {
     fetch( endpoint , requestOptions)
     .then((response) => response.json()) 
     .then(async (result) => {
-
-      return response.status(200).json({
-                  status: false,
-                  message: result,
-                });
    
       let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
 
