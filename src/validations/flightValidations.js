@@ -123,13 +123,31 @@ const availFlightSchema = Joi.object({
   originLocationCode: Joi.string().length(3).uppercase().required().messages({
     "string.length": "Origin location code must be a 3-letter IATA code"
   }),
-  arrivalDateTime: Joi.date().iso().greater(Joi.ref("departureDateTime")).required().messages({
-    "date.greater": "Arrival date must be after departure date"
+  arrivalDateTime: Joi.date().iso().required().custom((value, helpers) => {
+    const { departureDateTime } = helpers.state.ancestors[0];
+
+    // Convert to local date (ignore time & timezone)
+    const dep = new Date(departureDateTime);
+    const arr = new Date(value);
+
+    const depDate = dep.getFullYear() + "-" + (dep.getMonth() + 1) + "-" + dep.getDate();
+    const arrDate = arr.getFullYear() + "-" + (arr.getMonth() + 1) + "-" + arr.getDate();
+
+    // Compare by calendar day only
+    if (new Date(arrDate) < new Date(depDate)) {
+      return helpers.error("date.invalidOrder");
+    }
+
+    return value;
+  }, "Date-only comparison")
+  .messages({
+    "date.invalidOrder": "Arrival date must be on or after the departure date",
   }),
   destinationLocationCode: Joi.string().length(3).uppercase().required().messages({
     "string.length": "Destination location code must be a 3-letter IATA code"
   })
 });
+
 
 const availLegSchema = Joi.object({
   originLocation: Joi.string().length(3).uppercase().required(),
