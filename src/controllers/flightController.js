@@ -564,6 +564,10 @@ module.exports = {
             }
         };
 
+        // return response.status(500).json({
+        //       request: searchRequest,
+        //   });
+
         const requestOptions = {
           method: "POST",
           headers: myHeaders,
