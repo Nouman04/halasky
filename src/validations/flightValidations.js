@@ -184,7 +184,11 @@ const bookingPassengerSchema = Joi.object({
   residenceCountryCode: Joi.string().length(2).uppercase().required(),
   gender: Joi.string().valid("MALE", "FEMALE").required(),
   email: Joi.string().email().required(),
-  phone: Joi.string().pattern(/^[0-9+\- ]+$/).required()
+  phone: Joi.when("type", {
+    is: "ADT",
+    then: Joi.string().pattern(/^[0-9+\- ]+$/).required(),
+    otherwise: Joi.string().pattern(/^[0-9+\- ]+$/).optional().allow("", null)
+  })
 });
 
 const bookingPassengerCountSchema = Joi.object({
