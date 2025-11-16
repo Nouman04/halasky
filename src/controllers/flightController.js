@@ -139,13 +139,21 @@ module.exports = {
                         "PreferLevel": "Preferred"
                       }
                     ],
-                    "TPA_Extensions": {},
+                    "TPA_Extensions": {
+                      "DataSources": {
+                        "NDC": "Enable",
+                        // "ATPCO": "Disable",
+                        // "LCC": "Disable"
+                      },
+                      "PreferNDCSourceOnTie": {
+                        "Value": true
+                      }
+                    },
                      "Baggage": {
-                      "Description": true,
-                      "RequestType": "A",
-                      "CarryOnInfo":true
-                      
-                  },
+                        "Description": true,
+                        "RequestType": "A",
+                        "CarryOnInfo":true
+                      },
                   },
                   "TPA_Extensions": {
                     "IntelliSellTransaction": {
@@ -2046,7 +2054,7 @@ createBooking: async (request, response) => {
         flights: flightsDetail,
       };
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      // const browser = await puppeteer.launch();
+      //const browser = await puppeteer.launch();
       const browser = await puppeteer.launch({
                                         headless: true,
                                         args: [
@@ -2129,9 +2137,9 @@ cancelBooking : async (request, response) =>{
     myHeaders.append("Authorization", `Bearer ${accessToken}`);
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Accept", "application/json");
-
+   
     const bookedFlight = await FlightBooking.findOne({ where : { pnr : request.body.pnr}});
-
+    
     if(bookedFlight){
       const payload = {
         "confirmationId": request.body.pnr,
@@ -2148,11 +2156,31 @@ cancelBooking : async (request, response) =>{
       };
 
       
-
+      // await FlightBooking.update(
+      //   { status : 0 },
+      //   { where : {pnr : request.body.pnr }}
+      // )
+    
 
       const result = await fetch(endpoint, requestOptions).then((res) => res.json());
-      return response.status(200).json({
+
+      if(result.booking){
+        await FlightBooking.update(
+          { status : AppConst.bookingCanceled },
+          { where : {pnr : request.body.pnr }}
+        );
+
+        return response.status(200).json({
                     status: true,
+                    message : 'Booking canceled successfully',
+                     data : result,
+                });
+      }
+      
+
+      return response.status(200).json({
+                    status: false,
+                    message : 'Something Went wrong while cancel booking',
                      data : result,
                 });
 
@@ -2162,14 +2190,14 @@ cancelBooking : async (request, response) =>{
 
       
 
-              } catch (error) {
-    console.error("Booking Cancelation Error:", error);
-    return response.status(500).json({
-      status: false,
-      message: "Something Went Wrong",
-      error: error.message,
-    });
-  }
+    } catch (error) {
+    
+      return response.status(500).json({
+        status: false,
+        message: "Something Went Wrong",
+        error: error.message,
+      });
+    }
 
 }
 
