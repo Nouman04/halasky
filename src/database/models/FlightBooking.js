@@ -29,14 +29,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 0,
     },
-    pnr: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    amount: {
-      type: DataTypes.DOUBLE(10, 2),
-      allowNull: false,
-    },
+    // pnr: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    // },
+    // amount: {
+    //   type: DataTypes.DOUBLE(10, 2),
+    //   allowNull: false,
+    // },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,

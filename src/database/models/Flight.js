@@ -11,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    booking_status: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+    },
     origin: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -32,6 +36,14 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 0
     },
+    pnr: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    amount : {
+      type: DataTypes.DOUBLE(10, 2),
+      allowNull: false,
+    }
   }, {
     tableName: 'flights',
     timestamps: false,

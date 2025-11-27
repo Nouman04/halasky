@@ -82,7 +82,7 @@ module.exports = {
     });
 
     try {
-      let endpoint = "https://api.cert.sabre.com/v3.0.0/get/hotelavail";
+      let endpoint = "https://api.cert.sabre.com/v4.0.0/get/hotelavail";
 
       const myHeaders = new Headers();
       myHeaders.append("Authorization", `Bearer ${accessToken}`);

@@ -47,14 +47,14 @@ module.exports = {
         type : Sequelize.DataTypes.BOOLEAN,
         defaultValue: 0
       },
-      pnr : {
-        type : Sequelize.DataTypes.STRING,
-        allowNull: false
-      },
-      amount : {
-        type : Sequelize.DataTypes.DOUBLE(10 , 2),
-        allowNull: false
-      },
+      // pnr : {
+      //   type : Sequelize.DataTypes.STRING,
+      //   allowNull: false
+      // },
+      // amount : {
+      //   type : Sequelize.DataTypes.DOUBLE(10 , 2),
+      //   allowNull: false
+      // },
       created_at : {
         type : Sequelize.DATE,
         allowNull : false,

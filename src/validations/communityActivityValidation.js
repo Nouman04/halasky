@@ -275,23 +275,39 @@ const submitPollAnswerValidationSchema = Joi.object({
 
 
 const toggleActivityActionSchema = Joi.object({
-      activityId: Joi.number().integer().positive().required().messages({
-        "any.required": "Activity ID is required",
-        "number.base": "Activity ID must be a valid number",
-      }),
-      activityType: Joi.string()
-        .required()
-        .messages({
-          "any.required": "Activity type is required",
-          "any.only": "Activity type must be one of: spam, saved, liked",
-        }),
-      value: Joi.number()
-        .required()
-        .messages({
-          "any.required": "Value is required",
-          "any.only": "Value must be either 0 (remove) or 1 (add)",
-        }),
-    });
+  activityId: Joi.number().integer().positive().required().messages({
+    "any.required": "Activity ID is required",
+    "number.base": "Activity ID must be a valid number",
+  }),
+
+  activityType: Joi.string()
+    .valid(
+      "is_spam",
+      "is_saved",
+      "liked",
+      "heart",
+      "surprice",
+      "angry",
+      "happy",
+      "sad",
+      "shock"
+    )
+    .required()
+    .messages({
+      "any.required": "Activity type is required",
+      "any.only":
+        "Activity type must be one of: is_spam, is_saved, liked, heart, surprice, angry, happy, sad, shock",
+    }),
+
+  value: Joi.number()
+    .valid(0, 1)
+    .required()
+    .messages({
+      "any.required": "Value is required",
+      "any.only": "Value must be either 0 (remove) or 1 (add)",
+    }),
+});
+
 
 const getUserActivitiesSchema = Joi.object({
       pageNo: Joi.number()

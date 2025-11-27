@@ -21,6 +21,10 @@ const appConst = {
     bookingPending : 0,
     bookingCompleted: 1,
     bookingCanceled : 2,
+    flightBooked : 1,
+    flightPartiallyBooked : 2,
+    flightCanceled : 3,
+    flightPartiallyCanceled : 4
 }
 
 module.exports = appConst;

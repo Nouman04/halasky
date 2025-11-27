@@ -318,7 +318,67 @@ module.exports = {
                                                       AND aa.activity_type = 'liked'
                                                   )`),
                                                   'total_likes'
-                                                ]
+                                                ],
+                                                [
+                                                  Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.activity_type = 'heart'
+                                                  )`),
+                                                  'total_hearts'
+                                                ],
+                                                [
+                                                  Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.activity_type = 'surprice'
+                                                  )`),
+                                                  'total_surprice'
+                                                ],
+                                                [
+                                                  Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.activity_type = 'angry'
+                                                  )`),
+                                                  'total_angry'
+                                                ],
+                                                [
+                                                  Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.activity_type = 'happy'
+                                                  )`),
+                                                  'total_happy'
+                                                ],
+                                                [
+                                                  Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.activity_type = 'sad'
+                                                  )`),
+                                                  'total_sad'
+                                                ],
+                                                [
+                                                  Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.activity_type = 'shock'
+                                                  )`),
+                                                  'total_shock'
+                                                ],
                                               ]
                                             },
                                         include: [
@@ -782,7 +842,7 @@ module.exports = {
 
   toggleActivityAction: async (request, response) => {
     try {
-
+      
       const { error } = toggleActivityActionSchema.validate(request.body, { abortEarly: false });
       if (error) {
         return response.status(400).json({
@@ -795,10 +855,10 @@ module.exports = {
       const userId = request.user.id;
       const { activityId, activityType, value } = request.body;
      
-      const validActions = ['spam', 'saved', 'liked'];
-      if (!validActions.includes(activityType)) {
-        return response.status(400).json({ message: "Invalid action type" });
-      }
+      // const validActions = ['spam', 'saved', 'liked'];
+      // if (!validActions.includes(activityType)) {
+      //   return response.status(400).json({ message: "Invalid action type" });
+      // }
       
       const whereClause = {
         user_id: userId,

@@ -20,6 +20,10 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
+      booking_status : {
+        type: Sequelize.DataTypes.BOOLEAN,
+        allowNull: false,
+      },
       origin: {
         type: Sequelize.DataTypes.STRING,
         allowNull: false,
@@ -41,6 +45,14 @@ module.exports = {
         allowNull: false,
         defaultValue: 0
       },
+      pnr: {
+        type: Sequelize.DataTypes.STRING,
+        allowNull: true,
+      },
+      amount : {
+        type: Sequelize.DataTypes.DOUBLE(10, 2),
+        allowNull: false,
+      }
     })
   },
 

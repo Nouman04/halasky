@@ -940,347 +940,6 @@ module.exports = {
 
 
 
-///////////////////////////////////////////////////////////////////////////////
-testFlightList : async (request ,response)=>{
-        const { destinationList , passengerList , travelClass } = request.body;
-        const travelJson = destinationList.map( detail => {
-          return {
-                  "DepartureDateTime": detail.travelDate,
-                  "OriginLocation": {
-                    "LocationCode": detail.DepartureAirport
-                  },
-                  "DestinationLocation": {
-                    "LocationCode": detail.ArrivalAirport
-                  }
-                }
-        }); 
-
-        const passengerJson = passengerList.filter( passenger => {
-                                                      return passenger.total > 0;
-                                                    }).map(passenger => {
-                                                      return {
-                                                            "Code": passenger.type,
-                                                            "Quantity": passenger.total
-                                                          }
-                                                    });
-   
-        
-        const tokenDetail = await JsonHandler.findOne({
-            where : {type : AppConst.sabreFlights}
-        });
-
-        const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
-        
-        try{
-            let endpoint = 'https://api.cert.sabre.com/v5/offers/shop';
-            
-    
-            const myHeaders = new Headers();
-            myHeaders.append("Authorization", `Bearer ${accessToken}`);
-            myHeaders.append("Content-Type", "application/json");
-            myHeaders.append("Accept", "application/json");
-
-            const searchRequest = {
-                "OTA_AirLowFareSearchRQ": {
-                  "Version": "5",
-                  "POS": {
-                    "Source": [
-                      {
-                        "PseudoCityCode": "3GML",
-                        "RequestorID": {
-                          "Type": "1",
-                          "ID": "1",
-                          "CompanyName": {
-                            "Code": "TN"
-                          }
-                        }
-                      }
-                    ]
-                  },
-                  "OriginDestinationInformation": travelJson,
-                  "TravelerInfoSummary": {
-                    "AirTravelerAvail": [
-                      {
-                        "PassengerTypeQuantity": passengerJson
-                      }
-                    ]
-                  },
-                  "TravelPreferences": {
-                    "CabinPref": [
-                      {
-                        "Cabin": travelClass, // Y=Economy, C=Business, F=First
-                        "PreferLevel": "Preferred"
-                      }
-                    ],
-                    "TPA_Extensions": {}
-                  },
-                  "TPA_Extensions": {
-                    "IntelliSellTransaction": {
-                      "RequestType": {
-                        "Name": "50ITINS"
-                      }
-                    },
-                    "RichContent": {
-                      "FlightAmenities": true, // Moved here to request amenities
-                    }
-                  }
-                }
-              }
-    
-            const requestOptions = {
-                method: "POST",
-                headers: myHeaders,
-                body: JSON.stringify(searchRequest),
-                redirect: "follow"
-            };
-
-    
-            fetch( endpoint , requestOptions)
-            .then((response) => response.json()) 
-            .then(async (result) => {
-              //new code starts here
-              //return response.status(200).json(result);
-              if(result.status == "NotProcessed")
-              {
-                return response.status(500).json({
-                    status: false,
-                    message: result.message,
-                    error: result.errorCode,
-                }); 
-              }
-
-              //return response.status(200).json(result);
-              //return response.status(200).json(result.groupedItineraryResponse.itineraryGroups[0].itineraries[0])
-              let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
-
-              if(!foundItenararies){
-                return response.status(200).json({
-                  status: false,
-                  message: "No flight found.",
-                });
-              }
-
-
-
-
-        let flightAmenities = result.groupedItineraryResponse.flightAmenities;
-        let itineraryGroups = result.groupedItineraryResponse.itineraryGroups;
-        let legsInformation = result.groupedItineraryResponse.legDescs;
-        let baggageDescs = result.groupedItineraryResponse.baggageAllowanceDescs;
-        let taxDescs= result.groupedItineraryResponse.taxDescs;
-        let taxSummaryDescs = result.groupedItineraryResponse.taxSummaryDescs;
-        let scheduleDescs = result.groupedItineraryResponse.scheduleDescs;
-        let fareComponentDescs = result.groupedItineraryResponse.fareComponentDescs;
-        let obFeeDescs = result.groupedItineraryResponse.obFeeDescs ? result.groupedItineraryResponse.obFeeDescs : [];
-        let mappedLegs = Object.fromEntries(legsInformation.map(leg => [leg.id , leg]));
-        let mappedSchedule = Object.fromEntries(scheduleDescs.map(schedule => [schedule.id , schedule]));
-        let mappedBaggages = Object.fromEntries(baggageDescs.map(baggage => [baggage.id , baggage]));
-        let mappedTax = Object.fromEntries(taxDescs.map(tax => [tax.id , tax]));
-        let mappedTaxSummary = Object.fromEntries(taxSummaryDescs.map(taxSummary => [taxSummary.id , taxSummary]));
-        let mappedFareComponent = Object.fromEntries(fareComponentDescs.map(fareComponent => [fareComponent.id , fareComponent]));
-        let mappedObFees = Object.fromEntries(obFeeDescs.map(obFee => [obFee.id , obFee]));
-        let mappedEntertainment = flightAmenities.entertainment ? Object.fromEntries(flightAmenities.entertainment.map( entertainment => [entertainment.id , entertainment])) : [];
-        let mappedFood = flightAmenities.food ? Object.fromEntries(flightAmenities.food.map( food => [food.id , food])) : [];
-        let mappedLayout = flightAmenities.layout ? Object.fromEntries(flightAmenities.layout.map( layout => [layout.id , layout])) : [];
-        let mappedPower = flightAmenities.power ? Object.fromEntries(flightAmenities.power.map( power => [power.id , power])) : [];
-        let mappedSeat = flightAmenities.seat ? Object.fromEntries(flightAmenities.seat.map( seat => [seat.id , seat])) : [];
-        let mappedWifi = flightAmenities.wifi ? Object.fromEntries(flightAmenities.wifi.map( wifi => [wifi.id , wifi])) : [];
-
-        let itineraryGroupDetail = [];
-       
-    //    console.log(itineraryGroups);
-    //     return;
-       itineraryGroups.forEach( group => {
-
-            let groupDescription = group.groupDescription;
-            let groupItineraries = group.itineraries;
-            
-            let itinerariesList = groupItineraries.map(gi => {
-        let priceSource = gi.pricingSource;
-        let legIds = (gi.legs || []).map(leg => leg.ref);
-
-        let legDetail = legIds.map(leg => {
-            let legInformation = {};
-            let legSchedule = mappedLegs?.[leg]?.schedules || [];
-            let scheduleList = legSchedule.map(ls => mappedSchedule?.[ls.ref]);
-            legInformation.id = leg;
-            legInformation.schedule = scheduleList;
-
-            return legInformation;
-        });
-
-        let priceInformationList = gi.pricingInformation || [];
-        let priceDetail = [];
-        let segmentAmenitiesList = [];
-        let newAmenities = [];
-
-        priceInformationList.forEach(pi => {
-            let price = {};
-            price.priceSubSource = pi.pricingSubsource;
-            price.distributionModel = pi.distributionModel;
-            price.lastTicketDate = pi.fare?.lastTicketDate;
-            price.lastTicketTime = pi.fare?.lastTicketTime;
-            price.totalFareDetail = pi.fare?.totalFare;
-
-            // passenger list code starts here
-            price.passengerList = pi.fare?.passengerInfoList?.map(passenger => {
-                let passengerDetail = {};
-                passengerDetail.type = passenger.passengerInfo?.passengerType;
-                passengerDetail.total = passenger.passengerInfo?.passengerNumber;
-                passengerDetail.refundable = passenger.passengerInfo?.refundable;
-                passengerDetail.nonRefundable = passenger.passengerInfo?.nonRefundable;
-                let passengerFareComponentList = passenger.passengerInfo?.fareComponents || [];
-
-                // new amenities code
-                let namenitiesDetail = {};
-                namenitiesDetail.passengerType = passenger.passengerInfo?.passengerType;
-                namenitiesDetail.scheduleDetail = [];
-
-                // passenger fare components
-                passengerDetail.FareComponents = passengerFareComponentList.map(pfc => {
-                    let passengerScheduleList = {};
-                    passengerScheduleList.beginAirport = pfc.beginAirport;
-                    passengerScheduleList.endAirport = pfc.endAirport;
-                    passengerScheduleList.segments = [];
-
-                    let segmentList = pfc.segments || [];
-                    let segmentAmenities = [];
-
-                    segmentList.forEach((segment, index) => {
-                        let amenitiesList = segment?.segment?.flightAmenities || [];
-                        amenitiesList.forEach(eachAmenity => {
-                            let amenitiesInformation = [];
-                            for (const key in eachAmenity) {
-                                switch (key) {
-                                    case "entertainmentRef":
-                                        amenitiesInformation.push({ key: "entertainment", ...(mappedEntertainment?.[eachAmenity[key]] || {}) });
-                                        break;
-                                    case "foodRef":
-                                        amenitiesInformation.push({ key: "food", ...(mappedFood?.[eachAmenity[key]] || {}) });
-                                        break;
-                                    case "layoutRef":
-                                        amenitiesInformation.push({ key: "layout", ...(mappedLayout?.[eachAmenity[key]] || {}) });
-                                        break;
-                                    case "powerRef":
-                                        amenitiesInformation.push({ key: "power", ...(mappedPower?.[eachAmenity[key]] || {}) });
-                                        break;
-                                    case "seatRef":
-                                        amenitiesInformation.push({ key: "seat", ...(mappedSeat?.[eachAmenity[key]] || {}) });
-                                        break;
-                                    case "wifiRef":
-                                        amenitiesInformation.push({ key: "wifi", ...(mappedWifi?.[eachAmenity[key]] || {}) });
-                                        break;
-                                }
-                            }
-
-                            passengerScheduleList.segments.push({ segmentIndex: (index + 1), amenitiesList: amenitiesInformation });
-                            segmentAmenities.push(amenitiesInformation);
-                        });
-                    });
-
-                    namenitiesDetail.scheduleDetail.push(passengerScheduleList);
-                    segmentAmenitiesList.push({ segments: segmentAmenities });
-
-                    let fareComponentDetail = mappedFareComponent?.[pfc.ref];
-
-                    return {
-                        beginAirport: pfc.beginAirport,
-                        endAirport: pfc.endAirport,
-                        segments: pfc.segments,
-                        fareComponentDetail: fareComponentDetail
-                    };
-                });
-
-                // passenger taxes
-                passengerDetail.taxes = (passenger.passengerInfo?.taxes || []).map(tax => mappedTax?.[tax.ref]);
-                passengerDetail.taxSummary = (passenger.passengerInfo?.taxSummaries || []).map(summary => mappedTaxSummary?.[summary.ref]);
-                passengerDetail.obFees = (passenger.passengerInfo?.obFees || []).map(of => mappedObFees?.[of.ref]);
-
-                passengerDetail.baggageInformation = (passenger.passengerInfo?.baggageInformation || []).map(bi => {
-                    return {
-                        baggageProvision: bi.provisionType,
-                        airlineCode: bi.airlineCode,
-                        segments: bi.segments,
-                        detail: mappedBaggages?.[bi.allowance?.ref]
-                    };
-                });
-
-                passengerDetail.currencyConversion = passenger.passengerInfo?.currencyConversion;
-                passengerDetail.passengerTotalFare = passenger.passengerInfo?.passengerTotalFare;
-
-                newAmenities.push(namenitiesDetail);
-
-                return passengerDetail;
-            }) || [];
-
-            priceDetail.push(price);
-        });
-
-        return {
-            priceSource: priceSource,
-            legIds: legIds,
-            legList: legDetail,
-            passengerPriceDetail: priceDetail,
-            amenities: segmentAmenitiesList,
-            amenities1: newAmenities
-        };
-    });
-
-            itineraryGroupDetail.push({ description : groupDescription , itinerariesList : itinerariesList });
-       });
-
-
-       //new code starts here
-       let amounts = [], transitsAmount = [];
-       let minimumAmount =null, maximumAmount = null;
-       itineraryGroupDetail.forEach( group => {
-
-          group.itinerariesList.forEach( itenerary => {
-            let legs = itenerary.legList //array
-            let passengerPriceDetail = itenerary.passengerPriceDetail; // array
-
-              passengerPriceDetail.forEach( priceDetail => {
-
-                let totalFareDetail = priceDetail.totalFareDetail;
-                  amounts.push(totalFareDetail.totalPrice);
-
-              });
-
-          })
-
-       });
-
-       //new code ends here
-       minimumAmount = Math.min(...amounts);
-       maximumAmount = Math.max(...amounts);
-      
-                return response.status(200).json({
-                    status: true,
-                     data : itineraryGroupDetail[0].itinerariesList[0]
-                });
-            })
-            .catch((error) => {
-                return response.status(500).json({
-                    status: false,
-                    message: 'Something Went Wrong',
-                    error: error.message,
-                });
-            });
-
-
-        } catch (error){
-            return response.status(500).json({
-                status: false,
-                message: 'Something Went Wrong',
-                error: error.message,
-            });
-        }
-
-    },
-//////////////////////////////////////////////////////////////////////////////
-
-
-
 
 separateFlightList: async (request, response) => {
   const { destinationList, passengerList, travelClass } = request.body;
@@ -1758,7 +1417,7 @@ separateFlightList: async (request, response) => {
 },
 
 
-createBooking: async (request, response) => {
+createBookingTest: async (request, response) => {
   try {
 
       const { error } = bookingFlightSchema.validate(request.body, { abortEarly: false });
@@ -2120,10 +1779,246 @@ createBooking: async (request, response) => {
 
 
 
-cancelBooking : async (request, response) =>{
+// cancelBooking : async (request, response) =>{
 
+//   try {
+//     // Get authentication token
+//     const tokenDetail = await JsonHandler.findOne({
+//       where: { type: AppConst.sabreFlights },
+//     });
+//     const accessToken =
+//       typeof tokenDetail.information === "string"
+//         ? JSON.parse(tokenDetail.information).access_token
+//         : tokenDetail.information.access_token;
+
+//     const endpoint = "https://api.cert.platform.sabre.com/v1/trip/orders/cancelBooking";
+//     const myHeaders = new Headers();
+//     myHeaders.append("Authorization", `Bearer ${accessToken}`);
+//     myHeaders.append("Content-Type", "application/json");
+//     myHeaders.append("Accept", "application/json");
+   
+//     const bookedFlight = await FlightBooking.findOne({ where : { pnr : request.body.pnr}});
+    
+//     if(bookedFlight){
+//       const payload = {
+//         "confirmationId": request.body.pnr,
+//         "cancelAll": true,
+//         "retrieveBooking": true,
+//         "targetPcc": "3GML",
+//       }
+
+//       const requestOptions = {
+//         method: "POST",
+//         headers: myHeaders,
+//         body: JSON.stringify(payload),
+//         redirect: "follow",
+//       };
+
+      
+//       // await FlightBooking.update(
+//       //   { status : 0 },
+//       //   { where : {pnr : request.body.pnr }}
+//       // )
+    
+
+//       const result = await fetch(endpoint, requestOptions).then((res) => res.json());
+
+//       if(result.booking){
+//         await FlightBooking.update(
+//           { status : AppConst.bookingCanceled },
+//           { where : {pnr : request.body.pnr }}
+//         );
+
+//         return response.status(200).json({
+//                     status: true,
+//                     message : 'Booking canceled successfully',
+//                      data : result,
+//                 });
+//       }
+      
+
+//       return response.status(200).json({
+//                     status: false,
+//                     message : 'Something Went wrong while cancel booking',
+//                      data : result,
+//                 });
+
+//     }
+
+  
+
+      
+
+//     } catch (error) {
+    
+//       return response.status(500).json({
+//         status: false,
+//         message: "Something Went Wrong",
+//         error: error.message,
+//       });
+//     }
+
+// },
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+cancelBooking: async (request, response) => {
   try {
-    // Get authentication token
+    // 1. Fetch access token
+    const tokenDetail = await JsonHandler.findOne({
+      where: { type: AppConst.sabreFlights },
+    });
+
+    const accessToken =
+      typeof tokenDetail.information === "string"
+        ? JSON.parse(tokenDetail.information).access_token
+        : tokenDetail.information.access_token;
+
+    const headers = {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+    };
+
+    // 2. Fetch booking using UUID
+    const booking = await FlightBooking.findOne({
+      where: { uuid: request.body.uuid },
+    });
+
+    if (!booking) {
+      return response.status(404).json({
+        status: false,
+        message: "Booking not found",
+      });
+    }
+
+    // 3. Fetch all flights for this booking
+    const flights = await Flight.findAll({
+      where: { flight_booking_id: booking.id },
+    });
+
+    if (!flights.length) {
+      return response.status(404).json({
+        status: false,
+        message: "No flights found for this booking",
+      });
+    }
+
+    const endpoint =
+      "https://api.cert.platform.sabre.com/v1/trip/orders/cancelBooking";
+
+    let cancelSummary = [];
+
+    // Track results for status logic
+    let totalFlights = flights.length;
+    let canceledCount = 0;
+
+    // 4. Cancel each flight
+    for (const f of flights) {
+      if (!f.pnr) {
+        cancelSummary.push({
+          flightId: f.id,
+          pnr: null,
+          canceled: false,
+          message: "PNR not found for this flight",
+        });
+        continue;
+      }
+
+      const payload = {
+        confirmationId: f.pnr,
+        cancelAll: true,
+        retrieveBooking: true,
+        targetPcc: "3GML",
+      };
+
+      const requestOptions = {
+        method: "POST",
+        headers,
+        body: JSON.stringify(payload),
+      };
+
+      const result = await fetch(endpoint, requestOptions).then((res) =>
+        res.json()
+      );
+
+      if (result.booking) {
+        // update flight booking status
+        await Flight.update(
+          { booking_status: 0 },
+          { where: { id: f.id } }
+        );
+
+        canceledCount++;
+
+        cancelSummary.push({
+          pnr: f.pnr,
+          canceled: true,
+          message: "Flight canceled successfully",
+          sabreResponse: result,
+        });
+      } else {
+        cancelSummary.push({
+          pnr: f.pnr,
+          canceled: false,
+          message: "Cancellation failed",
+          sabreResponse: result,
+        });
+      }
+    }
+
+    // 5. Update main booking status
+    if (canceledCount === totalFlights) {
+      // All flights canceled
+      await FlightBooking.update({ status: 4 } , {where : {uuid : request.body.uuid}});
+    } else if (canceledCount > 0 && canceledCount < totalFlights) {
+      // Partial cancellation
+      await FlightBooking.update({ status: 3 } , {where : {uuid : request.body.uuid}});
+    } 
+
+    return response.status(200).json({
+      status: true,
+      message: "Cancellation process completed",
+      summary: cancelSummary,
+      bookingStatus: booking.status,
+    });
+
+  } catch (error) {
+    return response.status(500).json({
+      status: false,
+      message: "Something Went Wrong",
+      error: error.message,
+    });
+  }
+},
+
+
+
+
+createBooking: async (request, response) => {
+  try {
+    const { error } = bookingFlightSchema.validate(request.body, { abortEarly: false });
+    if (error) {
+      return response.status(400).json({
+        success: false,
+        message: "Validation failed",
+        details: error.details.map((d) => d.message),
+      });
+    }
+
+    const { passengers, passengerCounts, flights, codeId } = request.body;
+    const userId = request.user.id;
+
+    // Preprocess static data (same for all bookings)
     const tokenDetail = await JsonHandler.findOne({
       where: { type: AppConst.sabreFlights },
     });
@@ -2132,74 +2027,497 @@ cancelBooking : async (request, response) =>{
         ? JSON.parse(tokenDetail.information).access_token
         : tokenDetail.information.access_token;
 
-    const endpoint = "https://api.cert.platform.sabre.com/v1/trip/orders/cancelBooking";
     const myHeaders = new Headers();
     myHeaders.append("Authorization", `Bearer ${accessToken}`);
     myHeaders.append("Content-Type", "application/json");
     myHeaders.append("Accept", "application/json");
-   
-    const bookedFlight = await FlightBooking.findOne({ where : { pnr : request.body.pnr}});
-    
-    if(bookedFlight){
-      const payload = {
-        "confirmationId": request.body.pnr,
-        "cancelAll": true,
-        "retrieveBooking": true,
-        "targetPcc": "3GML",
-      }
 
-      const requestOptions = {
-        method: "POST",
-        headers: myHeaders,
-        body: JSON.stringify(payload),
-        redirect: "follow",
+    const endpoint = "https://api.cert.sabre.com/v1/trip/orders/createBooking";
+
+    // // Map passengers once (used for every flight booking)
+    const travelerList = passengers.map((passenger) => {
+      let traveler = {
+        givenName: passenger.firstname,
+        surname: passenger.lastname,
+        birthDate: passenger.birthDate,
+        passengerCode: passenger.type,
       };
 
-      
-      // await FlightBooking.update(
-      //   { status : 0 },
-      //   { where : {pnr : request.body.pnr }}
-      // )
-    
-
-      const result = await fetch(endpoint, requestOptions).then((res) => res.json());
-
-      if(result.booking){
-        await FlightBooking.update(
-          { status : AppConst.bookingCanceled },
-          { where : {pnr : request.body.pnr }}
-        );
-
-        return response.status(200).json({
-                    status: true,
-                    message : 'Booking canceled successfully',
-                     data : result,
-                });
+      if (passenger.type !== "INF") {
+        traveler.identityDocuments = [
+          {
+            documentNumber: passenger.passport,
+            documentType: "PASSPORT",
+            expiryDate: passenger.expiryDate,
+            issuingCountryCode: passenger.issuingCountryCode || "PK",
+            residenceCountryCode: passenger.residenceCountryCode || "PK",
+            givenName: passenger.firstname,
+            surname: passenger.lastname,
+            birthDate: passenger.birthDate,
+            gender: passenger.gender || "MALE",
+          },
+          {
+            documentType: "SECURE_FLIGHT_PASSENGER_DATA",
+            givenName: passenger.firstname,
+            surname: passenger.lastname,
+            birthDate: passenger.birthDate,
+            gender: passenger.gender || "MALE",
+          },
+        ];
+        traveler.emails = [passenger.email || `${passenger.firstname.toLowerCase()}@example.com`];
+        traveler.phones = [
+          {
+            number: passenger.phone || "00966-123456789",
+          },
+        ];
       }
-      
 
-      return response.status(200).json({
-                    status: false,
-                    message : 'Something Went wrong while cancel booking',
-                     data : result,
-                });
+      return traveler;
+    });
 
+    const contactList = passengers
+      .filter((p) => p.type === "ADT")
+      .map((p) => ({
+        emails: [p.email || `${p.firstname.toLowerCase()}@example.com`],
+        phones: [p.phone || "00966-123456789"],
+      }));
+
+    const countList = passengerCounts.map((pc) => ({
+      passengerCode: pc.type,
+      numberOfpassengers: pc.total,
+    }));
+
+    const contactInfo = contactList[0] || { emails: ["hello@wakanow.com"], phones: ["07059647234"] };
+
+const bookingUuid = uuidv4();
+// Prepare all payloads first
+const bookingPromises = flights.map(async (flight) => {
+  
+
+  const flightList = flight.segments.map((segment) => ({
+    flightNumber: String(segment.number),
+    airlineCode: segment.code,
+    fromAirportCode: segment.origin,
+    toAirportCode: segment.destination,
+    departureDate: segment.departureDate,
+    departureTime: segment.departureTime,
+    bookingClass: "Y",
+    flightStatusCode: "NN",
+    isMarriageGroup: false,
+  }));
+
+  const payload = {
+    targetPcc: "3GML",
+    receivedFrom: "Wakanow",
+    asynchronousUpdateWaitTime: 1000,
+    agency: {
+      address: {
+        city: "Sabre",
+        stateProvince: "Lagos",
+        postalCode: "Sabre",
+        countryCode: "NG",
+        name: "Wakanow",
+      },
+      ticketingPolicy: "TODAY",
+    },
+    contactInfo,
+    errorHandlingPolicy: [
+      "HALT_ON_ERROR",
+      "HALT_ON_INVALID_MINIMUM_CONNECTING_TIME_ERROR",
+    ],
+    flightDetails: {
+      haltOnFlightStatusCodes: ["NO", "NN", "US", "UN", "UU", "LL", "HL"],
+      flights: flightList,
+      flightPricing: [
+        {
+          qualifiers: {
+            passengersPricing: countList,
+          },
+        },
+      ],
+    },
+    travelers: travelerList,
+    payment: {
+      formsOfPayment: [{ type: "CASH" }],
+    },
+    remarks: [
+      { type: "GENERAL", alphaCode: "T", text: "GeneratedFromItinerary_14" },
+      { type: "INVOICE", text: bookingUuid },
+    ],
+  };
+
+  const requestOptions = {
+    method: "POST",
+    headers: myHeaders,
+    body: JSON.stringify(payload),
+    redirect: "follow",
+  };
+
+  try {
+      const res = await fetch(endpoint, requestOptions);
+      const result = await res.json();
+      return { flight, payload, result, success: true };
+    } catch (error) {
+      return { flight, payload, result: null, success: false, error: error.message };
     }
+});
+
+  const bookingResults = await Promise.all(bookingPromises);
+
+  // return response.status(200).json({ data : bookingResults});
+
+  // 1. Create master booking entry
+  // const bookingGroup = await FlightBooking.create({
+  //   user_id: userId,
+  //   uuid: bookingUuid,
+  //   is_applied_code: codeId ? 1 : 0,
+  //   status: 1,
+  //   codeId: codeId || null,
+  // });
+
+  // // 2. Store passengers ONCE
+  // await Promise.all(
+  //   passengers.map((passenger) => {
+  //     return Passenger.create({
+  //       flight_booking_id: bookingGroup.id,
+  //       firstname: passenger.firstname,
+  //       lastname: passenger.lastname,
+  //       phone: passenger.phone || null,
+  //       type: passenger.type,
+  //       passport: passenger.passport || null,
+  //     });
+  //   })
+  // );
+
+  // // 3. Store each flight & its segments
+  // const dbResults = await Promise.all(
+  //   bookingResults.map(async (r, idx) => {
+  //     const isBooked = r.result && r.result.confirmationId;
+  //     const PNR = isBooked ? r.result.confirmationId : null;
+  //     const fareInfo = isBooked ? r.result.booking.fares[0]?.totals || {} : {};
+  //     const totalAmount = isBooked ? fareInfo.total || 0 : 0;
+
+  //     // Create flight record
+  //     const flightRecord = await Flight.create({
+  //       booking_id: bookingGroup.id,
+  //       origin: r.flight.description.departure_location,
+  //       destination: r.flight.description.arrival_location,
+  //       country: locationHelper.locationDetail(r.flight.description.departure_location).country,
+  //       date: r.flight.description.departure_date,
+  //       transits: r.flight.segments.length,
+  //       pnr: PNR,
+  //       amount: totalAmount,
+  //       booking_status: isBooked,
+  //     });
+
+  //     // Store segments
+  //     await Promise.all(
+  //       r.flight.segments.map((segment) => {
+  //         return Segment.create({
+  //           flight_id: flightRecord.id,
+  //           departure_date: `${segment.departureDate} ${segment.departureTime}`,
+  //           arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
+  //           flight_number: segment.number,
+  //           flight_code: segment.code,
+  //           from_airport: segment.origin,
+  //           to_airport: segment.destination,
+  //           stops: segment.stops || 0,
+  //         });
+  //       })
+  //     );
+
+  //     return {
+  //       flight_index: idx,
+  //       flight_id: flightRecord.id,
+  //       booked: isBooked,
+  //       pnr: PNR,
+  //     };
+  //   })
+  // );
+
+
+
+  // // invoice code starts here
+  // // Generate PDF
+  //     const invoiceTemplate = path.join(__dirname, '../public/views/separate_invoice.ejs');
+  //     const pdfData = {
+  //       pnr: PNR,
+  //       totalBaseFare,
+  //       totalTaxAmount,
+  //       totalAmount,
+  //       passengers: result.booking.travelers,
+  //       flights: flightsDetail,
+  //     };
+  //     const html = await ejs.renderFile(invoiceTemplate, pdfData);
+  //     const browser = await puppeteer.launch();
+  //     // const browser = await puppeteer.launch({
+  //     //                                   headless: true,
+  //     //                                   args: [
+  //     //                                     '--no-sandbox',
+  //     //                                     '--disable-setuid-sandbox',
+  //     //                                     '--disable-dev-shm-usage',
+  //     //                                     '--disable-accelerated-2d-canvas',
+  //     //                                     '--no-zygote',
+  //     //                                     '--single-process',
+  //     //                                     '--disable-gpu'
+  //     //                                   ]
+  //     //                                 });
+  //     const page = await browser.newPage();
+  //     await page.setContent(html, { waitUntil: "load" });
+  //     const fileName = `${moment().unix()}-${request.user.name}-${PNR}.pdf`;
+  //     const pdfPath = path.join(__dirname, `../public/uploads/invoices/${fileName}`);
+  //     await page.pdf({ path: pdfPath, format: "A4" });
+  //     await browser.close();
+
+  //     const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
+
+  // 1. Create master booking entry
+const bookingGroup = await FlightBooking.create({
+  user_id: userId,
+  uuid: bookingUuid,
+  is_applied_code: codeId ? 1 : 0,
+  status: 1,
+  codeId: codeId || null,
+});
+
+// 2. Store passengers ONCE
+await Promise.all(
+  passengers.map((passenger) => {
+    return Passenger.create({
+      flight_booking_id: bookingGroup.id,
+      firstname: passenger.firstname,
+      lastname: passenger.lastname,
+      phone: passenger.phone || null,
+      type: passenger.type,
+      passport: passenger.passport || null,
+    });
+  })
+);
+
+// Collector for invoice building
+let allPNR = [];
+let allFlightsDetail = [];
+let totalBaseFare = 0;
+let totalTaxAmount = 0;
+let totalAmount = 0;
+
+// 3. Store each flight & segments
+const dbResults = await Promise.all(
+  bookingResults.map(async (r, idx) => {
+    const isBooked = r.result && r.result.confirmationId ? 1 : 0;
+    const PNR = isBooked ? r.result.confirmationId : null;
+
+    // Fare details
+    const fareInfo = isBooked ? r.result.booking.fares[0]?.totals || {} : {};
+
+    const flightBaseFare = parseFloat(fareInfo.subtotal || 0);
+    const flightTaxAmount = parseFloat(fareInfo.taxes || 0);
+    const flightTotalAmount = parseFloat(fareInfo.total || 0);
+
+    // Add to invoice totals
+    totalBaseFare += flightBaseFare;
+    totalTaxAmount += flightTaxAmount;
+    totalAmount += flightTotalAmount;
+
+    if (PNR) allPNR.push(PNR);
+
+    // Create flight record
+    const flightRecord = await Flight.create({
+      booking_id: bookingGroup.id,
+      origin: r.flight.description.departure_location,
+      destination: r.flight.description.arrival_location,
+      country: locationHelper.locationDetail(r.flight.description.departure_location).country,
+      date: r.flight.description.departure_date,
+      transits: r.flight.segments.length,
+      pnr: PNR,
+      amount: flightTotalAmount,
+      booking_status: isBooked,
+    });
+
+    // Prepare data for invoice
+    let flightDetail = {
+                        pnr: PNR,
+                        origin: r.flight.description.departure_location,
+                        origin_country: locationHelper.locationDetail(r.flight.description.departure_location).country,
+                        destination: r.flight.description.arrival_location,
+                        destination_country: locationHelper.locationDetail(r.flight.description.arrival_location).country,
+                        date: r.flight.description.departure_date,
+                        amount: flightTotalAmount,
+                        booking_status: isBooked,
+                        segments: [],
+                      };
+
+    // Store segments
+    await Promise.all(
+      r.flight.segments.map(async (segment) => {
+        await Segment.create({
+          flight_id: flightRecord.id,
+          departure_date: `${segment.departureDate} ${segment.departureTime}`,
+          arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
+          flight_number: segment.number,
+          flight_code: segment.code,
+          from_airport: segment.origin,
+          to_airport: segment.destination,
+          stops: segment.stops || 0,
+        });
+
+        // Add segment to invoice info
+        flightDetail.segments.push({
+          flight_code: segment.code,
+          flight_number: segment.number,
+          from_airport: segment.origin,
+          to_airport: segment.destination,
+          departure_date: `${segment.departureDate} ${segment.departureTime}`,
+          arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
+        });
+
+
+      })
+    );
+
+    // Add this flight to invoice list
+    allFlightsDetail.push(flightDetail);
+
+    return {
+      flight_index: idx,
+      flight_id: flightRecord.id,
+      booked: isBooked,
+      pnr: PNR,
+    };
+  })
+);
+
+//
+// -------- INVOICE (ONE FILE FOR ALL FLIGHTS) --------
+//
+
+const invoiceTemplate = path.join(__dirname, '../public/views/separate_invoice.ejs');
+
+const pdfData = {
+  pnrList: allPNR,
+  totalBaseFare,
+  totalTaxAmount,
+  totalAmount,
+  passengers: travelerList,
+  flights: allFlightsDetail,
+  bookingId : bookingUuid,
+};
+
+const html = await ejs.renderFile(invoiceTemplate, pdfData);
+const browser = await puppeteer.launch();
+const page = await browser.newPage();
+
+await page.setContent(html, { waitUntil: "load" });
+
+const fileName = `${moment().unix()}-${request.user.name}-invoice.pdf`;
+const pdfPath = path.join(__dirname, `../public/uploads/invoices/${fileName}`);
+
+await page.pdf({ path: pdfPath, format: "A4" });
+await browser.close();
+
+const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
+
+
+
+      // Send email
+      const mailOptions = {
+        from: process.env.EMAIL_FROM,
+        to: request.user.email,
+        subject: `Flight Booking Invoice - ${bookingUuid}`,
+        text: `Dear Customer,\n\nYour flight booking has been confirmed. Please find the invoice attached.\n\Booking id: ${bookingUuid}\nBest regards,\nHalasky`,
+        attachments: [
+          {
+            filename: `invoice-${bookingUuid}.pdf`,
+            path: pdfPath,
+            contentType: "application/pdf",
+          },
+        ],
+      };
+
+      transport.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Error sending email:", error);
+        } else {
+          console.log("Email sent successfully:", info.response);
+        }
+      });
+  // invoice code ends here
+
 
   
 
-      
 
-    } catch (error) {
-    
-      return response.status(500).json({
-        status: false,
-        message: "Something Went Wrong",
-        error: error.message,
-      });
-    }
+// --- Step 3: Only now send the response ---
+return response.status(200).json({
+  status: true,
+  message: "Booking process completed",
+  bookingUuid: bookingUuid,
+  flightBookingId: bookingGroup.id,
+  pdfUrl : pdfUrl,
+  results: dbResults.map((r, i) => ({
+    flightIndex: i,
+    success: r.success,
+    pnr: r.pnr,
+    flightId: r.flight_id,
+    error: r.dbError || null,
+  })),
+});
 
-}
+
+
+return response.status(200).json({
+  testMode: true,
+  totalFlights: flights.length,
+  results: bookingResults.map(r => ({
+    uuid: r.uuid,
+    pnr: r.result?.confirmationId || null,
+    success: r.success && !!r.result?.confirmationId,
+    error: r.error || (r.result?.message || null),
+  })),
+});
+
+      return response.status(200).json({
+                                          status: true,
+                                          message: "All flight bookings created successfully",
+                                          bookings: bookingResults,
+                                      });
+
+    return response.status(200).json({
+      status: true,
+      message: "All flight bookings created successfully",
+      bookings: bookingResults,
+    });
+  } catch (error) {
+    console.error("Booking Error:", error);
+    return response.status(500).json({
+      status: false,
+      message: "Something Went Wrong",
+      error: error.message,
+    });
+  }
+},
+
+/////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   
 }
