@@ -30,7 +30,8 @@ const hotelSearchSchema = Joi.object({
 
   countryCode: Joi.string()
     .alphanum()
-    .length(2)
+    .min(2)
+    .max(3)
     .uppercase()
     .required()
     .label('Country code'),
@@ -66,7 +67,7 @@ const hotelSearchSchema = Joi.object({
             return helpers.message('Each child age must be a valid number between 0 and 17.');
           }
         } else {
-          // ✅ No children, ChildAges must not exist
+          
           if (ChildAges && String(ChildAges).trim() !== '') {
             return helpers.message('ChildAges should not be provided when there are no children.');
           }

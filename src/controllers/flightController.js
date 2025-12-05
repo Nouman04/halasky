@@ -1913,6 +1913,25 @@ cancelBooking: async (request, response) => {
       });
     }
 
+    const sortedFlights = flights.sort(
+          (a, b) => new Date(a.departure_time) - new Date(b.departure_time)
+        );
+
+        const earliestFlight = sortedFlights[0];
+        const now = new Date();
+
+        if (new Date(earliestFlight.departure_time) < now) {
+          return response.status(400).json({
+            status: false,
+            message: "Cancellation not allowed. Earliest flight has already departed.",
+            earliestFlight: {
+              id: earliestFlight.id,
+              pnr: earliestFlight.pnr,
+              departure_time: earliestFlight.departure_time,
+            }
+          });
+        }
+
     const endpoint =
       "https://api.cert.platform.sabre.com/v1/trip/orders/cancelBooking";
 
@@ -2638,7 +2657,7 @@ function simplifyFlightResponse(itinerariesList) {
         };
       })
     );
-
+    console.log(itinerary.passengerPriceDetail[0].passengerList[0].baggageInformation);
     // Extract passenger and pricing details
     const passengers = itinerary.passengerPriceDetail[0].passengerList.map((passenger) => ({
       type: passenger.type === 'ADT' ? 'Adult' : passenger.type === 'C06' ? 'Child' : passenger.type,
@@ -2662,7 +2681,31 @@ function simplifyFlightResponse(itinerariesList) {
         [tax.code] : `${tax.amount} ${tax.currency}, ${tax.description}`,
       })) || [],
       baggage: passenger.baggageInformation?.map((bag) => ({
-        allowance: bag.detail ? `${bag.detail.weight} ${bag.detail.unit}` : 'N/A',
+        allowance: (() => {
+                        if (!bag.detail) return 'N/A';
+
+                        // Case 1: Weight-based bag
+                        if (bag.detail.weight) {
+                            return `${bag.detail.weight} ${bag.detail.unit || ''}`.trim();
+                        }
+
+                        // Case 2: Piece-based bag
+                        const parts = [];
+
+                        if (bag.detail.pieceCount) {
+                            parts.push(`total piece: ${bag.detail.pieceCount}`);
+                        }
+
+                        if (bag.detail.description1) {
+                            parts.push(bag.detail.description1);
+                        }
+
+                        if (bag.detail.description2) {
+                            parts.push(bag.detail.description2);
+                        }
+
+                        return parts.join(', ') || 'N/A';
+                    })(),
         airline: bag.airlineCode || 'N/A',
         segment:
           bag.segments[0]?.id >= 0 && itinerary.legList[bag.segments[0].id]?.schedule[0]

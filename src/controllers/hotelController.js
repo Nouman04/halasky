@@ -82,63 +82,55 @@ module.exports = {
     });
 
     try {
-      let endpoint = "https://api.cert.sabre.com/v4.0.0/get/hotelavail";
-
+      // let endpoint = "https://api.cert.sabre.com/v4.0.0/get/hotelavail";
+      let endpoint = "https://api.cert.sabre.com/v5/get/hotelavail";
       const myHeaders = new Headers();
       myHeaders.append("Authorization", `Bearer ${accessToken}`);
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Accept", "application/json");
 
-      let searchRequest = {
-        GetHotelAvailRQ: {
-          POS: {
-            Source: {
-              PseudoCityCode: "3GML",
-            },
-          },
-          SearchCriteria: {
-            OffSet: 1,
-            SortBy: "TotalRate",
-            SortOrder: "ASC",
-            TierLabels: true,
-            GeoSearch: {
-              GeoRef: {
-                Radius: 50,
-                UOM: "KM",
-                RefPoint: {
-                  Value: cityCode,
-                  ValueContext: "CODE",
-                  RefPointType: "6",
-                  CountryCode: countryCode,
+     const searchRequest = {
+              GetHotelAvailRQ: {
+                POS: {
+                  Source: {
+                    PseudoCityCode: "3GML"
+                  }
                 },
-              },
-            },
-            RateInfoRef: {
-              CurrencyCode: "SAR",
-              BestOnly: "2",
-              PrepaidQualifier: "IncludePrepaid",
-              RefundableOnly: false,
-              ConvertedRateInfoOnly: true,
-              StayDateRange: {
-                StartDate: checkIn,
-                EndDate: checkOut,
-              },
-              Rooms: {
-                Room: mappedRooms,
-              },
-            },
-            ImageRef: {
-              Type: "LARGE",
-              LanguageCode: "en",
-            },
-          },
-        },
-      };
-      //   return response.status(200).json({
-      //     status: true,
-      //     data: searchRequest,
-      // });
-
+                SearchCriteria: {
+                  OffSet: 1,
+                  SortBy: "NegotiatedRateAvailability",
+                  SortOrder: "ASC",
+                  PageSize: 40,
+                  GeoSearch: {
+                    GeoRef: {
+                      Radius: 200,
+                      UOM: "MI",
+                      RestrictSearchToCountry: "US",
+                      RefPoint: {
+                        Value: cityCode,              
+                        ValueContext: "CODE", 
+                        RefPointType: "6",    
+                        CountryCode: countryCode
+                      }
+                    }
+                  },
+                  RateInfoRef: {
+                    CurrencyCode: "SAR",
+                    BestOnly: "4",
+                    StayDateTimeRange: {
+                      StartDate: checkIn,
+                      EndDate: checkOut
+                    },
+                    Rooms: {
+                      Room: mappedRooms,
+                    }
+                  },
+                  HotelPref: {
+                    LenientHotelName: "inn and"
+                  }
+                }
+              }
+            }
       const requestOptions = {
         method: "POST",
         headers: myHeaders,
