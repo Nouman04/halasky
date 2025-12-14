@@ -101,6 +101,11 @@ module.exports = {
                   SortBy: "NegotiatedRateAvailability",
                   SortOrder: "ASC",
                   PageSize: 40,
+                  ImageRef: {
+                    Type: "MEDIUM",        // THUMBNAIL | SMALL | MEDIUM | LARGE | ORIGINAL
+                    CategoryCode: 3,       // 1=Exterior, 2=Lobby, 3=Room, etc.
+                    LanguageCode: "EN"
+                  },
                   GeoSearch: {
                     GeoRef: {
                       Radius: 200,
@@ -145,6 +150,11 @@ module.exports = {
 
           
           let detail = result.GetHotelAvailRS;
+
+          return response.status(200).json({
+                status: true,
+                message: result
+              });
 
           if(result.status && (result.status == 'NotProcessed' || result.status == 'Incomplete'))
           {
