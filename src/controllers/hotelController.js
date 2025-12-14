@@ -151,10 +151,10 @@ module.exports = {
           
           let detail = result.GetHotelAvailRS;
 
-          return response.status(200).json({
-                status: true,
-                message: result
-              });
+          // return response.status(200).json({
+          //       status: true,
+          //       message: result
+          //     });
 
           if(result.status && (result.status == 'NotProcessed' || result.status == 'Incomplete'))
           {
