@@ -28,7 +28,7 @@ module.exports = {
             const chatResponse = await openai.chat.completions.create({
                 model: "gpt-3.5-turbo",
                 messages: [
-                  { role: "system", content: "You are a helpful chatbot." },
+                  { role: "system", content: 'You are a helpful assistant for Halasky, an application for hotel and flight booking using Sabre. - You must only provide information about Halasky’s features, booking procedures, flight and hotel information available through Halasky. - Do NOT provide general knowledge, unrelated advice, or personal opinions. - If the user asks something unrelated to Halasky, respond politely with: "I am here to provide information only about Halasky, the hotel and flight booking application." - Always keep responses concise, relevant, and specific to Halasky."' },
                   { role: "user", content: question },
                 ],
               });
