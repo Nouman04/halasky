@@ -453,8 +453,13 @@ const hotelBookingSchema = Joi.object({
       .min(new Date().getFullYear())
       .required(),
   }).required(),
+
 });
 
+const hotelBookingDetailSchema = Joi.object({
+    pnr : Joi.string().required(),
+})
 
 
-module.exports = { hotelSearchSchema , hotelCompareSchema , hotelDetailSchema , hotelImageSchema , rateKeySchema , hotelBookingSchema}
+
+module.exports = { hotelSearchSchema , hotelCompareSchema , hotelDetailSchema , hotelImageSchema , rateKeySchema , hotelBookingSchema , hotelBookingDetailSchema}

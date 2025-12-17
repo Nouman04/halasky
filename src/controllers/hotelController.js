@@ -7,7 +7,7 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const moment = require('moment');
 const transport = require('../config/mailConfig');
-const { hotelSearchSchema , hotelCompareSchema , hotelDetailSchema, hotelImageSchema , rateKeySchema , hotelBookingSchema } =require('../validations/hotelValidation');
+const { hotelSearchSchema , hotelCompareSchema , hotelDetailSchema, hotelImageSchema , rateKeySchema , hotelBookingSchema , hotelBookingDetailSchema} =require('../validations/hotelValidation');
 require("dotenv").config();
 
 module.exports = {
@@ -136,6 +136,10 @@ module.exports = {
                 }
               }
             }
+
+    
+
+
       const requestOptions = {
         method: "POST",
         headers: myHeaders,
@@ -1160,7 +1164,63 @@ specificList: async (request, response) => {
         error: error.message,
       });
     }
-  }
+  },
+
+  bookingDetail : async (request , response ) => {
+     const { error } = hotelBookingDetailSchema.validate(request.body, { abortEarly: false });
+        
+      if (error) {
+          return response.status(400).json({
+            success: false,
+            message: "Validation failed",
+            details: error.details.map((d) => d.message),
+          });
+      }
+
+      try{
+
+        const pnr = request.body.pnr;
+        const booking = await HotelBooking.findOne({
+                            where: { pnr: pnr },
+                            include: [
+                              {
+                                model: User,
+                                as: 'user',
+                              },
+                              {
+                                model: Promotion,
+                                as: 'promotion',
+                              },
+                              {
+                                model: PaymentDetail,
+                                as: 'paymentDetail',
+                              },
+                              {
+                                model: Guest,
+                                as: 'guests',
+                              },
+                            ]
+                          });
+
+        const hotelId = booking.hotel_id;
+
+        const imageList = await getHotelImages(hotelId);
+
+
+         return response.status(200).json({
+          status : true,
+          data : { bookingDetail : booking , images : imageList } 
+        });
+
+
+      } catch (error) {
+      return response.status(500).json({
+        status: false,
+        message: "Something Went Wrong",
+        error: error.message,
+      });
+    }
+  } 
 
 };
 
@@ -1245,4 +1305,62 @@ const processHotelDetails = (apiResponse) => {
     rooms: simplifiedRooms
   };
 };
+
+
+const getHotelImages = async (hotelCode) => {
+
+   const tokenDetail = await JsonHandler.findOne({
+        where: { type: AppConst.sabreFlights },
+      });
+  
+      const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;  
+
+      let endpoint = "https://api.cert.sabre.com/v4.0.0/get/hotelcontent";
+
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${accessToken}`);
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/json");
+      console.log(hotelCode);
+      let searchRequest = {
+        GetHotelContentRQ: {
+          POS: {
+            Source: {
+              PseudoCityCode: "3GML" 
+            }
+          },
+          SearchCriteria: {
+            HotelRefs: {
+              HotelRef: {
+                HotelCode: hotelCode, 
+                CodeContext: "GLOBAL"  
+              }
+            },
+            MediaRef: {
+              MaxItems: "10", 
+              MediaTypes: {
+                Images: {
+                  Image: [
+                    {
+                      Type: "MEDIUM" 
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+
+      const response = await fetch(endpoint, {
+          method: "POST",
+          headers: myHeaders,
+          body: JSON.stringify(searchRequest),
+          redirect: "follow",
+      });
+
+       const result = await response.json();
+
+       return result;
+}
 

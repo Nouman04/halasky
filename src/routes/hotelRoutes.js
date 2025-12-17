@@ -21,5 +21,5 @@ router.post("/images", hotelController.images);
 router.post("/confirm-rate", hotelController.confirmRate);
 router.post("/add-booking", hotelController.createBooking);
 router.get("/bookings", hotelController.userBookings);
-
+router.post("/booking/detail", hotelController.bookingDetail);
 module.exports = router;
