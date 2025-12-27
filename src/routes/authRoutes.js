@@ -18,6 +18,6 @@ router.post('/verify-native-token' , JwtAuthentication.verifyNativeToken);
 router.post('/verify-login-token' , JwtAuthentication.verifyLoginToken);
 router.post('/generate-token' , AuthController.generateToken);
 router.post('/update-password' , AuthController.updateForgotPassword);
-
+router.post('/google-login' , JwtAuthentication.googleLogin);
 
 module.exports = router;

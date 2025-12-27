@@ -20,6 +20,7 @@ router.post('/airports' ,   flightController.airportList );
 router.post("/alternate-days", flightController.searchAlternateDatesFlights);
 router.get("/bookings", flightController.userBookings);
 router.post('/generate-booking' , flightController.createBooking);
+router.post('/generate-test-booking' , flightController.createBookingTest);
 router.post('/separate-flights' , flightController.separateFlightList);
 router.post('/cancel-booking' , flightController.cancelBooking);
 

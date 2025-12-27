@@ -7,6 +7,10 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false,
     },
+    platform_id : {
+      type : DataTypes.STRING,
+      allowNull :true
+    },
     name: {
       type: DataTypes.STRING,
       allowNull: true, 

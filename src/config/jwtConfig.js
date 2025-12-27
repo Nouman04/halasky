@@ -5,7 +5,8 @@ const bcrypt = require("bcrypt");
 const moment = require('moment');
 const { Op } = require('sequelize');
 const transport = require('../config/mailConfig');
-
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 function generateRandomToken(){
     let token = '';
@@ -260,5 +261,100 @@ module.exports = {
         error: error.message,
       });
     }
+  },
+
+
+  
+
+  googleLogin: async (request, response) => {
+    try {
+      const { token: idToken } = request.body;
+
+      if (!idToken) {
+        return response.status(400).json({
+          status: false,
+          message: "Google token is required",
+        });
+      }
+
+      //  Verify Google token
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+
+      const email   = payload.email;
+      const name    = payload.name;
+      const googleId = payload.sub;
+      const image   = payload.picture;
+
+      //  Find user
+      let userDetail = await User.findOne({
+        include: { model: Role },
+        where: { email },
+      });
+
+      //  Create user if not exists
+      if (!userDetail) {
+        userDetail = await User.create({
+          email,
+          name,
+          platform_id: googleId,
+          is_platform_logged: true,
+          platform_type: 'google',
+          platform_image: image,
+          password: null,
+        });
+
+        // Assign default role
+        const role = await Role.findOne({ where: { title: 'user' } });
+        if (role) await userDetail.addRole(role);
+
+        userDetail = await User.findOne({
+          include: { model: Role },
+          where: { id: userDetail.id },
+        });
+      } else {
+
+        await User.update(
+          {
+            platform_id: googleId,
+            is_platform_logged: true,
+            platform_type: 'google',
+            platform_image: image,
+          },
+          { where: { id: userDetail.id } }
+        );
+      }
+
+      let userData = userDetail.get();
+      delete userData.password;
+
+      const jwtToken = jwt.sign(userData, process.env.NODE_SECRET_KEY, {
+        expiresIn: "4h",
+      });
+
+      const imageUrl = `${process.env.APP_URL}/uploads/image`;
+
+      return response.status(200).json({
+        status: true,
+        message: "Google Login Successful",
+        token: jwtToken,
+        user: userData,
+        imageUrl,
+        roles: userDetail.Roles,
+      });
+
+    } catch (error) {
+      return response.status(401).json({
+        status: false,
+        message: "Invalid or expired Google token",
+        error: error.message,
+      });
   }
+  },
+
+
 };

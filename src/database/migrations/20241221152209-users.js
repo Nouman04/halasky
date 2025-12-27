@@ -19,6 +19,10 @@ module.exports = {
           isEmail: true,
         },
       },
+      platform_id : {
+        type : Sequelize.DataTypes.STRING,
+        allowNull :true
+      },
       is_platform_logged: {
         type: Sequelize.DataTypes.BOOLEAN,
         defaultValue: 0,

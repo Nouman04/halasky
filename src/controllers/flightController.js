@@ -1,4 +1,4 @@
-const { JsonHandler , FlightBooking, Flight, Segment, Passenger , User , Promotion  } = require('../database/models');
+const { JsonHandler , FlightBooking, Flight, Segment, Passenger , User , Promotion, FlightLog  } = require('../database/models');
 const AppConst = require('../appConst');
 const airports = require('../public/files/locations.json');
 const locationHelper = require('../Helpers/LocationHelper');
@@ -9,6 +9,7 @@ const moment = require('moment')
 const transport = require('../config/mailConfig');
 const { v4: uuidv4 } = require('uuid');
 const { searchAirportSchema , searchFlightSchema , alternateDateFlightSchema , availabilityFlightSchema , bookingFlightSchema } = require('../validations/flightValidations')
+const { writeFlightLog } = require('../Helpers/FlightLogWriter')
 require("dotenv").config();
 
 module.exports = {
@@ -2339,7 +2340,7 @@ const dbResults = await Promise.all(
     totalAmount += flightTotalAmount;
 
     if (PNR) allPNR.push(PNR);
-
+  
     // Create flight record
     const flightRecord = await Flight.create({
       booking_id: bookingGroup.id,
@@ -2351,6 +2352,20 @@ const dbResults = await Promise.all(
       pnr: PNR,
       amount: flightTotalAmount,
       booking_status: isBooked,
+    });
+    
+    const logPath = await writeFlightLog({
+      flightId: flightRecord.id,
+      type: "booking",
+      payload: r.payload,
+      response: r.result,
+    });
+
+    // store log path in DB
+    await FlightLog.create({
+      type: "booking",
+      flight_id: flightRecord.id,
+      log_path: logPath,
     });
 
     // Prepare data for invoice
@@ -2423,19 +2438,19 @@ const pdfData = {
 };
 
 const html = await ejs.renderFile(invoiceTemplate, pdfData);
-// const browser = await puppeteer.launch();
-const browser = await puppeteer.launch({
-                                        headless: true,
-                                        args: [
-                                          '--no-sandbox',
-                                          '--disable-setuid-sandbox',
-                                          '--disable-dev-shm-usage',
-                                          '--disable-accelerated-2d-canvas',
-                                          '--no-zygote',
-                                          '--single-process',
-                                          '--disable-gpu'
-                                        ]
-                                      });
+const browser = await puppeteer.launch();
+// const browser = await puppeteer.launch({
+//                                         headless: true,
+//                                         args: [
+//                                           '--no-sandbox',
+//                                           '--disable-setuid-sandbox',
+//                                           '--disable-dev-shm-usage',
+//                                           '--disable-accelerated-2d-canvas',
+//                                           '--no-zygote',
+//                                           '--single-process',
+//                                           '--disable-gpu'
+//                                         ]
+//                                       });
 const page = await browser.newPage();
 
 await page.setContent(html, { waitUntil: "load" });
