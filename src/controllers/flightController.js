@@ -915,6 +915,7 @@ module.exports = {
                                                     model: Passenger,
                                                     as: 'passengers',
                                                   },
+                                                  
                                                   {
                                                     model: Flight,
                                                     as: 'flights',
@@ -925,11 +926,15 @@ module.exports = {
                                                         as: 'segments',
                                                         attributes: ['id', 'departure_date', 'arrival_date', 'flight_number', 'flight_code'],
                                                       },
+                                                      {
+                                                        model: FlightLog,
+                                                        as: 'log',
+                                                      },
                                                     ],
                                                   },
                                                 ],
                                               });
-          return response.status(200).json({ status : true , data : flightBookings});
+          return response.status(200).json({ status : true , data : flightBookings , path :  process.env.APP_URL});
      } catch (error){
           return response.status(500).json({
               status: false,
