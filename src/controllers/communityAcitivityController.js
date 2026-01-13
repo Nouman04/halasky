@@ -288,14 +288,14 @@ module.exports = {
   list: async (request, response) => {
     try {
       const { error } = listCommunityActivityValidationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
       let status = request.body.status;
 
       whereCondition = {};
@@ -303,153 +303,186 @@ module.exports = {
         whereCondition.status = status;
       }
       let skip = (parseInt(request.body.pageNo) - 1) * 10;
-      
+
 
 
       const posts = await CommunityActivity.findAll({
-                                        attributes: {
-                                              include: [
-                                                [
-                                                  Sequelize.literal(`(
+        attributes: {
+          include: [
+            [
+              Sequelize.literal(`(
                                                     SELECT COUNT(*)
                                                     FROM activity_actions AS aa
                                                     WHERE
                                                       aa.activity_id = CommunityActivity.id
                                                       AND aa.activity_type = 'liked'
                                                   )`),
-                                                  'total_likes'
-                                                ],
-                                                [
-                                                  Sequelize.literal(`(
+              'total_likes'
+            ],
+            [
+              Sequelize.literal(`(
                                                     SELECT COUNT(*)
                                                     FROM activity_actions AS aa
                                                     WHERE
                                                       aa.activity_id = CommunityActivity.id
                                                       AND aa.activity_type = 'heart'
                                                   )`),
-                                                  'total_hearts'
-                                                ],
-                                                [
-                                                  Sequelize.literal(`(
+              'total_hearts'
+            ],
+            [
+              Sequelize.literal(`(
                                                     SELECT COUNT(*)
                                                     FROM activity_actions AS aa
                                                     WHERE
                                                       aa.activity_id = CommunityActivity.id
                                                       AND aa.activity_type = 'surprice'
                                                   )`),
-                                                  'total_surprice'
-                                                ],
-                                                [
-                                                  Sequelize.literal(`(
+              'total_surprice'
+            ],
+            [
+              Sequelize.literal(`(
                                                     SELECT COUNT(*)
                                                     FROM activity_actions AS aa
                                                     WHERE
                                                       aa.activity_id = CommunityActivity.id
                                                       AND aa.activity_type = 'angry'
                                                   )`),
-                                                  'total_angry'
-                                                ],
-                                                [
-                                                  Sequelize.literal(`(
+              'total_angry'
+            ],
+            [
+              Sequelize.literal(`(
                                                     SELECT COUNT(*)
                                                     FROM activity_actions AS aa
                                                     WHERE
                                                       aa.activity_id = CommunityActivity.id
                                                       AND aa.activity_type = 'happy'
                                                   )`),
-                                                  'total_happy'
-                                                ],
-                                                [
-                                                  Sequelize.literal(`(
+              'total_happy'
+            ],
+            [
+              Sequelize.literal(`(
                                                     SELECT COUNT(*)
                                                     FROM activity_actions AS aa
                                                     WHERE
                                                       aa.activity_id = CommunityActivity.id
                                                       AND aa.activity_type = 'sad'
                                                   )`),
-                                                  'total_sad'
-                                                ],
-                                                [
-                                                  Sequelize.literal(`(
+              'total_sad'
+            ],
+            [
+              Sequelize.literal(`(
                                                     SELECT COUNT(*)
                                                     FROM activity_actions AS aa
                                                     WHERE
                                                       aa.activity_id = CommunityActivity.id
                                                       AND aa.activity_type = 'shock'
                                                   )`),
-                                                  'total_shock'
-                                                ],
-                                              ]
-                                            },
-                                        include: [
-                                          {
-                                            model: Tag,
-                                            as: 'tags',
-                                            where: { tagable_type: 'CommunityActivity' },
-                                            required: false,
-                                          },
-                                          {
-                                            model: CommunityActivityContent,
-                                            as: 'content',
-                                            required: false,
-                                          },
-                                          {
-                                            model: User,
-                                            as: 'user',
-                                          },
-                                          {
-                                            model: Comment,
-                                            as: 'comments',
-                                            where: { commentable_type: 'CommunityActivity' },
-                                            required: false,
-                                            include: [
-                                                {
-                                                  model: User,
-                                                  as: 'commentedUser',
-                                                  attributes: ['name', 'platform_image']
-                                                }
-                                              ]
-                                          },
-                                          {
-                                            model: Category,
-                                            as: 'category',
-                                          },
-                                          {
-                                            model: PollQuestion,
-                                            as: 'pollQuestions',
-                                            include: [
-                                              {
-                                                model: PollOption,
-                                                as: 'options',
-                                                attributes: [
-                                                  'id',
-                                                  'poll_question_id',
-                                                  'option_text',
-                                                  [
-                                                    Sequelize.literal(`(
+              'total_shock'
+            ],
+            [
+              Sequelize.literal(`(
+                                                    SELECT JSON_ARRAYAGG(aa.activity_type)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.user_id = ${request.user.id}
+                                                      AND aa.activity_type NOT IN ('saved', 'spam')
+                                                  )`),
+              'user_activity_reactions'
+            ],
+            [
+              Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.user_id = ${request.user.id}
+                                                      AND aa.activity_type = 'saved'
+                                                  )`),
+              'is_saved'
+            ],
+            [
+              Sequelize.literal(`(
+                                                    SELECT COUNT(*)
+                                                    FROM activity_actions AS aa
+                                                    WHERE
+                                                      aa.activity_id = CommunityActivity.id
+                                                      AND aa.user_id = ${request.user.id}
+                                                      AND aa.activity_type = 'spam'
+                                                  )`),
+              'is_spam'
+            ],
+          ]
+        },
+        include: [
+          {
+            model: Tag,
+            as: 'tags',
+            where: { tagable_type: 'CommunityActivity' },
+            required: false,
+          },
+          {
+            model: CommunityActivityContent,
+            as: 'content',
+            required: false,
+          },
+          {
+            model: User,
+            as: 'user',
+          },
+          {
+            model: Comment,
+            as: 'comments',
+            where: { commentable_type: 'CommunityActivity' },
+            required: false,
+            include: [
+              {
+                model: User,
+                as: 'commentedUser',
+                attributes: ['name', 'platform_image']
+              }
+            ]
+          },
+          {
+            model: Category,
+            as: 'category',
+          },
+          {
+            model: PollQuestion,
+            as: 'pollQuestions',
+            include: [
+              {
+                model: PollOption,
+                as: 'options',
+                attributes: [
+                  'id',
+                  'poll_question_id',
+                  'option_text',
+                  [
+                    Sequelize.literal(`(
                                                       SELECT COUNT(*) 
                                                       FROM poll_answers 
                                                       WHERE poll_answers.poll_option_id = \`pollQuestions->options\`.id
                                                     )`),
-                                                    'answerCount'
-                                                  ]
-                                                ],
-                                                required: false
-                                              }
-                                            ]
-                                          }
-                                        ],
-                                        where: whereCondition,
-                                        offset: skip,
-                                        limit: 10
-                                      });
-      const imageUrl =  `${process.env.APP_URL}/uploads/thumbnail`;
-      const profileImageUrl =  `${process.env.APP_URL}/uploads/image`;
+                    'answerCount'
+                  ]
+                ],
+                required: false
+              }
+            ]
+          }
+        ],
+        where: whereCondition,
+        offset: skip,
+        limit: 10
+      });
+      const imageUrl = `${process.env.APP_URL}/uploads/thumbnail`;
+      const profileImageUrl = `${process.env.APP_URL}/uploads/image`;
 
       return response.status(200).json({
         status: true,
         data: posts,
-        imageUrl : imageUrl,
+        imageUrl: imageUrl,
         profileImageUrl: profileImageUrl
       });
     } catch (error) {
@@ -459,7 +492,7 @@ module.exports = {
         error: error.message,
       });
     }
-    
+
   },
 
   popularTags : async (request ,response)=>{
