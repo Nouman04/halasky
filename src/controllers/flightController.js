@@ -1021,7 +1021,7 @@ module.exports = {
         : tokenDetail.information.access_token;
 
     try {
-      const endpoint = "https://api.cert.sabre.com/v5/offers/shop";
+      const endpoint = `${getSabreUrl()}/v5/offers/shop`;
       const myHeaders = new Headers();
       myHeaders.append("Authorization", `Bearer ${accessToken}`);
       myHeaders.append("Content-Type", "application/json");
@@ -1181,7 +1181,7 @@ module.exports = {
         where: { type: AppConst.sabreFlights }
       });
       const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
-      let endpoint = 'https://api.cert.sabre.com/v6.1.0/shop/altdates/flights?mode=live';
+      let endpoint = `${getSabreUrl()}/v6.1.0/shop/altdates/flights?mode=live`;
       const myHeaders = new Headers();
       myHeaders.append("Authorization", `Bearer ${accessToken}`);
       myHeaders.append("Content-Type", "application/json");
@@ -1496,7 +1496,7 @@ module.exports = {
           ? JSON.parse(tokenDetail.information).access_token
           : tokenDetail.information.access_token;
 
-      const endpoint = "https://api.cert.sabre.com/v1/trip/orders/createBooking";
+      const endpoint = `${getSabreUrl()}/v1/trip/orders/createBooking`;
       const myHeaders = new Headers();
       myHeaders.append("Authorization", `Bearer ${accessToken}`);
       myHeaders.append("Content-Type", "application/json");
@@ -1845,7 +1845,7 @@ module.exports = {
   //         ? JSON.parse(tokenDetail.information).access_token
   //         : tokenDetail.information.access_token;
 
-  //     const endpoint = "https://api.cert.platform.sabre.com/v1/trip/orders/cancelBooking";
+  //     const endpoint = `${getSabreUrl()}/v1/trip/orders/cancelBookin`;
   //     const myHeaders = new Headers();
   //     myHeaders.append("Authorization", `Bearer ${accessToken}`);
   //     myHeaders.append("Content-Type", "application/json");
@@ -1987,7 +1987,7 @@ module.exports = {
       }
 
       const endpoint =
-        "https://api.cert.platform.sabre.com/v1/trip/orders/cancelBooking";
+        `${getSabreUrl()}/v1/trip/orders/cancelBooking`;
 
       let cancelSummary = [];
 
@@ -2105,7 +2105,7 @@ module.exports = {
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Accept", "application/json");
 
-      const endpoint = "https://api.cert.sabre.com/v1/trip/orders/createBooking";
+      const endpoint = `${getSabreUrl()}/v1/trip/orders/createBooking`;
 
       // // Map passengers once (used for every flight booking)
       const travelerList = passengers.map((passenger) => {
