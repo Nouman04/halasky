@@ -140,9 +140,9 @@ const availFlightSchema = Joi.object({
 
     return value;
   }, "Date-only comparison")
-  .messages({
-    "date.invalidOrder": "Arrival date must be on or after the departure date",
-  }),
+    .messages({
+      "date.invalidOrder": "Arrival date must be on or after the departure date",
+    }),
   destinationLocationCode: Joi.string().length(3).uppercase().required().messages({
     "string.length": "Destination location code must be a 3-letter IATA code"
   })
@@ -226,4 +226,9 @@ const bookingFlightSchema = Joi.object({
 
 
 
-module.exports = { searchAirportSchema , searchFlightSchema , alternateDateFlightSchema , availabilityFlightSchema , bookingFlightSchema };
+const orderFulfillmentSchema = Joi.object({
+  pnr: Joi.string().alphanum().min(6).max(8).required()
+});
+
+module.exports = { searchAirportSchema, searchFlightSchema, alternateDateFlightSchema, availabilityFlightSchema, bookingFlightSchema, orderFulfillmentSchema };
+
