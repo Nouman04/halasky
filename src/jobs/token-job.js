@@ -6,6 +6,10 @@ const { JsonHandler } = require("../database/models");
 const appConst = require("../appConst");
 // 0 1 * * 1,5
 // * * * * * *
+const getSabreUrl = () => {
+  return process.env.NODE_ENV === 'production' ? process.env.SABRE_API_URL_PROD : process.env.SABRE_API_URL_DEV;
+}
+
 const tokenJob = new CronJob("0 1 * * 1,5", async function () {
   const logFilePath = path.join(__dirname, "..", "storage", "cron-logs.js");
   const dir = path.dirname(logFilePath);
@@ -14,7 +18,8 @@ const tokenJob = new CronJob("0 1 * * 1,5", async function () {
     fs.mkdirSync(dir, { recursive: true });
   }
   try {
-    let endpoint = "https://api.cert.platform.sabre.com/v2/auth/token";
+    let endpoint = `${getSabreUrl()}/v2/auth/token`;
+    // let endpoint = "https://api.cert.platform.sabre.com/v2/auth/token";
 
     const myHeaders = new Headers();
     myHeaders.append(
