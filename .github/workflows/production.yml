@@ -1,9 +1,9 @@
-name: Deploy to development
+name: Deploy to production
 
 on:
   push:
     branches:
-      - development
+      - production
 
 jobs:
   deploy:
@@ -17,14 +17,14 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_GITHUB_AWS }}
 
-      - name: SSH to development
+      - name: SSH to production
         run: |
           ssh -o StrictHostKeyChecking=no githubactions@${{ secrets.AWS_DEV_SERVER_1_IP }} << 'EOF'
-            cd /var/www/Project1/halasky
-            git pull origin development
+            cd /var/www/Project1/halasky-live
+            git pull origin production
             npm install
             npm run db:migrate
-            pm2 restart halasky --update-env
+            pm2 restart halasky-live --update-env
           EOF
 
           
