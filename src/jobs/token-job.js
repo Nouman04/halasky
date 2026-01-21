@@ -22,10 +22,12 @@ const tokenJob = new CronJob("0 1 * * 1,5", async function () {
     // let endpoint = "https://api.cert.platform.sabre.com/v2/auth/token";
 
     const myHeaders = new Headers();
+    
     myHeaders.append(
       "Authorization",
-      "Basic VmpFNk1UVXpOamd3T2pOSFRVdzZRVUU9OmJXVmtNalZrYlcwPQ=="
+      "Basic VmpFNk1UVXpOamd3T2pOSFRVdzZRVUU9OmJsVTJOR3hVTVdjPQ=="
     );
+
     myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
     const urlencoded = new URLSearchParams();
