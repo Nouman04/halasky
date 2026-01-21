@@ -2485,13 +2485,13 @@ module.exports = {
         totalBaseFare,
         totalTaxAmount,
         totalAmount,
-        passengers: travelerList,
+        passengers: passengers,
         flights: allFlightsDetail,
         bookingId: bookingUuid,
       };
 
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      // const browser = await puppeteer.launch();
+      //const browser = await puppeteer.launch();
       const browser = await puppeteer.launch({
         headless: true,
         args: [
