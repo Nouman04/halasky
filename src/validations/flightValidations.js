@@ -46,7 +46,8 @@ const searchFlightSchema = Joi.object({
     })
     .required(),
   travelClass: Joi.string().valid("Y", "F", "C").required(),
-  passengerList: Joi.array().items(listPassengerSchema).min(1).required()
+  passengerList: Joi.array().items(listPassengerSchema).min(1).required(),
+  currencyCode: Joi.string().min(2).max(4).allow(null).optional(),
 });
 
 

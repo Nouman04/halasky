@@ -66,7 +66,7 @@ module.exports = {
       });
     }
 
-    const { destinationList, passengerList, travelClass } = request.body;
+    const { destinationList, passengerList, travelClass , currencyCode } = request.body;
 
     const travelJson = destinationList.map(detail => {
       return {
@@ -131,6 +131,9 @@ module.exports = {
           },
           "OriginDestinationInformation": travelJson,
           "TravelerInfoSummary": {
+            PriceRequestInformation : {
+              "CurrencyCode": currencyCode || "USD"
+            },
             "AirTravelerAvail": [
               {
                 "PassengerTypeQuantity": passengerJson
