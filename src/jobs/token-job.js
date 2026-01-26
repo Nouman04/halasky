@@ -6,6 +6,7 @@ const { JsonHandler } = require("../database/models");
 const appConst = require("../appConst");
 // 0 1 * * 1,5
 // * * * * * *
+
 const getSabreUrl = () => {
   return process.env.NODE_ENV === 'production' ? process.env.SABRE_API_URL_PROD : process.env.SABRE_API_URL_DEV;
 }
