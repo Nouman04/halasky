@@ -1960,7 +1960,7 @@ module.exports = {
 
       // 3. Fetch all flights for this booking
       const flights = await Flight.findAll({
-        where: { flight_booking_id: booking.id },
+        where: { booking_id: booking.id },
       });
 
       if (!flights.length) {
