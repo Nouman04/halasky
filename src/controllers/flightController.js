@@ -226,7 +226,7 @@ module.exports = {
           let mappedTaxSummary = Object.fromEntries(taxSummaryDescs.map(taxSummary => [taxSummary.id, taxSummary]));
           let mappedFareComponent = Object.fromEntries(fareComponentDescs.map(fareComponent => [fareComponent.id, fareComponent]));
           let mappedObFees = Object.fromEntries(obFeeDescs.map(obFee => [obFee.id, obFee]));
-          let mappedEntertainment = flightAmenities.entertainment ? Object.fromEntries(flightAmenities.entertainment.map(entertainment => [entertainment.id, entertainment])) : [];
+          let mappedEntertainment = flightAmenities?.entertainment ? Object.fromEntries(flightAmenities.entertainment.map(entertainment => [entertainment.id, entertainment])) : [];
           let mappedFood = flightAmenities.food ? Object.fromEntries(flightAmenities.food.map(food => [food.id, food])) : [];
           let mappedLayout = flightAmenities.layout ? Object.fromEntries(flightAmenities.layout.map(layout => [layout.id, layout])) : [];
           let mappedPower = flightAmenities.power ? Object.fromEntries(flightAmenities.power.map(power => [power.id, power])) : [];
