@@ -25,7 +25,7 @@ const tokenJob = new CronJob("0 1 * * 1,5", async function () {
     const myHeaders = new Headers();
     myHeaders.append(
       "Authorization",
-      "Basic VmpFNk1UVXpOamd3T2pOSFRVdzZRVUU9OmJXVmtNalZrYlcwPQ=="
+      "Basic VmpFNk1UVXpOamd3T2pOSFRVdzZRVUU9OmJVbzFiRFpNTlVRPQ=="
     );
     myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
 
