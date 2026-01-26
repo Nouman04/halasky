@@ -66,7 +66,7 @@ module.exports = {
       });
     }
 
-    const { destinationList, passengerList, travelClass } = request.body;
+    const { destinationList, passengerList, travelClass , currencyCode } = request.body;
 
     const travelJson = destinationList.map(detail => {
       return {
@@ -131,6 +131,9 @@ module.exports = {
           },
           "OriginDestinationInformation": travelJson,
           "TravelerInfoSummary": {
+            PriceRequestInformation : {
+              "CurrencyCode": currencyCode || "USD"
+            },
             "AirTravelerAvail": [
               {
                 "PassengerTypeQuantity": passengerJson
@@ -2485,13 +2488,13 @@ module.exports = {
         totalBaseFare,
         totalTaxAmount,
         totalAmount,
-        passengers: travelerList,
+        passengers: passengers,
         flights: allFlightsDetail,
         bookingId: bookingUuid,
       };
 
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      // const browser = await puppeteer.launch();
+      //const browser = await puppeteer.launch();
       const browser = await puppeteer.launch({
         headless: true,
         args: [
