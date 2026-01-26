@@ -3,5 +3,4 @@ src/public/uploads
 src/database/config
 .github/workflows/main.yml
 src/config/mailConfig.js
-src/jobs/token-job.js
 .env
