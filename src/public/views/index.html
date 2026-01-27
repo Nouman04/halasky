@@ -121,7 +121,7 @@
       e.preventDefault();
       const input = document.getElementById("input");
       const message = input.value;
-      fetch("http://localhost:3005/chat/send-message", {
+      fetch("https://api.development.halasky.com/chat/send-message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message , username }),
