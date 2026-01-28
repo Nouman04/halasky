@@ -102,7 +102,7 @@ module.exports = {
 
     sendMessage : async (request ,response , io , socketConnectedUser ) => {
         try {
-            const { error } = chatMessageSchema.validate(request.body, { abortEarly: false });
+            const { error } = sendMessageSchema.validate(request.body, { abortEarly: false });
                     
                       if (error) {
                             return response.status(400).json({
@@ -135,7 +135,7 @@ module.exports = {
 
     chatMessages : async (request ,response  ) => {
         try{ 
-            const { error } = blogListSchema.validate(request.body, { abortEarly: false });
+            const { error } = chatMessageSchema.validate(request.body, { abortEarly: false });
                     
                       if (error) {
                             return response.status(400).json({

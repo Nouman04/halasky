@@ -132,7 +132,7 @@ module.exports = {
           "OriginDestinationInformation": travelJson,
           "TravelerInfoSummary": {
             PriceRequestInformation : {
-              "CurrencyCode": currencyCode || "USD"
+              "CurrencyCode": currencyCode || "SAR"
             },
             "AirTravelerAvail": [
               {
