@@ -132,7 +132,7 @@ module.exports = {
           "OriginDestinationInformation": travelJson,
           "TravelerInfoSummary": {
             PriceRequestInformation : {
-              "CurrencyCode": currencyCode || "USD"
+              "CurrencyCode": currencyCode || "SAR"
             },
             "AirTravelerAvail": [
               {
@@ -227,11 +227,11 @@ module.exports = {
           let mappedFareComponent = Object.fromEntries(fareComponentDescs.map(fareComponent => [fareComponent.id, fareComponent]));
           let mappedObFees = Object.fromEntries(obFeeDescs.map(obFee => [obFee.id, obFee]));
           let mappedEntertainment = flightAmenities?.entertainment ? Object.fromEntries(flightAmenities.entertainment.map(entertainment => [entertainment.id, entertainment])) : [];
-          let mappedFood = flightAmenities.food ? Object.fromEntries(flightAmenities.food.map(food => [food.id, food])) : [];
-          let mappedLayout = flightAmenities.layout ? Object.fromEntries(flightAmenities.layout.map(layout => [layout.id, layout])) : [];
-          let mappedPower = flightAmenities.power ? Object.fromEntries(flightAmenities.power.map(power => [power.id, power])) : [];
-          let mappedSeat = flightAmenities.seat ? Object.fromEntries(flightAmenities.seat.map(seat => [seat.id, seat])) : [];
-          let mappedWifi = flightAmenities.wifi ? Object.fromEntries(flightAmenities.wifi.map(wifi => [wifi.id, wifi])) : [];
+          let mappedFood = flightAmenities?.food ? Object.fromEntries(flightAmenities.food.map(food => [food.id, food])) : [];
+          let mappedLayout = flightAmenities?.layout ? Object.fromEntries(flightAmenities.layout.map(layout => [layout.id, layout])) : [];
+          let mappedPower = flightAmenities?.power ? Object.fromEntries(flightAmenities.power.map(power => [power.id, power])) : [];
+          let mappedSeat = flightAmenities?.seat ? Object.fromEntries(flightAmenities.seat.map(seat => [seat.id, seat])) : [];
+          let mappedWifi = flightAmenities?.wifi ? Object.fromEntries(flightAmenities.wifi.map(wifi => [wifi.id, wifi])) : [];
 
           let itineraryGroupDetail = [];
 
