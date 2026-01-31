@@ -95,7 +95,10 @@ const alternateDateFlightSchema = Joi.object({
       "array.base": "Passenger detail must be an array",
       "array.min": "At least one passenger must be provided",
       "any.required": "Passenger detail is required"
-    })
+    }),
+
+    currencyCode: Joi.string().min(2).max(4).allow(null).optional(),
+
 });
 
 

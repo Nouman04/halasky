@@ -930,7 +930,7 @@ module.exports = {
     }
   },
 
-  getUserActivities : async (req, res) => {
+  getUserActivities : async (request, response) => {
     try {
 
       const { error } = getUserActivitiesSchema.validate(request.body, { abortEarly: false });

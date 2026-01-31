@@ -1178,7 +1178,7 @@ module.exports = {
         });
       }
 
-      const { originLocation, destinationLocation, departureDate, passengerDetail } = request.body;
+      const { originLocation, destinationLocation, departureDate, passengerDetail , currencyCode } = request.body;
 
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights }
@@ -1241,6 +1241,9 @@ module.exports = {
             }
           },
           "TravelerInfoSummary": {
+            PriceRequestInformation : {
+              "CurrencyCode": currencyCode || "SAR"
+            },
             "AirTravelerAvail": [
               {
                 "PassengerTypeQuantity": passengers
@@ -1268,6 +1271,12 @@ module.exports = {
       fetch(endpoint, requestOptions)
         .then((response) => response.json())
         .then(async (result) => {
+
+          return response.status(200).json({
+              status: false,
+              data : result,
+            });
+
 
           let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
 
