@@ -9,7 +9,8 @@ const moment = require('moment')
 const transport = require('../config/mailConfig');
 const { v4: uuidv4 } = require('uuid');
 const { searchAirportSchema, searchFlightSchema, alternateDateFlightSchema, availabilityFlightSchema, bookingFlightSchema, orderFulfillmentSchema } = require('../validations/flightValidations')
-const { writeFlightLog } = require('../Helpers/FlightLogWriter')
+const { writeFlightLog } = require('../Helpers/FlightLogWriter');
+// const { addNotification } = require('../Helpers/notificationHandler');
 require("dotenv").config();
 
 const getSabreUrl = () => {
@@ -66,7 +67,7 @@ module.exports = {
       });
     }
 
-    const { destinationList, passengerList, travelClass , currencyCode } = request.body;
+    const { destinationList, passengerList, travelClass, currencyCode } = request.body;
 
     const travelJson = destinationList.map(detail => {
       return {
@@ -131,7 +132,7 @@ module.exports = {
           },
           "OriginDestinationInformation": travelJson,
           "TravelerInfoSummary": {
-            PriceRequestInformation : {
+            PriceRequestInformation: {
               "CurrencyCode": currencyCode || "SAR"
             },
             "AirTravelerAvail": [
@@ -1167,6 +1168,7 @@ module.exports = {
 
 
   searchAlternateDatesFlights: async (request, response) => {
+    console.log(1111);
     try {
       const { error } = alternateDateFlightSchema.validate(request.body, { abortEarly: false });
 
@@ -1178,7 +1180,7 @@ module.exports = {
         });
       }
 
-      const { originLocation, destinationLocation, departureDate, passengerDetail , currencyCode } = request.body;
+      const { originLocation, destinationLocation, departureDate, passengerDetail, currencyCode } = request.body;
 
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights }
@@ -1241,7 +1243,7 @@ module.exports = {
             }
           },
           "TravelerInfoSummary": {
-            PriceRequestInformation : {
+            PriceRequestInformation: {
               "CurrencyCode": currencyCode || "SAR"
             },
             "AirTravelerAvail": [
@@ -1272,10 +1274,10 @@ module.exports = {
         .then((response) => response.json())
         .then(async (result) => {
 
-          return response.status(200).json({
-              status: false,
-              data : result,
-            });
+          // return response.status(200).json({
+          //   status: false,
+          //   data: result,
+          // });
 
 
           let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
@@ -2070,6 +2072,10 @@ module.exports = {
         await FlightBooking.update({ status: 3 }, { where: { uuid: request.body.uuid } });
       }
 
+      // if (canceledCount > 0) {
+      //   await addNotification(booking.user_id, 'cancellation', { msg: "booking successfully cancellation", id: booking.id, uuid: booking.uuid });
+      // }
+
       return response.status(200).json({
         status: true,
         message: "Cancellation process completed",
@@ -2553,6 +2559,8 @@ module.exports = {
         }
       });
       // invoice code ends here
+
+      // await addNotification(userId, 'booking', { msg: "booking successfully created", id: bookingGroup.id, uuid: bookingUuid });
 
 
 
