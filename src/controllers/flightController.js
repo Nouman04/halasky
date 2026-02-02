@@ -1467,7 +1467,7 @@ module.exports = {
           });
 
           const simplifiedDetail = simplifyALTFlightResponse(itineraryGroupDetail)
-
+          console.log("HEEEEEEEEEEEEEEEEEEELOOOOOOOOOOOOOOOOOOO")
           return response.status(200).json({
             status: true,
             data: simplifiedDetail,
@@ -2363,11 +2363,28 @@ module.exports = {
       //     const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
 
       // 1. Create master booking entry
+
+
+      const totalFlights = bookingResults.length;
+      const bookedFlights = bookingResults.filter(
+        r => r.success && r.result?.confirmationId
+      ).length;
+
+      let bookingStatus = 0; // default: none booked
+
+      if (bookedFlights === totalFlights) {
+        bookingStatus = 1; // fully booked
+      } else if (bookedFlights > 0) {
+        bookingStatus = 3; // partially booked
+      }
+
+
+
       const bookingGroup = await FlightBooking.create({
         user_id: userId,
         uuid: bookingUuid,
         is_applied_code: codeId ? 1 : 0,
-        status: 1,
+        status: bookingStatus,
         codeId: codeId || null,
       });
 
@@ -2509,19 +2526,19 @@ module.exports = {
       };
 
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      //const browser = await puppeteer.launch();
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--no-zygote',
-          '--single-process',
-          '--disable-gpu'
-        ]
-      });
+      const browser = await puppeteer.launch();
+      // const browser = await puppeteer.launch({
+      //   headless: true,
+      //   args: [
+      //     '--no-sandbox',
+      //     '--disable-setuid-sandbox',
+      //     '--disable-dev-shm-usage',
+      //     '--disable-accelerated-2d-canvas',
+      //     '--no-zygote',
+      //     '--single-process',
+      //     '--disable-gpu'
+      //   ]
+      // });
       const page = await browser.newPage();
 
       await page.setContent(html, { waitUntil: "load" });
