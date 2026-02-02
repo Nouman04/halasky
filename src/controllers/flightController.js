@@ -151,8 +151,8 @@ module.exports = {
             "TPA_Extensions": {
               "DataSources": {
                 "NDC": "Enable",
-                "ATPCO": "Disable",
-                "LCC": "Disable"
+                // "ATPCO": "Disable",
+                // "LCC": "Disable"
               },
               "PreferNDCSourceOnTie": {
                 "Value": true
