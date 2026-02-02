@@ -151,8 +151,8 @@ module.exports = {
             "TPA_Extensions": {
               "DataSources": {
                 "NDC": "Enable",
-                // "ATPCO": "Disable",
-                // "LCC": "Disable"
+                "ATPCO": "Disable",
+                "LCC": "Disable"
               },
               "PreferNDCSourceOnTie": {
                 "Value": true
@@ -198,6 +198,13 @@ module.exports = {
             });
           }
 
+
+          // return response.status(500).json({
+          //     status: false,
+          //     result: result
+          //   });
+
+
           //return response.status(200).json(result);
           //return response.status(200).json(result.groupedItineraryResponse.itineraryGroups[0].itineraries[0])
           let foundItenararies = result.groupedItineraryResponse.statistics.itineraryCount;
@@ -220,13 +227,13 @@ module.exports = {
           let scheduleDescs = result.groupedItineraryResponse.scheduleDescs;
           let fareComponentDescs = result.groupedItineraryResponse.fareComponentDescs;
           let obFeeDescs = result.groupedItineraryResponse.obFeeDescs ? result.groupedItineraryResponse.obFeeDescs : [];
-          let mappedLegs = Object.fromEntries(legsInformation.map(leg => [leg.id, leg]));
-          let mappedSchedule = Object.fromEntries(scheduleDescs.map(schedule => [schedule.id, schedule]));
-          let mappedBaggages = Object.fromEntries(baggageDescs.map(baggage => [baggage.id, baggage]));
-          let mappedTax = Object.fromEntries(taxDescs.map(tax => [tax.id, tax]));
-          let mappedTaxSummary = Object.fromEntries(taxSummaryDescs.map(taxSummary => [taxSummary.id, taxSummary]));
-          let mappedFareComponent = Object.fromEntries(fareComponentDescs.map(fareComponent => [fareComponent.id, fareComponent]));
-          let mappedObFees = Object.fromEntries(obFeeDescs.map(obFee => [obFee.id, obFee]));
+          let mappedLegs = Object.fromEntries((legsInformation ?? []).map(leg => [leg.id, leg]));
+          let mappedSchedule = Object.fromEntries((scheduleDescs ?? []).map(schedule => [schedule.id, schedule]));
+          let mappedBaggages = Object.fromEntries((baggageDescs ?? []).map(baggage => [baggage.id, baggage]));
+          let mappedTax = Object.fromEntries((taxDescs ?? []).map(tax => [tax.id, tax]));
+          let mappedTaxSummary = Object.fromEntries((taxSummaryDescs ?? []).map(taxSummary => [taxSummary.id, taxSummary]));
+          let mappedFareComponent = Object.fromEntries((fareComponentDescs ?? []).map(fareComponent => [fareComponent.id, fareComponent]));
+          let mappedObFees = Object.fromEntries((obFeeDescs ?? []).map(obFee => [obFee.id, obFee]));
           let mappedEntertainment = flightAmenities?.entertainment ? Object.fromEntries(flightAmenities.entertainment.map(entertainment => [entertainment.id, entertainment])) : [];
           let mappedFood = flightAmenities?.food ? Object.fromEntries(flightAmenities.food.map(food => [food.id, food])) : [];
           let mappedLayout = flightAmenities?.layout ? Object.fromEntries(flightAmenities.layout.map(layout => [layout.id, layout])) : [];
@@ -440,8 +447,10 @@ module.exports = {
           //     // data : itineraryGroupDetail
           //     data: { simplifiedItineraries :  simplifiedItineraries[0].itineraries[0]},
           // });
+          
         })
         .catch((error) => {
+          console.error('🔥 ERROR:', error);
           return response.status(500).json({
             status: false,
             message: 'Something Went Wrong',
