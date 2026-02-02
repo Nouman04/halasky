@@ -2370,12 +2370,12 @@ module.exports = {
         r => r.success && r.result?.confirmationId
       ).length;
 
-      let bookingStatus = 0; // default: none booked
+      let bookingStatus = 0;
 
       if (bookedFlights === totalFlights) {
-        bookingStatus = 1; // fully booked
+        bookingStatus = 1; 
       } else if (bookedFlights > 0) {
-        bookingStatus = 3; // partially booked
+        bookingStatus = 3;
       }
 
 
@@ -2526,19 +2526,19 @@ module.exports = {
       };
 
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      const browser = await puppeteer.launch();
-      // const browser = await puppeteer.launch({
-      //   headless: true,
-      //   args: [
-      //     '--no-sandbox',
-      //     '--disable-setuid-sandbox',
-      //     '--disable-dev-shm-usage',
-      //     '--disable-accelerated-2d-canvas',
-      //     '--no-zygote',
-      //     '--single-process',
-      //     '--disable-gpu'
-      //   ]
-      // });
+      //const browser = await puppeteer.launch();
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-zygote',
+          '--single-process',
+          '--disable-gpu'
+        ]
+      });
       const page = await browser.newPage();
 
       await page.setContent(html, { waitUntil: "load" });
