@@ -447,7 +447,7 @@ module.exports = {
           //     // data : itineraryGroupDetail
           //     data: { simplifiedItineraries :  simplifiedItineraries[0].itineraries[0]},
           // });
-          
+
         })
         .catch((error) => {
           console.error('🔥 ERROR:', error);
@@ -910,49 +910,106 @@ module.exports = {
   },
 
   orderFulfillment: async (request, response) => {
+  try {
+
     const { error } = orderFulfillmentSchema.validate(request.body, { abortEarly: false });
 
     if (error) {
       return response.status(400).json({
         success: false,
         message: "Validation failed",
-        details: error.details.map((d) => d.message),
+        details: error.details.map(d => d.message),
       });
     }
 
     const { pnr } = request.body;
 
-    try {
-      const booking = await FlightBooking.findOne({ where: { pnr } });
+    const booking = await FlightBooking.findOne({ where: { pnr } });
 
-      if (!booking) {
-        return response.status(404).json({
-          success: false,
-          message: "Booking not found",
-        });
-      }
-
-      // Logic to fulfill order / ticket booking
-      // For now, we'll assume it updates status or behaves as a placeholder for ticket issuance
-      // If actual Sabre ticketing is needed, it should be implemented here.
-
-      booking.status = 2; // Assuming 2 is 'Ticketed' or 'Fulfilled'
-      await booking.save();
-
-      return response.status(200).json({
-        success: true,
-        message: "Order fulfilled successfully",
-        data: booking
-      });
-
-    } catch (error) {
-      return response.status(500).json({
-        status: false,
-        message: 'Something Went Wrong',
-        error: error.message,
+    if (!booking) {
+      return response.status(404).json({
+        success: false,
+        message: "Booking not found",
       });
     }
-  },
+
+    const tokenDetail = await JsonHandler.findOne({
+      where: { type: AppConst.sabreFlights }
+    });
+
+    const accessToken =
+      typeof tokenDetail.information === "string"
+        ? JSON.parse(tokenDetail.information).access_token
+        : tokenDetail.information.access_token;
+
+    // 🔹 Sabre endpoint
+    const endpoint = `${getSabreUrl()}/v1/trip/orders/fulfillFlightTickets`;
+
+    const myHeaders = new Headers();
+    myHeaders.append("Authorization", `Bearer ${accessToken}`);
+    myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Accept", "application/json");
+
+    const payload = {
+      confirmationId: pnr,
+      fulfillments: [
+        {
+          payment: {
+            primaryFormOfPayment: 1
+          }
+        }
+      ],
+      designatePrinters: [
+        {
+          profileNumber: 1
+        }
+      ],
+      formsOfPayment: [
+        { type: "CASH" },
+        { type: "CHECK" }
+      ]
+    };
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: JSON.stringify(payload),
+      redirect: "follow"
+    };
+
+    fetch(endpoint, requestOptions)
+      .then(res => res.json())
+      .then(async (result) => {
+
+        if (result?.errors || result?.Error) {
+          return response.status(400).json({
+            success: false,
+            message: "Sabre ticketing failed",
+            error: result
+          });
+        }
+
+        booking.status = 2; // Ticketed
+        booking.ticketed_at = new Date();
+        booking.sabre_ticket_response = result;
+        await booking.save();
+
+        return response.status(200).json({
+          success: true,
+          message: "Ticket issued successfully",
+          data: result
+        });
+      });
+
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      message: "Something Went Wrong",
+      error: error.message,
+    });
+  }
+},
+
 
   userBookings: async (request, response) => {
     try {
@@ -1177,7 +1234,6 @@ module.exports = {
 
 
   searchAlternateDatesFlights: async (request, response) => {
-    console.log(1111);
     try {
       const { error } = alternateDateFlightSchema.validate(request.body, { abortEarly: false });
 
@@ -1284,7 +1340,6 @@ module.exports = {
         .then(async (result) => {
 
           // return response.status(200).json({
-          //   status: false,
           //   data: result,
           // });
 
@@ -1424,8 +1479,13 @@ module.exports = {
                   });
 
                   passengerDetail.currencyConversion = passenger.passengerInfo.currencyConversion;
-                  passengerDetail.passengerTotalFare = passenger.passengerInfo.passengerTotalFare;
-                  passengerDetail.currencyConversion = passenger.passengerInfo.currencyConversion;
+
+                  const pTotalFare = passenger.passengerInfo.passengerTotalFare;
+                  passengerDetail.passengerTotalFare = pTotalFare ? {
+                    ...pTotalFare,
+                    baseCurrency: pTotalFare.baseFareCurrency,
+                    equivalentCurrency: pTotalFare.equivalentCurrency
+                  } : pTotalFare;
 
 
 
@@ -2382,7 +2442,7 @@ module.exports = {
       let bookingStatus = 0;
 
       if (bookedFlights === totalFlights) {
-        bookingStatus = 1; 
+        bookingStatus = 1;
       } else if (bookedFlights > 0) {
         bookingStatus = 3;
       }
@@ -2927,6 +2987,9 @@ function simplifyALTFlightResponse(itineraryGroupDetail, groupDescription = null
           passengerFareComponentDetail.fareCurrency,
           passenger.currencyConversion
         );
+        passengerDetail.totalAmount = passenger.passengerTotalFare.totalFare;
+        passengerDetail.baseCurrency = passenger.passengerTotalFare.baseFareCurrency;
+        passengerDetail.convertedCurrency = passenger.passengerTotalFare.currency;
 
         passengers.push(passengerDetail);
       });
