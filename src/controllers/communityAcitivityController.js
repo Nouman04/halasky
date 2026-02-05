@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { Sequelize , QueryTypes } = require('sequelize');
+const { Sequelize, QueryTypes } = require('sequelize');
 const {
   CommunityActivity,
   CommunityActivityContent,
@@ -18,11 +18,12 @@ const {
 } = require("../database/models");
 const LogActivityHandler = require("../Helpers/logActivityHandler");
 const appConst = require("../appConst");
+const { addNotification } = require('../Helpers/notificationHandler');
 let moment = require("moment");
-const {   
-  addCommunityActivitySchema , 
-  editValidationSchema , 
-  deleteCommunityValidationSchema , 
+const {
+  addCommunityActivitySchema,
+  editValidationSchema,
+  deleteCommunityValidationSchema,
   listCommunityActivityValidationSchema,
   changeStatusValidationSchema,
   changeApprovalValidationSchema,
@@ -32,20 +33,20 @@ const {
   toggleActivityActionSchema,
   getUserActivitiesSchema,
   adminActivitiesSchema,
- } = require('../validations/communityActivityValidation')
+} = require('../validations/communityActivityValidation')
 module.exports = {
   add: async (request, response) => {
     try {
 
       const { error } = addCommunityActivitySchema.validate(request.body, { abortEarly: false });
-                          
-                            if (error) {
-                                  return response.status(400).json({
-                                  success: false,
-                                  message: "Validation failed",
-                                  details: error.details.map((d) => d.message),
-                                  });
-                              }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
 
       let categoryId = request.body.categoryId;
       let title = request.body.title;
@@ -62,15 +63,15 @@ module.exports = {
 
       const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
 
-      let fileInformation = request.files.map( (file) => {
-         const fileDetail = file.filename.split(".");
-         const extension = fileDetail[fileDetail.length - 1].toLowerCase();
-         return  {
-            community_activity_id: communityActivity.id,
-            content: file.filename, // Correctly extract filename
-            type : fileExtensions.includes(extension) ? 1 : 2
-          }
+      let fileInformation = request.files.map((file) => {
+        const fileDetail = file.filename.split(".");
+        const extension = fileDetail[fileDetail.length - 1].toLowerCase();
+        return {
+          community_activity_id: communityActivity.id,
+          content: file.filename, // Correctly extract filename
+          type: fileExtensions.includes(extension) ? 1 : 2
         }
+      }
       );
 
       await CommunityActivityContent.bulkCreate(fileInformation);
@@ -95,7 +96,7 @@ module.exports = {
       return response.status(200).json({
         status: true,
         message: "Post added successfully",
-        postId : communityActivity.id
+        postId: communityActivity.id
       });
     } catch (error) {
       return response.status(500).json({
@@ -109,14 +110,14 @@ module.exports = {
   edit: async (request, response) => {
     try {
       const { error } = editValidationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
 
       const activityThumbnailPath = path.join(
         __dirname,
@@ -159,31 +160,31 @@ module.exports = {
         description: description,
       };
 
-     if (request.files && request.files.length > 0) {
-          postDetail.content.forEach(activity => {
-              let filePath = path.join(activityThumbnailPath, activity.content);
-              if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-              }
-          }); 
-          
-          
-          const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+      if (request.files && request.files.length > 0) {
+        postDetail.content.forEach(activity => {
+          let filePath = path.join(activityThumbnailPath, activity.content);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+          }
+        });
 
-          let fileInformation = request.files.map( (file) => {
-            const fileDetail = file.filename.split(".");
-            const extension = fileDetail[fileDetail.length - 1].toLowerCase();
-            return  {
-                community_activity_id: postDetail.id,
-                content: file.filename, // Correctly extract filename
-                type : fileExtensions.includes(extension) ? 1 : 2
-              }
-            }
-          );
 
-      await CommunityActivityContent.bulkCreate(fileInformation);
+        const fileExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
 
-     }
+        let fileInformation = request.files.map((file) => {
+          const fileDetail = file.filename.split(".");
+          const extension = fileDetail[fileDetail.length - 1].toLowerCase();
+          return {
+            community_activity_id: postDetail.id,
+            content: file.filename, // Correctly extract filename
+            type: fileExtensions.includes(extension) ? 1 : 2
+          }
+        }
+        );
+
+        await CommunityActivityContent.bulkCreate(fileInformation);
+
+      }
 
       let tags = request.body.tags;
 
@@ -222,14 +223,14 @@ module.exports = {
   delete: async (request, response) => {
     try {
       const { error } = deleteCommunityValidationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
       let postId = request.body.id;
       console.log(postId);
       const activityThumbnailPath = path.join(
@@ -297,16 +298,16 @@ module.exports = {
         });
       }
       let status = request.body.status;
+      let page = parseInt(request.body.pageNo) || 1;
+      let pageSize = parseInt(request.body.pageSize) || 10;
 
       whereCondition = {};
       if (status) {
         whereCondition.status = status;
       }
-      let skip = (parseInt(request.body.pageNo) - 1) * 10;
+      let skip = (page - 1) * pageSize;
 
-
-
-      const posts = await CommunityActivity.findAll({
+      const { count, rows } = await CommunityActivity.findAndCountAll({
         attributes: {
           include: [
             [
@@ -474,14 +475,25 @@ module.exports = {
         ],
         where: whereCondition,
         offset: skip,
-        limit: 10
+        limit: pageSize,
+        distinct: true
       });
       const imageUrl = `${process.env.APP_URL}/uploads/thumbnail`;
       const profileImageUrl = `${process.env.APP_URL}/uploads/image`;
 
+      const totalPages = Math.ceil(count / pageSize);
+
       return response.status(200).json({
         status: true,
-        data: posts,
+        data: rows,
+        pagination: {
+          page: page,
+          pageSize: pageSize,
+          totalItems: count,
+          totalPages: totalPages,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        },
         imageUrl: imageUrl,
         profileImageUrl: profileImageUrl
       });
@@ -495,18 +507,18 @@ module.exports = {
 
   },
 
-  popularTags : async (request ,response)=>{
+  popularTags: async (request, response) => {
     try {
       const tags = await Tag.findAll({
-                          attributes: [
-                            [Sequelize.fn('LOWER', Sequelize.col('title')), 'title'],
-                            [Sequelize.fn('COUNT', '*'), 'count'],
-                          ],
-                          group: [Sequelize.literal('LOWER(title)')],
-                          order: [[Sequelize.literal('count'), 'DESC']],
-                          limit: 5,
-                          raw: true,
-                        });
+        attributes: [
+          [Sequelize.fn('LOWER', Sequelize.col('title')), 'title'],
+          [Sequelize.fn('COUNT', '*'), 'count'],
+        ],
+        group: [Sequelize.literal('LOWER(title)')],
+        order: [[Sequelize.literal('count'), 'DESC']],
+        limit: 5,
+        raw: true,
+      });
 
       return response.status(200).json({
         status: true,
@@ -525,14 +537,14 @@ module.exports = {
   changeStatus: async (request, response) => {
     try {
       const { error } = changeStatusValidationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
       let postId = request.body.postId;
       let status = request.body.status;
       await CommunityActivity.update(
@@ -569,14 +581,14 @@ module.exports = {
   changeApproval: async (request, response) => {
     try {
       const { error } = changeApprovalValidationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
       let postId = request.body.postId;
       let approvalStatus = request.body.approvalStatus;
       await CommunityActivity.update(
@@ -611,14 +623,14 @@ module.exports = {
   updateRestriction: async (request, response) => {
     try {
       const { error } = updateRestrictionValidationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
       let postId = request.body.postId;
       let restrictionType = request.body.restrictionType;
       let restrictionTime = request.body.restrictionTime;
@@ -652,14 +664,14 @@ module.exports = {
   createPoll: async (request, response) => {
     try {
       const { error } = createPollValidationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
       const { activityId, questions } = request.body;
       const userId = request.user.id;
 
@@ -700,23 +712,23 @@ module.exports = {
   submitPollAnswer: async (request, response) => {
     try {
       const { error } = submitPollAnswerValidationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
-      const { answerId, questionId  } = request.body;
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
+      const { answerId, questionId } = request.body;
       const userId = request.user.id;
       const existingPollAnswer = await PollAnswer.findOne({
-        include : {
-          model : PollOption,
+        include: {
+          model: PollOption,
           as: 'pollOption',
-          where : {poll_question_id : questionId }
+          where: { poll_question_id: questionId }
         },
-        where: { user_id : userId}
+        where: { user_id: userId }
       });
 
       if (existingPollAnswer) {
@@ -726,37 +738,37 @@ module.exports = {
         );
       } else {
         await PollAnswer.create({
-          user_id: userId, 
+          user_id: userId,
           poll_option_id: answerId
         });
       }
 
 
       const pollDetail = await PollQuestion.findOne({
-                                              where: { id: questionId },
-                                              include: {
-                                                model: PollOption,
-                                                as: 'options',
-                                                include: [
-                                                  {
-                                                    model: PollAnswer,
-                                                    as: 'answers',
-                                                    attributes: []
-                                                  }
-                                                ],
-                                                attributes: {
-                                                  include: [
-                                                    [
-                                                      Sequelize.fn("COUNT", Sequelize.col("options.answers.id")),
-                                                      "answerCount"
-                                                    ]
-                                                  ]
-                                                },
-                                                required: false,
-                                                subQuery: false
-                                              },
-                                              group: ['PollQuestion.id', 'options.id']
-                                            });
+        where: { id: questionId },
+        include: {
+          model: PollOption,
+          as: 'options',
+          include: [
+            {
+              model: PollAnswer,
+              as: 'answers',
+              attributes: []
+            }
+          ],
+          attributes: {
+            include: [
+              [
+                Sequelize.fn("COUNT", Sequelize.col("options.answers.id")),
+                "answerCount"
+              ]
+            ]
+          },
+          required: false,
+          subQuery: false
+        },
+        group: ['PollQuestion.id', 'options.id']
+      });
 
 
       await LogActivityHandler(
@@ -768,7 +780,7 @@ module.exports = {
 
       return response.status(200).json({
         status: true,
-        data : pollDetail,
+        data: pollDetail,
         message: "Poll answer submitted successfully",
       });
     } catch (error) {
@@ -782,33 +794,33 @@ module.exports = {
 
   getPollResults: async (request, response) => {
     try {
-     const { questionId } = request.params;
+      const { questionId } = request.params;
 
       const results = await PollQuestion.findOne({
-                                              where: { id: questionId },
-                                              include: {
-                                                model: PollOption,
-                                                as: 'options',
-                                                include: [
-                                                  {
-                                                    model: PollAnswer,
-                                                    as: 'answers',
-                                                    attributes: []
-                                                  }
-                                                ],
-                                                attributes: {
-                                                  include: [
-                                                    [
-                                                      Sequelize.fn("COUNT", Sequelize.col("options.answers.id")),
-                                                      "answerCount"
-                                                    ]
-                                                  ]
-                                                },
-                                                required: false,
-                                                subQuery: false
-                                              },
-                                              group: ['PollQuestion.id', 'options.id']
-                                            });
+        where: { id: questionId },
+        include: {
+          model: PollOption,
+          as: 'options',
+          include: [
+            {
+              model: PollAnswer,
+              as: 'answers',
+              attributes: []
+            }
+          ],
+          attributes: {
+            include: [
+              [
+                Sequelize.fn("COUNT", Sequelize.col("options.answers.id")),
+                "answerCount"
+              ]
+            ]
+          },
+          required: false,
+          subQuery: false
+        },
+        group: ['PollQuestion.id', 'options.id']
+      });
 
 
       return response.status(200).json({
@@ -829,43 +841,43 @@ module.exports = {
       const { postId } = req.params;
 
       const results = await CommunityActivity.findOne({
-                                            where: { id: postId },
-                                            include: [
-                                              {
-                                                model: PollQuestion,
-                                                as: 'pollQuestions',
-                                                include: [
-                                                  {
-                                                    model: PollOption,
-                                                    as: 'options',
-                                                    include: [
-                                                      {
-                                                        model: PollAnswer,
-                                                        as: 'answers',
-                                                        attributes: []
-                                                      }
-                                                    ],
-                                                    attributes: {
-                                                      include: [
-                                                        [
-                                                          Sequelize.fn("COUNT", Sequelize.col("pollQuestions.options.answers.id")),
-                                                          "answerCount"
-                                                        ]
-                                                      ]
-                                                    },
-                                                    required: false
-                                                  }
-                                                ]
-                                              },
-                                              {
-                                                  model: User,
-                                                  as: 'user',
-                                              },
-                                            ],
-                                            group: ['CommunityActivity.id', 'pollQuestions.id', 'pollQuestions.options.id'],
-                                          });
+        where: { id: postId },
+        include: [
+          {
+            model: PollQuestion,
+            as: 'pollQuestions',
+            include: [
+              {
+                model: PollOption,
+                as: 'options',
+                include: [
+                  {
+                    model: PollAnswer,
+                    as: 'answers',
+                    attributes: []
+                  }
+                ],
+                attributes: {
+                  include: [
+                    [
+                      Sequelize.fn("COUNT", Sequelize.col("pollQuestions.options.answers.id")),
+                      "answerCount"
+                    ]
+                  ]
+                },
+                required: false
+              }
+            ]
+          },
+          {
+            model: User,
+            as: 'user',
+          },
+        ],
+        group: ['CommunityActivity.id', 'pollQuestions.id', 'pollQuestions.options.id'],
+      });
 
-      res.status(200).json({ status: true , data : results });
+      res.status(200).json({ status: true, data: results });
     } catch (error) {
       console.error("Error fetching community activity:", error);
       return res.status(500).json({ message: "Server error", error: error.message });
@@ -875,7 +887,7 @@ module.exports = {
 
   toggleActivityAction: async (request, response) => {
     try {
-      
+
       const { error } = toggleActivityActionSchema.validate(request.body, { abortEarly: false });
       if (error) {
         return response.status(400).json({
@@ -887,12 +899,12 @@ module.exports = {
 
       const userId = request.user.id;
       const { activityId, activityType, value } = request.body;
-     
+
       // const validActions = ['spam', 'saved', 'liked'];
       // if (!validActions.includes(activityType)) {
       //   return response.status(400).json({ message: "Invalid action type" });
       // }
-      
+
       const whereClause = {
         user_id: userId,
         activity_id: activityId,
@@ -917,7 +929,15 @@ module.exports = {
           is_saved: activityType == 'saved' ? 1 : null,
         };
 
-        await ActivityAction.create(actionData);
+        let createdAction = await ActivityAction.create(actionData);
+
+        if (!['spam', 'saved'].includes(activityType)) {
+          const activityDetail = await CommunityActivity.findOne({ where: { id: activityId } });
+          if (activityDetail && activityDetail.added_by !== userId) {
+            await addNotification(activityDetail.added_by, 'reaction', { msg: `${request.user.name} reacted to your post`, id: activityId });
+          }
+        }
+
         return response.status(200).json({ message: `${activityType} added` });
 
       } else {
@@ -930,7 +950,7 @@ module.exports = {
     }
   },
 
-  getUserActivities : async (request, response) => {
+  getUserActivities: async (request, response) => {
     try {
 
       const { error } = getUserActivitiesSchema.validate(request.body, { abortEarly: false });
@@ -941,7 +961,7 @@ module.exports = {
           errors: error.details.map((err) => err.message),
         });
       }
-      
+
       const userId = req.user.id;
       const page = parseInt(req.body.pageNo) || 1;
       const limit = 10;
@@ -1003,25 +1023,25 @@ module.exports = {
     }
   },
 
-  trendingTags : async (request , response) => {
+  trendingTags: async (request, response) => {
     try {
-            const topTags = await Tag.findAll({
-                                attributes: [
-                                  'title',
-                                  [Sequelize.fn('COUNT', Sequelize.col('title')), 'usage_count']
-                                ],
-                                group: ['title'],
-                                order: [[Sequelize.literal('usage_count'), 'DESC']],
-                                limit: 10
-                              });
-             return response.status(200).json({ status: true, data: topTags });
-        } catch (error) {
-          return response.status(500).json({ message: 'Server error', error: error.message });
-        }
+      const topTags = await Tag.findAll({
+        attributes: [
+          'title',
+          [Sequelize.fn('COUNT', Sequelize.col('title')), 'usage_count']
+        ],
+        group: ['title'],
+        order: [[Sequelize.literal('usage_count'), 'DESC']],
+        limit: 10
+      });
+      return response.status(200).json({ status: true, data: topTags });
+    } catch (error) {
+      return response.status(500).json({ message: 'Server error', error: error.message });
+    }
   },
 
 
-  getAdminActivities : async (request, response) => {
+  getAdminActivities: async (request, response) => {
     try {
       const { error } = adminActivitiesSchema.validate(request.body, { abortEarly: false });
       if (error) {
@@ -1043,7 +1063,7 @@ module.exports = {
             include: [
               {
                 model: Role,
-                through: "UserRole", 
+                through: "UserRole",
                 where: { title: "admin" },
                 required: true,
               },
@@ -1055,14 +1075,14 @@ module.exports = {
         limit: 10,
       });
 
-    response.json({ success: true, data: logs });
-  } catch (error) {
-    console.error("Error fetching admin activities:", error);
-    response.status(500).json({ success: false, message: "Server error" });
-  }
+      response.json({ success: true, data: logs });
+    } catch (error) {
+      console.error("Error fetching admin activities:", error);
+      response.status(500).json({ success: false, message: "Server error" });
+    }
   },
 
 
 
-  updateTemplate: async (request, response) => {},
+  updateTemplate: async (request, response) => { },
 };
