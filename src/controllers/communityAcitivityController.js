@@ -18,7 +18,7 @@ const {
 } = require("../database/models");
 const LogActivityHandler = require("../Helpers/logActivityHandler");
 const appConst = require("../appConst");
-const { addNotification } = require('../Helpers/notificationHandler');
+// const { addNotification } = require('../Helpers/notificationHandler');
 let moment = require("moment");
 const {
   addCommunityActivitySchema,
@@ -932,12 +932,12 @@ module.exports = {
 
         let createdAction = await ActivityAction.create(actionData);
 
-        if (!['spam', 'saved'].includes(activityType)) {
-          const activityDetail = await CommunityActivity.findOne({ where: { id: activityId } });
-          if (activityDetail && activityDetail.added_by !== userId) {
-            await addNotification(activityDetail.added_by, 'reaction', { msg: `${request.user.name} reacted to your post`, id: activityId });
-          }
-        }
+        // if (!['spam', 'saved'].includes(activityType)) {
+        //   const activityDetail = await CommunityActivity.findOne({ where: { id: activityId } });
+        //   if (activityDetail && activityDetail.added_by !== userId) {
+        //     await addNotification(activityDetail.added_by, 'reaction', { msg: `${request.user.name} reacted to your post`, id: activityId });
+        //   }
+        // }
 
         return response.status(200).json({ message: `${activityType} added` });
 

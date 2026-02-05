@@ -912,26 +912,26 @@ module.exports = {
   orderFulfillment: async (request, response) => {
   try {
 
-    const { error } = orderFulfillmentSchema.validate(request.body, { abortEarly: false });
+    // const { error } = orderFulfillmentSchema.validate(request.body, { abortEarly: false });
 
-    if (error) {
-      return response.status(400).json({
-        success: false,
-        message: "Validation failed",
-        details: error.details.map(d => d.message),
-      });
-    }
+    // if (error) {
+    //   return response.status(400).json({
+    //     success: false,
+    //     message: "Validation failed",
+    //     details: error.details.map(d => d.message),
+    //   });
+    // }
 
     const { pnr } = request.body;
 
-    const booking = await FlightBooking.findOne({ where: { pnr } });
+    // const booking = await FlightBooking.findOne({ where: { pnr } });
 
-    if (!booking) {
-      return response.status(404).json({
-        success: false,
-        message: "Booking not found",
-      });
-    }
+    // if (!booking) {
+    //   return response.status(404).json({
+    //     success: false,
+    //     message: "Booking not found",
+    //   });
+    // }
 
     const tokenDetail = await JsonHandler.findOne({
       where: { type: AppConst.sabreFlights }
