@@ -234,12 +234,12 @@ module.exports = {
           let mappedTaxSummary = Object.fromEntries((taxSummaryDescs ?? []).map(taxSummary => [taxSummary.id, taxSummary]));
           let mappedFareComponent = Object.fromEntries((fareComponentDescs ?? []).map(fareComponent => [fareComponent.id, fareComponent]));
           let mappedObFees = Object.fromEntries((obFeeDescs ?? []).map(obFee => [obFee.id, obFee]));
-          let mappedEntertainment = flightAmenities.entertainment ? Object.fromEntries(flightAmenities.entertainment.map(entertainment => [entertainment.id, entertainment])) : [];
-          let mappedFood = flightAmenities.food ? Object.fromEntries(flightAmenities.food.map(food => [food.id, food])) : [];
-          let mappedLayout = flightAmenities.layout ? Object.fromEntries(flightAmenities.layout.map(layout => [layout.id, layout])) : [];
-          let mappedPower = flightAmenities.power ? Object.fromEntries(flightAmenities.power.map(power => [power.id, power])) : [];
-          let mappedSeat = flightAmenities.seat ? Object.fromEntries(flightAmenities.seat.map(seat => [seat.id, seat])) : [];
-          let mappedWifi = flightAmenities.wifi ? Object.fromEntries(flightAmenities.wifi.map(wifi => [wifi.id, wifi])) : [];
+          let mappedEntertainment = mapAmenities(flightAmenities?.entertainment);
+          let mappedFood = mapAmenities(flightAmenities?.food);
+          let mappedLayout = mapAmenities(flightAmenities?.layout);
+          let mappedPower = mapAmenities(flightAmenities?.power);
+          let mappedSeat = mapAmenities(flightAmenities?.seat);
+          let mappedWifi = mapAmenities(flightAmenities?.wifi);tAmenities.wifi ? Object.fromEntries(flightAmenities.wifi.map(wifi => [wifi.id, wifi])) : [];
 
           let itineraryGroupDetail = [];
 
@@ -959,8 +959,17 @@ module.exports = {
           }
         }
       ],
-      designatePrinters: [
+       designatePrinters: [
         {
+          type: "TKT",
+          profileNumber: 1
+        },
+        {
+          type: "ITIN",
+          profileNumber: 1
+        },
+        {
+          type: "INV",
           profileNumber: 1
         }
       ],
@@ -3027,6 +3036,11 @@ function convertToSAR(amount, fromCurrency, currencyConversion) {
   if (fromCurrency === 'SAR') return amount;
   return amount * (currencyConversion?.exchangeRateUsed || 1);
 }
+
+const mapAmenities = (items = []) =>
+  Array.isArray(items)
+    ? Object.fromEntries(items.map(i => [i.id, i]))
+    : {};
 
 
 
