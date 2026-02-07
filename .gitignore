@@ -5,3 +5,4 @@ src/database/config
 src/config/mailConfig.js
 src/jobs/token-job.js
 .env
+config.bat
