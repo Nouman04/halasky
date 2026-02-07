@@ -239,7 +239,7 @@ module.exports = {
           let mappedLayout = mapAmenities(flightAmenities?.layout);
           let mappedPower = mapAmenities(flightAmenities?.power);
           let mappedSeat = mapAmenities(flightAmenities?.seat);
-          let mappedWifi = mapAmenities(flightAmenities?.wifi);tAmenities.wifi ? Object.fromEntries(flightAmenities.wifi.map(wifi => [wifi.id, wifi])) : [];
+          let mappedWifi = mapAmenities(flightAmenities?.wifi);
 
           let itineraryGroupDetail = [];
 
