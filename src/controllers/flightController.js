@@ -217,7 +217,6 @@ module.exports = {
             });
           }
 
-
           let flightAmenities = result.groupedItineraryResponse.flightAmenities;
           let itineraryGroups = result.groupedItineraryResponse.itineraryGroups;
           let legsInformation = result.groupedItineraryResponse.legDescs;
