@@ -909,114 +909,114 @@ module.exports = {
   },
 
   orderFulfillment: async (request, response) => {
-  try {
+    try {
 
-    // const { error } = orderFulfillmentSchema.validate(request.body, { abortEarly: false });
+      // const { error } = orderFulfillmentSchema.validate(request.body, { abortEarly: false });
 
-    // if (error) {
-    //   return response.status(400).json({
-    //     success: false,
-    //     message: "Validation failed",
-    //     details: error.details.map(d => d.message),
-    //   });
-    // }
+      // if (error) {
+      //   return response.status(400).json({
+      //     success: false,
+      //     message: "Validation failed",
+      //     details: error.details.map(d => d.message),
+      //   });
+      // }
 
-    const { pnr } = request.body;
+      const { pnr } = request.body;
 
-    // const booking = await FlightBooking.findOne({ where: { pnr } });
+      // const booking = await FlightBooking.findOne({ where: { pnr } });
 
-    // if (!booking) {
-    //   return response.status(404).json({
-    //     success: false,
-    //     message: "Booking not found",
-    //   });
-    // }
+      // if (!booking) {
+      //   return response.status(404).json({
+      //     success: false,
+      //     message: "Booking not found",
+      //   });
+      // }
 
-    const tokenDetail = await JsonHandler.findOne({
-      where: { type: AppConst.sabreFlights }
-    });
-
-    const accessToken =
-      typeof tokenDetail.information === "string"
-        ? JSON.parse(tokenDetail.information).access_token
-        : tokenDetail.information.access_token;
-
-    // 🔹 Sabre endpoint
-    const endpoint = `${getSabreUrl()}/v1/trip/orders/fulfillFlightTickets`;
-
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${accessToken}`);
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Accept", "application/json");
-
-    const payload = {
-      confirmationId: pnr,
-      fulfillments: [
-        {
-          payment: {
-            primaryFormOfPayment: 1
-          }
-        }
-      ],
-       designatePrinters: [
-        {
-          type: "TKT",
-          profileNumber: 1
-        },
-        {
-          type: "ITIN",
-          profileNumber: 1
-        },
-        {
-          type: "INV",
-          profileNumber: 1
-        }
-      ],
-      formsOfPayment: [
-        { type: "CASH" },
-        { type: "CHECK" }
-      ]
-    };
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: JSON.stringify(payload),
-      redirect: "follow"
-    };
-
-    fetch(endpoint, requestOptions)
-      .then(res => res.json())
-      .then(async (result) => {
-
-        if (result?.errors || result?.Error) {
-          return response.status(400).json({
-            success: false,
-            message: "Sabre ticketing failed",
-            error: result
-          });
-        }
-
-        booking.status = 2; // Ticketed
-        booking.ticketed_at = new Date();
-        booking.sabre_ticket_response = result;
-        await booking.save();
-
-        return response.status(200).json({
-          success: true,
-          message: "Ticket issued successfully",
-          data: result
-        });
+      const tokenDetail = await JsonHandler.findOne({
+        where: { type: AppConst.sabreFlights }
       });
 
-  } catch (error) {
-    return response.status(500).json({
-      success: false,
-      message: "Something Went Wrong",
-      error: error.message,
-    });
-  }
-},
+      const accessToken =
+        typeof tokenDetail.information === "string"
+          ? JSON.parse(tokenDetail.information).access_token
+          : tokenDetail.information.access_token;
+
+      // 🔹 Sabre endpoint
+      const endpoint = `${getSabreUrl()}/v1/trip/orders/fulfillFlightTickets`;
+
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${accessToken}`);
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/json");
+
+      const payload = {
+        confirmationId: pnr,
+        fulfillments: [
+          {
+            payment: {
+              primaryFormOfPayment: 1
+            }
+          }
+        ],
+        designatePrinters: [
+          {
+            type: "TKT",
+            profileNumber: 1
+          },
+          {
+            type: "ITIN",
+            profileNumber: 1
+          },
+          {
+            type: "INV",
+            profileNumber: 1
+          }
+        ],
+        formsOfPayment: [
+          { type: "CASH" },
+          { type: "CHECK" }
+        ]
+      };
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(payload),
+        redirect: "follow"
+      };
+
+      fetch(endpoint, requestOptions)
+        .then(res => res.json())
+        .then(async (result) => {
+
+          if (result?.errors || result?.Error) {
+            return response.status(400).json({
+              success: false,
+              message: "Sabre ticketing failed",
+              error: result
+            });
+          }
+
+          booking.status = 2; // Ticketed
+          booking.ticketed_at = new Date();
+          booking.sabre_ticket_response = result;
+          await booking.save();
+
+          return response.status(200).json({
+            success: true,
+            message: "Ticket issued successfully",
+            data: result
+          });
+        });
+
+    } catch (error) {
+      return response.status(500).json({
+        success: false,
+        message: "Something Went Wrong",
+        error: error.message,
+      });
+    }
+  },
 
 
   userBookings: async (request, response) => {
@@ -2498,11 +2498,13 @@ module.exports = {
           const flightBaseFare = parseFloat(fareInfo.subtotal || 0);
           const flightTaxAmount = parseFloat(fareInfo.taxes || 0);
           const flightTotalAmount = parseFloat(fareInfo.total || 0);
+          const flightCurrency = fareInfo.currency || 'SAR';
 
           // Add to invoice totals
           totalBaseFare += flightBaseFare;
           totalTaxAmount += flightTaxAmount;
           totalAmount += flightTotalAmount;
+          const currency = flightCurrency;
 
           if (PNR) allPNR.push(PNR);
 
@@ -2542,6 +2544,7 @@ module.exports = {
             destination_country: locationHelper.locationDetail(r.flight.description.arrival_location).country,
             date: r.flight.description.departure_date,
             amount: flightTotalAmount,
+            currency: flightCurrency,
             booking_status: isBooked,
             segments: [],
           };
@@ -2597,6 +2600,7 @@ module.exports = {
         totalBaseFare,
         totalTaxAmount,
         totalAmount,
+        currency: allFlightsDetail.length > 0 ? allFlightsDetail[0].currency : 'SAR',
         passengers: passengers,
         flights: allFlightsDetail,
         bookingId: bookingUuid,
