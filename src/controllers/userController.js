@@ -856,6 +856,33 @@ module.exports = {
                 error: error.message
             });
         }
+    },
+
+    getUnreadNotifications: async (request, response) => {
+        try {
+            const userId = request.user.id;
+
+            const notifications = await Notification.findAll({
+                where: {
+                    user_id: userId,
+                    reads_at: null
+                },
+                order: [['created_at', 'DESC']]
+            });
+
+            return response.status(200).json({
+                status: true,
+                message: 'Unread notifications fetched successfully',
+                data: notifications
+            });
+
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
     }
 };
 

@@ -25,5 +25,6 @@ router.put('/update-profile-password', UserController.updateProfilePassword);
 router.put('/update-profile', UserController.updateProfileDetail);
 router.get('/get-role-permissions', UserController.getRolePermission);
 router.post('/read-notification', UserController.readNotification);
+router.get('/unread-notifications', UserController.getUnreadNotifications);
 
 module.exports = router;
