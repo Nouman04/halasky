@@ -1,4 +1,4 @@
-const { JsonHandler , HotelBooking , Guest , PaymentDetail , User , Promotion } = require("../database/models");
+const { JsonHandler, HotelBooking, Guest, PaymentDetail, User, Promotion } = require("../database/models");
 const AppConst = require("../appConst");
 const locations = require('../public/files/destinations.json');
 const locationHelper = require('../Helpers/LocationHelper');
@@ -7,58 +7,59 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const moment = require('moment');
 const transport = require('../config/mailConfig');
-const { hotelSearchSchema , hotelCompareSchema , hotelDetailSchema, hotelImageSchema , rateKeySchema , hotelBookingSchema , hotelBookingDetailSchema} =require('../validations/hotelValidation');
+const { hotelSearchSchema, hotelCompareSchema, hotelDetailSchema, hotelImageSchema, rateKeySchema, hotelBookingSchema, hotelBookingDetailSchema } = require('../validations/hotelValidation');
+const { addNotification } = require('../Helpers/notificationHandler');
 require("dotenv").config();
 
 module.exports = {
 
-  locationList : async (request , response) => {
-        const { searchQuery } = request.body;
-        try{
-          filteredLocations = locations.filter( location => {
-            let locationCode = location.code.toLowerCase();
-            let locationCity = location.city.toLowerCase();
-            return locationCode.includes(searchQuery.toLowerCase()) || locationCity.includes(searchQuery.toLowerCase());
-          }).map( location => {
-            return {
-                    "code": location.code,
-                    "lat": location.lat,
-                    "lon": location.lon,
-                    "city": location.city,
-                    "state": location.state,
-                    "country": location.country,
-                    "country_code" : location.country_code
-                  };
-    
-          }).slice(0 , 20);
+  locationList: async (request, response) => {
+    const { searchQuery } = request.body;
+    try {
+      filteredLocations = locations.filter(location => {
+        let locationCode = location.code.toLowerCase();
+        let locationCity = location.city.toLowerCase();
+        return locationCode.includes(searchQuery.toLowerCase()) || locationCity.includes(searchQuery.toLowerCase());
+      }).map(location => {
+        return {
+          "code": location.code,
+          "lat": location.lat,
+          "lon": location.lon,
+          "city": location.city,
+          "state": location.state,
+          "country": location.country,
+          "country_code": location.country_code
+        };
 
-         
-          return response.status(200).json({
-              status: true,
-              data: filteredLocations,
-          });
-        } catch (error){
-          return response.status(500).json({
-              status: false,
-              message: 'Something Went Wrong',
-              error: error.message,
-          });
-      }
-        
-  
-      },
+      }).slice(0, 20);
+
+
+      return response.status(200).json({
+        status: true,
+        data: filteredLocations,
+      });
+    } catch (error) {
+      return response.status(500).json({
+        status: false,
+        message: 'Something Went Wrong',
+        error: error.message,
+      });
+    }
+
+
+  },
 
 
   list: async (request, response) => {
     const { error } = hotelSearchSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
-            return response.status(400).json({
-              success: false,
-              message: "Validation failed",
-              details: error.details.map((d) => d.message),
-            });
-        }
+
+    if (error) {
+      return response.status(400).json({
+        success: false,
+        message: "Validation failed",
+        details: error.details.map((d) => d.message),
+      });
+    }
     const { checkIn, checkOut, cityCode, countryCode, rooms } = request.body;
     const tokenDetail = await JsonHandler.findOne({
       where: { type: AppConst.sabreFlights },
@@ -66,7 +67,7 @@ module.exports = {
 
 
 
-    const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
+    const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
 
     let mappedRooms = rooms.map((room, index) => {
@@ -89,55 +90,55 @@ module.exports = {
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Accept", "application/json");
 
-     const searchRequest = {
-              GetHotelAvailRQ: {
-                POS: {
-                  Source: {
-                    PseudoCityCode: "3GML"
-                  }
-                },
-                SearchCriteria: {
-                  OffSet: 1,
-                  SortBy: "NegotiatedRateAvailability",
-                  SortOrder: "ASC",
-                  PageSize: 40,
-                  ImageRef: {
-                    Type: "MEDIUM",        // THUMBNAIL | SMALL | MEDIUM | LARGE | ORIGINAL
-                    CategoryCode: 3,       // 1=Exterior, 2=Lobby, 3=Room, etc.
-                    LanguageCode: "EN"
-                  },
-                  GeoSearch: {
-                    GeoRef: {
-                      Radius: 200,
-                      UOM: "MI",
-                      RestrictSearchToCountry: "US",
-                      RefPoint: {
-                        Value: cityCode,              
-                        ValueContext: "CODE", 
-                        RefPointType: "6",    
-                        CountryCode: countryCode
-                      }
-                    }
-                  },
-                  RateInfoRef: {
-                    CurrencyCode: "SAR",
-                    BestOnly: "4",
-                    StayDateTimeRange: {
-                      StartDate: checkIn,
-                      EndDate: checkOut
-                    },
-                    Rooms: {
-                      Room: mappedRooms,
-                    }
-                  },
-                  HotelPref: {
-                    LenientHotelName: "inn and"
-                  }
+      const searchRequest = {
+        GetHotelAvailRQ: {
+          POS: {
+            Source: {
+              PseudoCityCode: "3GML"
+            }
+          },
+          SearchCriteria: {
+            OffSet: 1,
+            SortBy: "NegotiatedRateAvailability",
+            SortOrder: "ASC",
+            PageSize: 40,
+            ImageRef: {
+              Type: "MEDIUM",        // THUMBNAIL | SMALL | MEDIUM | LARGE | ORIGINAL
+              CategoryCode: 3,       // 1=Exterior, 2=Lobby, 3=Room, etc.
+              LanguageCode: "EN"
+            },
+            GeoSearch: {
+              GeoRef: {
+                Radius: 200,
+                UOM: "MI",
+                RestrictSearchToCountry: "US",
+                RefPoint: {
+                  Value: cityCode,
+                  ValueContext: "CODE",
+                  RefPointType: "6",
+                  CountryCode: countryCode
                 }
               }
+            },
+            RateInfoRef: {
+              CurrencyCode: "SAR",
+              BestOnly: "4",
+              StayDateTimeRange: {
+                StartDate: checkIn,
+                EndDate: checkOut
+              },
+              Rooms: {
+                Room: mappedRooms,
+              }
+            },
+            HotelPref: {
+              LenientHotelName: "inn and"
             }
+          }
+        }
+      }
 
-    
+
 
 
       const requestOptions = {
@@ -152,7 +153,7 @@ module.exports = {
         .then(async (result) => {
 
 
-          
+
           let detail = result.GetHotelAvailRS;
 
           // return response.status(200).json({
@@ -160,8 +161,7 @@ module.exports = {
           //       message: result
           //     });
 
-          if(result.status && (result.status == 'NotProcessed' || result.status == 'Incomplete'))
-          {
+          if (result.status && (result.status == 'NotProcessed' || result.status == 'Incomplete')) {
             return response.status(200).json({
               status: false,
               message: result.errorCode,
@@ -169,7 +169,7 @@ module.exports = {
             });
           }
 
-        
+
           const appResults = result?.GetHotelAvailRS?.ApplicationResults;
 
           if (appResults?.Error && Array.isArray(appResults.Error)) {
@@ -181,24 +181,24 @@ module.exports = {
           }
 
 
-          if(detail.ApplicationResults.status != "Complete"){
-              return response.status(200).json({
-                status: false,
-                message: 'Something went wrong'
-              });
+          if (detail.ApplicationResults.status != "Complete") {
+            return response.status(200).json({
+              status: false,
+              message: 'Something went wrong'
+            });
           }
 
           //listing amount in amountList
-          let amountList = detail.HotelAvailInfos.HotelAvailInfo.map( info => {
-             let rateInfos = info.HotelRateInfo.RateInfos.ConvertedRateInfo
-             hotelRateInfo = [];
-             rateInfos.forEach( rate => {
-                if(rate.AverageNightlyRate){
-                  hotelRateInfo.push(rate.AverageNightlyRate);
-                }
-             });
+          let amountList = detail.HotelAvailInfos.HotelAvailInfo.map(info => {
+            let rateInfos = info.HotelRateInfo.RateInfos.ConvertedRateInfo
+            hotelRateInfo = [];
+            rateInfos.forEach(rate => {
+              if (rate.AverageNightlyRate) {
+                hotelRateInfo.push(rate.AverageNightlyRate);
+              }
+            });
 
-             return Math.min(...hotelRateInfo);
+            return Math.min(...hotelRateInfo);
           })
 
           let maximumNightlyRate = Math.max(...amountList);
@@ -206,7 +206,7 @@ module.exports = {
 
           return response.status(200).json({
             status: true,
-            data: { result , maximumNightlyRate , minimumNightlyRate }
+            data: { result, maximumNightlyRate, minimumNightlyRate }
           });
         });
     } catch (error) {
@@ -219,197 +219,197 @@ module.exports = {
   },
 
 
-specificList: async (request, response) => {
-  const { error } = hotelCompareSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
-            return response.status(400).json({
-              success: false,
-              message: "Validation failed",
-              details: error.details.map((d) => d.message),
-            });
-        }
+  specificList: async (request, response) => {
+    const { error } = hotelCompareSchema.validate(request.body, { abortEarly: false });
 
-  const { checkIn, checkOut, cityCode, countryCode, rooms, hotelCodes } = request.body;
-
-  // Validate hotelCodes
-  if (!hotelCodes || !Array.isArray(hotelCodes) || hotelCodes.length === 0) {
-    return response.status(400).json({
-      status: false,
-      message: "hotelCodes must be a non-empty array",
-    });
-  }
-
-  const tokenDetail = await JsonHandler.findOne({
-    where: { type: AppConst.sabreFlights },
-  });
-
-  const accessToken =
-    typeof tokenDetail.information === "string"
-      ? JSON.parse(tokenDetail.information).access_token
-      : tokenDetail.information.access_token;
-
-  let mappedRooms = rooms.map((room, index) => {
-    let roomDetail = {
-      Index: index + 1,
-      Adults: room.Adults,
-    };
-    if (room.Children) {
-      roomDetail.Children = room.Children;
-      roomDetail.ChildAges = room.ChildAges;
+    if (error) {
+      return response.status(400).json({
+        success: false,
+        message: "Validation failed",
+        details: error.details.map((d) => d.message),
+      });
     }
-    return roomDetail;
-  });
 
-  try {
-    let endpoint = "https://api.cert.sabre.com/v3.0.0/get/hotelavail";
+    const { checkIn, checkOut, cityCode, countryCode, rooms, hotelCodes } = request.body;
 
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${accessToken}`);
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Accept", "application/json");
+    // Validate hotelCodes
+    if (!hotelCodes || !Array.isArray(hotelCodes) || hotelCodes.length === 0) {
+      return response.status(400).json({
+        status: false,
+        message: "hotelCodes must be a non-empty array",
+      });
+    }
 
-    let searchRequest = {
-      GetHotelAvailRQ: {
-        POS: {
-          Source: {
-            PseudoCityCode: "3GML",
+    const tokenDetail = await JsonHandler.findOne({
+      where: { type: AppConst.sabreFlights },
+    });
+
+    const accessToken =
+      typeof tokenDetail.information === "string"
+        ? JSON.parse(tokenDetail.information).access_token
+        : tokenDetail.information.access_token;
+
+    let mappedRooms = rooms.map((room, index) => {
+      let roomDetail = {
+        Index: index + 1,
+        Adults: room.Adults,
+      };
+      if (room.Children) {
+        roomDetail.Children = room.Children;
+        roomDetail.ChildAges = room.ChildAges;
+      }
+      return roomDetail;
+    });
+
+    try {
+      let endpoint = "https://api.cert.sabre.com/v3.0.0/get/hotelavail";
+
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${accessToken}`);
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/json");
+
+      let searchRequest = {
+        GetHotelAvailRQ: {
+          POS: {
+            Source: {
+              PseudoCityCode: "3GML",
+            },
           },
-        },
-        SearchCriteria: {
-          OffSet: 1,
-          SortBy: "TotalRate",
-          SortOrder: "ASC",
-          TierLabels: true,
-          GeoSearch: {
-            GeoRef: {
-              Radius: 50,
-              UOM: "KM",
-              RefPoint: {
-                Value: cityCode,
-                ValueContext: "CODE",
-                RefPointType: "6",
-                CountryCode: countryCode,
+          SearchCriteria: {
+            OffSet: 1,
+            SortBy: "TotalRate",
+            SortOrder: "ASC",
+            TierLabels: true,
+            GeoSearch: {
+              GeoRef: {
+                Radius: 50,
+                UOM: "KM",
+                RefPoint: {
+                  Value: cityCode,
+                  ValueContext: "CODE",
+                  RefPointType: "6",
+                  CountryCode: countryCode,
+                },
               },
             },
-          },
-          RateInfoRef: {
-            CurrencyCode: "SAR",
-            BestOnly: "2",
-            PrepaidQualifier: "IncludePrepaid",
-            RefundableOnly: false,
-            ConvertedRateInfoOnly: true,
-            StayDateRange: {
-              StartDate: checkIn,
-              EndDate: checkOut,
+            RateInfoRef: {
+              CurrencyCode: "SAR",
+              BestOnly: "2",
+              PrepaidQualifier: "IncludePrepaid",
+              RefundableOnly: false,
+              ConvertedRateInfoOnly: true,
+              StayDateRange: {
+                StartDate: checkIn,
+                EndDate: checkOut,
+              },
+              Rooms: {
+                Room: mappedRooms,
+              },
             },
-            Rooms: {
-              Room: mappedRooms,
+            ImageRef: {
+              Type: "LARGE",
+              LanguageCode: "en",
             },
-          },
-          ImageRef: {
-            Type: "LARGE",
-            LanguageCode: "en",
           },
         },
-      },
-    };
+      };
 
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: JSON.stringify(searchRequest),
-      redirect: "follow",
-    };
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(searchRequest),
+        redirect: "follow",
+      };
 
-    const result = await fetch(endpoint, requestOptions).then((res) => res.json());
-    let detail = result.GetHotelAvailRS;
+      const result = await fetch(endpoint, requestOptions).then((res) => res.json());
+      let detail = result.GetHotelAvailRS;
 
-    if (result.status && result.status === "NotProcessed") {
-      return response.status(200).json({
-        status: false,
-        message: result.errorCode,
-        error: result.errorCode,
-      });
-    }
+      if (result.status && result.status === "NotProcessed") {
+        return response.status(200).json({
+          status: false,
+          message: result.errorCode,
+          error: result.errorCode,
+        });
+      }
 
-    const appResults = result?.GetHotelAvailRS?.ApplicationResults;
+      const appResults = result?.GetHotelAvailRS?.ApplicationResults;
 
-    if (appResults?.Error && Array.isArray(appResults.Error)) {
-      return response.status(200).json({
-        status: false,
-        message: "Something went wrong",
-        error: appResults.Error,
-      });
-    }
+      if (appResults?.Error && Array.isArray(appResults.Error)) {
+        return response.status(200).json({
+          status: false,
+          message: "Something went wrong",
+          error: appResults.Error,
+        });
+      }
 
-    if (detail.ApplicationResults.status !== "Complete") {
-      return response.status(200).json({
-        status: false,
-        message: "Something went wrong",
-      });
-    }
+      if (detail.ApplicationResults.status !== "Complete") {
+        return response.status(200).json({
+          status: false,
+          message: "Something went wrong",
+        });
+      }
 
-    // Filter hotels based on provided hotelCodes
-    const filteredHotels = detail.HotelAvailInfos.HotelAvailInfo.filter((hotel) =>
-      hotelCodes.includes(hotel.HotelInfo.HotelCode)
-    );
-
-    // If no hotels match the provided codes
-    if (filteredHotels.length === 0) {
-      return response.status(200).json({
-        status: false,
-        message: "No hotels found for the provided hotel codes",
-      });
-    }
-
-    // Map the filtered hotels to the required format
-    const hotelsData = filteredHotels.map((hotel) => {
-      const hotelInfo = hotel.HotelInfo;
-      const locationInfo = hotelInfo.LocationInfo;
-      const imageInfo = hotel.HotelImageInfo?.ImageItem;
-      const rateInfos = hotel.HotelRateInfo.RateInfos.ConvertedRateInfo;
-      // Get the minimum AverageNightlyRate for the hotel
-      const amount = Math.min(
-        ...rateInfos
-          .filter((rate) => rate.AverageNightlyRate)
-          .map((rate) => rate.AverageNightlyRate)
+      // Filter hotels based on provided hotelCodes
+      const filteredHotels = detail.HotelAvailInfos.HotelAvailInfo.filter((hotel) =>
+        hotelCodes.includes(hotel.HotelInfo.HotelCode)
       );
 
-      return {
-        hotelTitle: hotelInfo.HotelName,
-        location: {
-          address: locationInfo.Address.AddressLine1,
-          city: locationInfo.Address.CityName.value,
-          country: locationInfo.Address.CountryName.value,
-          latitude: locationInfo.Latitude,
-          longitude: locationInfo.Longitude,
-          cityCode: locationInfo.Address.CityName.CityCode,
-          countryCode: locationInfo.Address.CountryName.Code,
-          distance: hotelInfo.Distance,
-          direction: hotelInfo.Direction,
-        },
-        amenities: hotelInfo.Amenities.Amenity.map((amenity) => amenity.Description),
-        logo: hotelInfo.Logo,
-        imageUrl: imageInfo ? imageInfo.Image.Url : null,
-        amount: isFinite(amount) ? amount : null, // Handle cases where no valid rates are found
-      };
-    });
+      // If no hotels match the provided codes
+      if (filteredHotels.length === 0) {
+        return response.status(200).json({
+          status: false,
+          message: "No hotels found for the provided hotel codes",
+        });
+      }
 
-    return response.status(200).json({
-      status: true,
-      data: {
-        hotels: hotelsData,
-      },
-    });
-  } catch (error) {
-    return response.status(500).json({
-      status: false,
-      message: "Something Went Wrong",
-      error: error.message,
-    });
-  }
-},
+      // Map the filtered hotels to the required format
+      const hotelsData = filteredHotels.map((hotel) => {
+        const hotelInfo = hotel.HotelInfo;
+        const locationInfo = hotelInfo.LocationInfo;
+        const imageInfo = hotel.HotelImageInfo?.ImageItem;
+        const rateInfos = hotel.HotelRateInfo.RateInfos.ConvertedRateInfo;
+        // Get the minimum AverageNightlyRate for the hotel
+        const amount = Math.min(
+          ...rateInfos
+            .filter((rate) => rate.AverageNightlyRate)
+            .map((rate) => rate.AverageNightlyRate)
+        );
+
+        return {
+          hotelTitle: hotelInfo.HotelName,
+          location: {
+            address: locationInfo.Address.AddressLine1,
+            city: locationInfo.Address.CityName.value,
+            country: locationInfo.Address.CountryName.value,
+            latitude: locationInfo.Latitude,
+            longitude: locationInfo.Longitude,
+            cityCode: locationInfo.Address.CityName.CityCode,
+            countryCode: locationInfo.Address.CountryName.Code,
+            distance: hotelInfo.Distance,
+            direction: hotelInfo.Direction,
+          },
+          amenities: hotelInfo.Amenities.Amenity.map((amenity) => amenity.Description),
+          logo: hotelInfo.Logo,
+          imageUrl: imageInfo ? imageInfo.Image.Url : null,
+          amount: isFinite(amount) ? amount : null, // Handle cases where no valid rates are found
+        };
+      });
+
+      return response.status(200).json({
+        status: true,
+        data: {
+          hotels: hotelsData,
+        },
+      });
+    } catch (error) {
+      return response.status(500).json({
+        status: false,
+        message: "Something Went Wrong",
+        error: error.message,
+      });
+    }
+  },
 
 
   trending: async (request, response) => {
@@ -418,7 +418,7 @@ specificList: async (request, response) => {
       where: { type: AppConst.sabreFlights },
     });
 
-    const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
+    const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
     let mappedRooms = rooms.map((room, index) => {
       roomDetail = {};
@@ -517,25 +517,25 @@ specificList: async (request, response) => {
 
 
 
-  hotelDetail : async ( request , response ) =>{
+  hotelDetail: async (request, response) => {
     try {
 
       const { error } = hotelDetailSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
-            return response.status(400).json({
-              success: false,
-              message: "Validation failed",
-              details: error.details.map((d) => d.message),
-            });
-        }
 
-      const { hotelCode , checkIn , checkOut , rooms } = request.body;
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
+
+      const { hotelCode, checkIn, checkOut, rooms } = request.body;
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights },
       });
-  
-      const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;  
+
+      const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
       let endpoint = "https://api.cert.sabre.com/v5/get/hoteldetails";
 
@@ -544,18 +544,18 @@ specificList: async (request, response) => {
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Accept", "application/json");
 
-      let roomJson = rooms.map( (room , index) => {
-          let roomDetail = {};
-          roomDetail.Index = index+1;
-          roomDetail.Adults = room.adults;
+      let roomJson = rooms.map((room, index) => {
+        let roomDetail = {};
+        roomDetail.Index = index + 1;
+        roomDetail.Adults = room.adults;
 
-          if(room.children){
-            roomDetail.Children = room.childrens;
-            roomDetail.ChildAges = room.childAges;
-          }
+        if (room.children) {
+          roomDetail.Children = room.childrens;
+          roomDetail.ChildAges = room.childAges;
+        }
 
-          return roomDetail;
-      }) 
+        return roomDetail;
+      })
 
       // [
       //   {
@@ -576,15 +576,15 @@ specificList: async (request, response) => {
           SearchCriteria: {
             HotelRefs: {
               HotelRef: {
-                HotelCode: hotelCode, 
+                HotelCode: hotelCode,
                 CodeContext: "GLOBAL"
               }
             },
             RateInfoRef: {
-              CurrencyCode: "SAR", 
+              CurrencyCode: "SAR",
               StayDateTimeRange: {
-                StartDate: checkIn, 
-                EndDate: checkOut    
+                StartDate: checkIn,
+                EndDate: checkOut
               },
               Rooms: {
                 Room: roomJson
@@ -607,19 +607,18 @@ specificList: async (request, response) => {
 
           let apiResposneStatus = result.GetHotelDetailsRS.ApplicationResults.status;
 
-          if(apiResposneStatus == "Incomplete"){
+          if (apiResposneStatus == "Incomplete") {
             return response.status(200).json({
               status: false,
               error: result.GetHotelDetailsRS.ApplicationResults.Error,
             });
           }
 
-          if(!result.GetHotelDetailsRS.HotelDetailsInfo)
-          {
+          if (!result.GetHotelDetailsRS.HotelDetailsInfo) {
             return response.status(200).json({
-                status: false,
-                data: result,
-              });
+              status: false,
+              data: result,
+            });
           }
 
 
@@ -647,25 +646,25 @@ specificList: async (request, response) => {
 
 
 
-  images : async ( request , response ) =>{
+  images: async (request, response) => {
     try {
-      
+
       const { error } = hotelImageSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
-            return response.status(400).json({
-              success: false,
-              message: "Validation failed",
-              details: error.details.map((d) => d.message),
-            });
-        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
 
       const { hotelCode } = request.body;
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights },
       });
-  
-      const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;  
+
+      const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
       let endpoint = "https://api.cert.sabre.com/v4.0.0/get/hotelcontent";
 
@@ -678,23 +677,23 @@ specificList: async (request, response) => {
         GetHotelContentRQ: {
           POS: {
             Source: {
-              PseudoCityCode: "3GML" 
+              PseudoCityCode: "3GML"
             }
           },
           SearchCriteria: {
             HotelRefs: {
               HotelRef: {
-                HotelCode: hotelCode, 
-                CodeContext: "GLOBAL"  
+                HotelCode: hotelCode,
+                CodeContext: "GLOBAL"
               }
             },
             MediaRef: {
-              MaxItems: "10", 
+              MaxItems: "10",
               MediaTypes: {
                 Images: {
                   Image: [
                     {
-                      Type: "MEDIUM" 
+                      Type: "MEDIUM"
                     }
                   ]
                 }
@@ -731,25 +730,25 @@ specificList: async (request, response) => {
 
 
 
-  confirmRate : async ( request , response ) =>{
+  confirmRate: async (request, response) => {
     try {
 
       const { error } = rateKeySchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
-            return response.status(400).json({
-              success: false,
-              message: "Validation failed",
-              details: error.details.map((d) => d.message),
-            });
-        }
-      
-      const { rateKey , checkIn , checkOut , rooms } = request.body;
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
+
+      const { rateKey, checkIn, checkOut, rooms } = request.body;
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights },
       });
-  
-      const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;  
+
+      const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
       let endpoint = "https://api.cert.sabre.com/v5/hotel/pricecheck";
 
@@ -758,18 +757,18 @@ specificList: async (request, response) => {
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Accept", "application/json");
 
-      let roomJson = rooms.map( (room , index) => {
+      let roomJson = rooms.map((room, index) => {
         let roomDetail = {};
-        roomDetail.Index = index+1;
+        roomDetail.Index = index + 1;
         roomDetail.Adults = room.adults;
 
-        if(room.childrens){
+        if (room.childrens) {
           roomDetail.Children = room.childrens;
           roomDetail.ChildAges = room.childAges;
         }
 
         return roomDetail;
-    })
+      })
 
 
       let searchRequest = {
@@ -782,9 +781,9 @@ specificList: async (request, response) => {
           // "CorporateNumber": "DK44391RC",
           RateInfoRef: {
             RateKey: rateKey,
-              StayDateTimeRange: {
-              StartDate: checkIn, 
-                EndDate: checkOut  
+            StayDateTimeRange: {
+              StartDate: checkIn,
+              EndDate: checkOut
             },
             Rooms: {
               Room: roomJson
@@ -820,34 +819,34 @@ specificList: async (request, response) => {
     }
   },
 
-  createBooking : async ( request , response ) => {
-    try{
+  createBooking: async (request, response) => {
+    try {
 
       const { error } = hotelBookingSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
-            return response.status(400).json({
-              success: false,
-              message: "Validation failed",
-              details: error.details.map((d) => d.message),
-            });
-        }
+
+      if (error) {
+        return response.status(400).json({
+          success: false,
+          message: "Validation failed",
+          details: error.details.map((d) => d.message),
+        });
+      }
 
       const tokenDetail = await JsonHandler.findOne({
         where: { type: AppConst.sabreFlights },
       });
-  
-      const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;  
-      
+
+      const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
+
       let endpoint = "https://api.cert.sabre.com/v2.5.0/passenger/records?mode=create";
 
       const myHeaders = new Headers();
       myHeaders.append("Authorization", `Bearer ${accessToken}`);
       myHeaders.append("Content-Type", "application/json");
       myHeaders.append("Accept", "application/json");
-      
-      const { 
-        contactNumber, 
+
+      const {
+        contactNumber,
         bookingKey,
         email,
         personList,
@@ -856,61 +855,61 @@ specificList: async (request, response) => {
       } = request.body;
 
       //contact detail
-      const contactDetail = contactNumber.map( (cn , index) => {
+      const contactDetail = contactNumber.map((cn, index) => {
         return {
-                  "NameNumber": (index+1)+".1",
-                  "Phone": cn.phone,
-                  "PhoneUseType": "H"
-                }
-      })
-
-      const personDetail = personList.map( (person , index) =>{
-        return {
-           "NameNumber": (index+1)+".1",
-            "PassengerType": person.type,
-            "GivenName": person.firstName,
-            "Surname": person.lastName 
+          "NameNumber": (index + 1) + ".1",
+          "Phone": cn.phone,
+          "PhoneUseType": "H"
         }
       })
 
-      const roomDetail = roomList.map( (room , index) =>{
-        const roomGuests = room.guests.map((guest , guestIndex) =>{
+      const personDetail = personList.map((person, index) => {
+        return {
+          "NameNumber": (index + 1) + ".1",
+          "PassengerType": person.type,
+          "GivenName": person.firstName,
+          "Surname": person.lastName
+        }
+      })
+
+      const roomDetail = roomList.map((room, index) => {
+        const roomGuests = room.guests.map((guest, guestIndex) => {
           let guestDetail = {};
-          
+
           guestDetail.Type = guest.type == 'ADT' ? 10 : 8;
           guestDetail.Index = (guestIndex + 1);
           guestDetail.FirstName = guest.firstName;
           guestDetail.LastName = guest.lastName;
 
-          if(guest.leadGuest){
+          if (guest.leadGuest) {
             guestDetail.LeadGuest = true;
           }
 
-          if(guest.phone){
+          if (guest.phone) {
             guestDetail.Contact = {
-              Phone : guest.phone
+              Phone: guest.phone
             };
           }
 
-          if(guest.email){
+          if (guest.email) {
             guestDetail.Email = guest.email;
           }
 
-          if(guest.age){
+          if (guest.age) {
             guestDetail.Age = guest.age;
           }
 
           return guestDetail;
         });
 
-          return {
-              "RoomIndex": (index + 1),
-              "Guests": {
-                "Guest": roomGuests
-              }
-            }
+        return {
+          "RoomIndex": (index + 1),
+          "Guests": {
+            "Guest": roomGuests
+          }
+        }
       })
-      
+
       let createRequest = {
         "CreatePassengerNameRecordRQ": {
           "version": "2.5.0",
@@ -972,150 +971,153 @@ specificList: async (request, response) => {
         }
       }
 
-      
+
 
       const requestOptions = {
         method: "POST",
         headers: myHeaders,
         body: JSON.stringify(createRequest),
         redirect: "follow"
-    };
+      };
 
-    fetch( endpoint , requestOptions)
-    .then((response) => response.json()) 
-    .then(async (result) => {
-      if(
-        result.CreatePassengerNameRecordRS && 
-        result.CreatePassengerNameRecordRS.ApplicationResults.status === "Complete"
-      ){
+      fetch(endpoint, requestOptions)
+        .then((response) => response.json())
+        .then(async (result) => {
+          if (
+            result.CreatePassengerNameRecordRS &&
+            result.CreatePassengerNameRecordRS.ApplicationResults.status === "Complete"
+          ) {
 
-        // return response.status(200).json({ status : false , data : result});
+            // return response.status(200).json({ status : false , data : result});
 
-        let PNR = result.CreatePassengerNameRecordRS.ItineraryRef.ID;
-        let user_id = request.user.id;
-        let is_applied_code = request.body.appliedCode ? request.body.appliedCode : false;
-        let code_id = request.body.code_id ? request.body.code_id : null;
-        let from = request.body.from;
-        let to = request.body.to;
-        let hotel_id = request.body.hotel_id;
-        let amount = request.body.amount;
-        let country = locationHelper.locationDetail(request.body.location_code).country;
-        let hotelDetail = await HotelBooking.create({
-                                  pnr : PNR,
-                                  user_id : user_id,
-                                  is_applied_code : is_applied_code,
-                                  hotel_id : hotel_id,
-                                  code_id : code_id,
-                                  from : from,
-                                  to : to,
-                                  amount: amount,
-                                  booking_key : bookingKey,
-                                  country : country 
-                                });
-
-            
-
-      let guestList = [];
-      roomList.forEach( (room ) =>{
-        room.guests.forEach((guest) =>{
-          let guestDetail = {};
-          					
-          guestDetail.type = guest.type;
-          guestDetail.hotel_booking_id = hotelDetail.id;
-          guestDetail.first_name = guest.firstName;
-          guestDetail.last_name = guest.lastName;
-          guestDetail.is_lead_guest = guest.leadGuest ? guest.leadGuest : false;
-          guestDetail.phone_number = guest.phone ? guest.phone : null;
-          guestDetail.age = guest.age ? guest.age : null;
-          guestDetail.email = guest.email ? guest.email : null;
-
-          guestList.push(guestDetail);
-        });
-
-      });
+            let PNR = result.CreatePassengerNameRecordRS.ItineraryRef.ID;
+            let user_id = request.user.id;
+            let is_applied_code = request.body.appliedCode ? request.body.appliedCode : false;
+            let code_id = request.body.code_id ? request.body.code_id : null;
+            let from = request.body.from;
+            let to = request.body.to;
+            let hotel_id = request.body.hotel_id;
+            let amount = request.body.amount;
+            let country = locationHelper.locationDetail(request.body.location_code).country;
+            let hotelDetail = await HotelBooking.create({
+              pnr: PNR,
+              user_id: user_id,
+              is_applied_code: is_applied_code,
+              hotel_id: hotel_id,
+              code_id: code_id,
+              from: from,
+              to: to,
+              amount: amount,
+              booking_key: bookingKey,
+              country: country
+            });
 
 
-        await Guest.bulkCreate(guestList);
 
-        await PaymentDetail.create({
-                                booking_id	:  hotelDetail.id,
-                                first_name	: paymentDetail.firstName,
-                                last_name	: paymentDetail.lastName,
-                                card_type : paymentDetail.type,
-                                card_code: paymentDetail.cardCode,
-                                card_number:	paymentDetail.cardNumber,
-                                card_expiry_month: paymentDetail.expiryMonth,	
-                                card_expiry_year: paymentDetail.expiryYear
-                            });
+            let guestList = [];
+            roomList.forEach((room) => {
+              room.guests.forEach((guest) => {
+                let guestDetail = {};
+
+                guestDetail.type = guest.type;
+                guestDetail.hotel_booking_id = hotelDetail.id;
+                guestDetail.first_name = guest.firstName;
+                guestDetail.last_name = guest.lastName;
+                guestDetail.is_lead_guest = guest.leadGuest ? guest.leadGuest : false;
+                guestDetail.phone_number = guest.phone ? guest.phone : null;
+                guestDetail.age = guest.age ? guest.age : null;
+                guestDetail.email = guest.email ? guest.email : null;
+
+                guestList.push(guestDetail);
+              });
+
+            });
 
 
-        const invoiceTemplate =  path.join(__dirname, '../public/views/hotel-invoice.ejs');
-        const pdfData = {
-                          pnr : PNR,
-                          totalAmount :amount,
-                          from : from,
-                          to : to,
-                          roomList : roomList,
-                          paymentDetail : paymentDetail,
-                          hotelName: request.body.hotelName,
-                          hotelRoom: request.body.hotelRoom,
-                        } 
-        const html = await ejs.renderFile(invoiceTemplate, pdfData);
-        // const browser = await puppeteer.launch();
-         const browser = await puppeteer.launch({
-                                            headless: true,
-                                            args: [
-                                              '--no-sandbox',
-                                              '--disable-setuid-sandbox',
-                                              '--disable-dev-shm-usage',
-                                              '--disable-accelerated-2d-canvas',
-                                              '--no-zygote',
-                                              '--single-process',
-                                              '--disable-gpu'
-                                            ]
-                                          });
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'load' });
-        const fileName = moment().unix()+"-"+request.user.name+"-"+PNR+".pdf";
-        const pdfPath = path.join(__dirname, `../public/uploads/invoices/${fileName}`);
-        await page.pdf({ path: pdfPath, format: 'A4' });
-        await browser.close();
+            await Guest.bulkCreate(guestList);
 
-        const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
+            await PaymentDetail.create({
+              booking_id: hotelDetail.id,
+              first_name: paymentDetail.firstName,
+              last_name: paymentDetail.lastName,
+              card_type: paymentDetail.type,
+              card_code: paymentDetail.cardCode,
+              card_number: paymentDetail.cardNumber,
+              card_expiry_month: paymentDetail.expiryMonth,
+              card_expiry_year: paymentDetail.expiryYear
+            });
 
-        const mailOptions = {
-                          from: process.env.EMAIL_FROM,
-                          to: request.user.email,
-                          subject: `Hotel Booking Invoice - PNR ${PNR}`,
-                          text: `Dear Customer,\n\nYour hotel booking has been confirmed. Please find the invoice attached.\n\nPNR: ${PNR}\nCheck-in: ${from}\nCheck-out: ${to}\nTotal Amount: ${amount}\n\nThank you for booking with us!\nBest regards,\nHalasky`,
-                          attachments: [
-                            {
-                              filename: `invoice-${PNR}.pdf`,
-                              path: pdfPath,
-                              contentType: 'application/pdf'
-                            }
-                          ]
-                        };
 
-        transport.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.error('Error sending email:', error);
+            const invoiceTemplate = path.join(__dirname, '../public/views/hotel-invoice.ejs');
+            const pdfData = {
+              pnr: PNR,
+              totalAmount: amount,
+              from: from,
+              to: to,
+              roomList: roomList,
+              paymentDetail: paymentDetail,
+              hotelName: request.body.hotelName,
+              hotelRoom: request.body.hotelRoom,
+            }
+            const html = await ejs.renderFile(invoiceTemplate, pdfData);
+            // const browser = await puppeteer.launch();
+            const browser = await puppeteer.launch({
+              headless: true,
+              args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--no-zygote',
+                '--single-process',
+                '--disable-gpu'
+              ]
+            });
+            const page = await browser.newPage();
+            await page.setContent(html, { waitUntil: 'load' });
+            const fileName = moment().unix() + "-" + request.user.name + "-" + PNR + ".pdf";
+            const pdfPath = path.join(__dirname, `../public/uploads/invoices/${fileName}`);
+            await page.pdf({ path: pdfPath, format: 'A4' });
+            await browser.close();
+
+            const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
+
+            const mailOptions = {
+              from: process.env.EMAIL_FROM,
+              to: request.user.email,
+              subject: `Hotel Booking Invoice - PNR ${PNR}`,
+              text: `Dear Customer,\n\nYour hotel booking has been confirmed. Please find the invoice attached.\n\nPNR: ${PNR}\nCheck-in: ${from}\nCheck-out: ${to}\nTotal Amount: ${amount}\n\nThank you for booking with us!\nBest regards,\nHalasky`,
+              attachments: [
+                {
+                  filename: `invoice-${PNR}.pdf`,
+                  path: pdfPath,
+                  contentType: 'application/pdf'
+                }
+              ]
+            };
+
+            transport.sendMail(mailOptions, (error, info) => {
+              if (error) {
+                console.error('Error sending email:', error);
+              } else {
+                console.log('Email sent successfully:', info.response);
+              }
+            });
+
+            await addNotification(user_id, 'booking', { msg: "hotel booking successfully created", id: hotelDetail.id, pnr: PNR });
+
+            return response.status(200).json({
+              status: true,
+              message: "Booking created successfully",
+              downloadUrl: pdfUrl
+            });
+
           } else {
-            console.log('Email sent successfully:', info.response);
+            return response.status(200).json({ status: false, data: result });
           }
-        });
-        return response.status(200).json({
-          status : true,
-          message : "Booking created successfully",
-          downloadUrl : pdfUrl
-        });
 
-      } else {
-        return response.status(200).json({ status : false , data : result});
-      }
 
-      
-    })
+        })
 
 
     } catch (error) {
@@ -1127,37 +1129,37 @@ specificList: async (request, response) => {
     }
   },
 
-  userBookings : async (request , response ) => {
-    try{
-    const userId = request.user.id;
-    const bookings = await HotelBooking.findAll({
-                        where: { user_id: userId },
-                        include: [
-                          {
-                            model: User,
-                            as: 'user',
-                          },
-                          {
-                            model: Promotion,
-                            as: 'promotion',
-                          },
-                          {
-                            model: PaymentDetail,
-                            as: 'paymentDetail',
-                          },
-                          {
-                            model: Guest,
-                            as: 'guests',
-                          },
-                        ],
-                        order: [['created_at', 'DESC']],
-                      });
+  userBookings: async (request, response) => {
+    try {
+      const userId = request.user.id;
+      const bookings = await HotelBooking.findAll({
+        where: { user_id: userId },
+        include: [
+          {
+            model: User,
+            as: 'user',
+          },
+          {
+            model: Promotion,
+            as: 'promotion',
+          },
+          {
+            model: PaymentDetail,
+            as: 'paymentDetail',
+          },
+          {
+            model: Guest,
+            as: 'guests',
+          },
+        ],
+        order: [['created_at', 'DESC']],
+      });
 
-        return response.status(200).json({
-          status : true,
-          data : { bookings }
-        });
-     } catch (error) {
+      return response.status(200).json({
+        status: true,
+        data: { bookings }
+      });
+    } catch (error) {
       return response.status(500).json({
         status: false,
         message: "Something Went Wrong",
@@ -1166,61 +1168,61 @@ specificList: async (request, response) => {
     }
   },
 
-  bookingDetail : async (request , response ) => {
-     const { error } = hotelBookingDetailSchema.validate(request.body, { abortEarly: false });
-        
-      if (error) {
-          return response.status(400).json({
-            success: false,
-            message: "Validation failed",
-            details: error.details.map((d) => d.message),
-          });
-      }
+  bookingDetail: async (request, response) => {
+    const { error } = hotelBookingDetailSchema.validate(request.body, { abortEarly: false });
 
-      try{
+    if (error) {
+      return response.status(400).json({
+        success: false,
+        message: "Validation failed",
+        details: error.details.map((d) => d.message),
+      });
+    }
 
-        const pnr = request.body.pnr;
-        const booking = await HotelBooking.findOne({
-                            where: { pnr: pnr },
-                            include: [
-                              {
-                                model: User,
-                                as: 'user',
-                              },
-                              {
-                                model: Promotion,
-                                as: 'promotion',
-                              },
-                              {
-                                model: PaymentDetail,
-                                as: 'paymentDetail',
-                              },
-                              {
-                                model: Guest,
-                                as: 'guests',
-                              },
-                            ]
-                          });
+    try {
 
-        const hotelId = booking.hotel_id;
+      const pnr = request.body.pnr;
+      const booking = await HotelBooking.findOne({
+        where: { pnr: pnr },
+        include: [
+          {
+            model: User,
+            as: 'user',
+          },
+          {
+            model: Promotion,
+            as: 'promotion',
+          },
+          {
+            model: PaymentDetail,
+            as: 'paymentDetail',
+          },
+          {
+            model: Guest,
+            as: 'guests',
+          },
+        ]
+      });
 
-        const imageList = await getHotelImages(hotelId);
+      const hotelId = booking.hotel_id;
 
-
-         return response.status(200).json({
-          status : true,
-          data : { bookingDetail : booking , images : imageList } 
-        });
+      const imageList = await getHotelImages(hotelId);
 
 
-      } catch (error) {
+      return response.status(200).json({
+        status: true,
+        data: { bookingDetail: booking, images: imageList }
+      });
+
+
+    } catch (error) {
       return response.status(500).json({
         status: false,
         message: "Something Went Wrong",
         error: error.message,
       });
     }
-  } 
+  }
 
 };
 
@@ -1253,11 +1255,11 @@ const processHotelDetails = (apiResponse) => {
       productCode: ratePlan.ProductCode,
       mealPlan: ratePlan.MealsIncluded
         ? {
-            breakfast: ratePlan.MealsIncluded.Breakfast || false,
-            lunch: ratePlan.MealsIncluded.Lunch || false,
-            dinner: ratePlan.MealsIncluded.Dinner || false,
-            description: ratePlan.MealsIncluded.MealPlanDescription || 'None'
-          }
+          breakfast: ratePlan.MealsIncluded.Breakfast || false,
+          lunch: ratePlan.MealsIncluded.Lunch || false,
+          dinner: ratePlan.MealsIncluded.Dinner || false,
+          description: ratePlan.MealsIncluded.MealPlanDescription || 'None'
+        }
         : { description: 'None' },
       pricing: {
         startDate: ratePlan.ConvertedRateInfo.StartDate,
@@ -1270,9 +1272,9 @@ const processHotelDetails = (apiResponse) => {
       },
       cancellationPolicy: ratePlan.ConvertedRateInfo.CancelPenalties.CancelPenalty[0].Refundable
         ? {
-            refundable: true,
-            deadline: ratePlan.ConvertedRateInfo.CancelPenalties.CancelPenalty[0].Deadline
-          }
+          refundable: true,
+          deadline: ratePlan.ConvertedRateInfo.CancelPenalties.CancelPenalty[0].Deadline
+        }
         : { refundable: false },
       guarantee: {
         type: ratePlan.ConvertedRateInfo.Guarantee.GuaranteeType,
@@ -1309,58 +1311,58 @@ const processHotelDetails = (apiResponse) => {
 
 const getHotelImages = async (hotelCode) => {
 
-   const tokenDetail = await JsonHandler.findOne({
-        where: { type: AppConst.sabreFlights },
-      });
-  
-      const accessToken = typeof(tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;  
+  const tokenDetail = await JsonHandler.findOne({
+    where: { type: AppConst.sabreFlights },
+  });
 
-      let endpoint = "https://api.cert.sabre.com/v4.0.0/get/hotelcontent";
+  const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
 
-      const myHeaders = new Headers();
-      myHeaders.append("Authorization", `Bearer ${accessToken}`);
-      myHeaders.append("Content-Type", "application/json");
-      myHeaders.append("Accept", "application/json");
-      console.log(hotelCode);
-      let searchRequest = {
-        GetHotelContentRQ: {
-          POS: {
-            Source: {
-              PseudoCityCode: "3GML" 
-            }
-          },
-          SearchCriteria: {
-            HotelRefs: {
-              HotelRef: {
-                HotelCode: hotelCode, 
-                CodeContext: "GLOBAL"  
-              }
-            },
-            MediaRef: {
-              MaxItems: "10", 
-              MediaTypes: {
-                Images: {
-                  Image: [
-                    {
-                      Type: "MEDIUM" 
-                    }
-                  ]
+  let endpoint = "https://api.cert.sabre.com/v4.0.0/get/hotelcontent";
+
+  const myHeaders = new Headers();
+  myHeaders.append("Authorization", `Bearer ${accessToken}`);
+  myHeaders.append("Content-Type", "application/json");
+  myHeaders.append("Accept", "application/json");
+  console.log(hotelCode);
+  let searchRequest = {
+    GetHotelContentRQ: {
+      POS: {
+        Source: {
+          PseudoCityCode: "3GML"
+        }
+      },
+      SearchCriteria: {
+        HotelRefs: {
+          HotelRef: {
+            HotelCode: hotelCode,
+            CodeContext: "GLOBAL"
+          }
+        },
+        MediaRef: {
+          MaxItems: "10",
+          MediaTypes: {
+            Images: {
+              Image: [
+                {
+                  Type: "MEDIUM"
                 }
-              }
+              ]
             }
           }
         }
       }
+    }
+  }
 
-      const response = await fetch(endpoint, {
-          method: "POST",
-          headers: myHeaders,
-          body: JSON.stringify(searchRequest),
-          redirect: "follow",
-      });
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: myHeaders,
+    body: JSON.stringify(searchRequest),
+    redirect: "follow",
+  });
 
-       const result = await response.json();
+  const result = await response.json();
 
-       return result;
+  return result;
 }
 

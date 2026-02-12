@@ -225,7 +225,8 @@ const bookingFlightListSchema = Joi.object({
 const bookingFlightSchema = Joi.object({
   passengers: Joi.array().items(bookingPassengerSchema).min(1).required(),
   passengerCounts: Joi.array().items(bookingPassengerCountSchema).min(1).required(),
-  flights: Joi.array().items(bookingFlightListSchema).min(1).required()
+  flights: Joi.array().items(bookingFlightListSchema).min(1).required(),
+  currencyCode: Joi.string().min(2).max(4).allow(null).optional(),
 });
 
 

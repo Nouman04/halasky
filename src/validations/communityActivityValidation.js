@@ -1,63 +1,63 @@
 const Joi = require("joi");
 
 const addCommunityActivitySchema = Joi.object({
-        categoryId: Joi.number()
-          .integer()
-          .positive()
-          .required()
-          .messages({
-            "number.base": `"categoryId" must be a number`,
-            "number.integer": `"categoryId" must be an integer`,
-            "number.positive": `"categoryId" must be a positive number`,
-            "any.required": `"categoryId" is required`,
-          }),
+  categoryId: Joi.number()
+    .integer()
+    .positive()
+    .required()
+    .messages({
+      "number.base": `"categoryId" must be a number`,
+      "number.integer": `"categoryId" must be an integer`,
+      "number.positive": `"categoryId" must be a positive number`,
+      "any.required": `"categoryId" is required`,
+    }),
 
-        title: Joi.string()
-          .trim()
-          .min(3)
-          .max(255)
-          .required()
-          .messages({
-            "string.base": `"title" must be a string`,
-            "string.empty": `"title" cannot be empty`,
-            "string.min": `"title" must contain at least 3 characters`,
-            "string.max": `"title" cannot exceed 255 characters`,
-            "any.required": `"title" is required`,
-          }),
+  title: Joi.string()
+    .trim()
+    .min(3)
+    .max(255)
+    .required()
+    .messages({
+      "string.base": `"title" must be a string`,
+      "string.empty": `"title" cannot be empty`,
+      "string.min": `"title" must contain at least 3 characters`,
+      "string.max": `"title" cannot exceed 255 characters`,
+      "any.required": `"title" is required`,
+    }),
 
-        description: Joi.string()
-          .trim()
-          .min(5)
-          .max(5000)
-          .required()
-          .messages({
-            "string.base": `"description" must be a string`,
-            "string.empty": `"description" cannot be empty`,
-            "string.min": `"description" must contain at least 5 characters`,
-            "string.max": `"description" cannot exceed 5000 characters`,
-            "any.required": `"description" is required`,
-          }),
+  description: Joi.string()
+    .trim()
+    .min(5)
+    .max(5000)
+    .required()
+    .messages({
+      "string.base": `"description" must be a string`,
+      "string.empty": `"description" cannot be empty`,
+      "string.min": `"description" must contain at least 5 characters`,
+      "string.max": `"description" cannot exceed 5000 characters`,
+      "any.required": `"description" is required`,
+    }),
 
-        tags: Joi.array()
-          .items(
-            Joi.string()
-              .trim()
-              .min(1)
-              .max(50)
-              .messages({
-                "string.base": `"tags" must be an array of strings`,
-                "string.empty": `"tags" cannot contain empty values`,
-                "string.max": `"tags" cannot exceed 50 characters`,
-              })
-          )
-          .min(1)
-          .required()
-          .messages({
-            "array.base": `"tags" must be an array`,
-            "array.min": `"tags" must contain at least one tag`,
-            "any.required": `"tags" is required`,
-          }),
-      });
+  tags: Joi.array()
+    .items(
+      Joi.string()
+        .trim()
+        .min(1)
+        .max(50)
+        .messages({
+          "string.base": `"tags" must be an array of strings`,
+          "string.empty": `"tags" cannot contain empty values`,
+          "string.max": `"tags" cannot exceed 50 characters`,
+        })
+    )
+    .min(1)
+    .required()
+    .messages({
+      "array.base": `"tags" must be an array`,
+      "array.min": `"tags" must contain at least one tag`,
+      "any.required": `"tags" is required`,
+    }),
+});
 
 const editValidationSchema = Joi.object({
   id: Joi.number().integer().required().messages({
@@ -118,6 +118,16 @@ const listCommunityActivityValidationSchema = Joi.object({
       "number.base": "Page number must be a number",
       "number.integer": "Page number must be an integer",
       "number.min": "Page number must be at least 1",
+    }),
+
+  pageSize: Joi.number()
+    .integer()
+    .min(1)
+    .optional()
+    .messages({
+      "number.base": "Page size must be a number",
+      "number.integer": "Page size must be an integer",
+      "number.min": "Page size must be at least 1",
     }),
 });
 
@@ -310,39 +320,39 @@ const toggleActivityActionSchema = Joi.object({
 
 
 const getUserActivitiesSchema = Joi.object({
-      pageNo: Joi.number()
-        .integer()
-        .positive()
-        .optional()
-        .messages({
-          "number.base": "Page number must be a valid number",
-          "number.positive": "Page number must be greater than 0",
-        }),
-    });
+  pageNo: Joi.number()
+    .integer()
+    .positive()
+    .optional()
+    .messages({
+      "number.base": "Page number must be a valid number",
+      "number.positive": "Page number must be greater than 0",
+    }),
+});
 
 
 const adminActivitiesSchema = Joi.object({
-      pageNo: Joi.number()
-        .integer()
-        .positive()
-        .optional()
-        .messages({
-          "number.base": "Page number must be a valid number",
-          "number.positive": "Page number must be greater than 0",
-        }),
-    });
-      
-module.exports = {  
-                    addCommunityActivitySchema, 
-                    editValidationSchema,
-                    deleteCommunityValidationSchema,
-                    listCommunityActivityValidationSchema,
-                    changeStatusValidationSchema,
-                    changeApprovalValidationSchema,
-                    updateRestrictionValidationSchema,
-                    createPollValidationSchema,
-                    submitPollAnswerValidationSchema,
-                    toggleActivityActionSchema,
-                    getUserActivitiesSchema,
-                    adminActivitiesSchema
-             };
+  pageNo: Joi.number()
+    .integer()
+    .positive()
+    .optional()
+    .messages({
+      "number.base": "Page number must be a valid number",
+      "number.positive": "Page number must be greater than 0",
+    }),
+});
+
+module.exports = {
+  addCommunityActivitySchema,
+  editValidationSchema,
+  deleteCommunityValidationSchema,
+  listCommunityActivityValidationSchema,
+  changeStatusValidationSchema,
+  changeApprovalValidationSchema,
+  updateRestrictionValidationSchema,
+  createPollValidationSchema,
+  submitPollAnswerValidationSchema,
+  toggleActivityActionSchema,
+  getUserActivitiesSchema,
+  adminActivitiesSchema
+};

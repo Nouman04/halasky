@@ -10,7 +10,7 @@ const transport = require('../config/mailConfig');
 const { v4: uuidv4 } = require('uuid');
 const { searchAirportSchema, searchFlightSchema, alternateDateFlightSchema, availabilityFlightSchema, bookingFlightSchema, orderFulfillmentSchema } = require('../validations/flightValidations')
 const { writeFlightLog } = require('../Helpers/FlightLogWriter');
-// const { addNotification } = require('../Helpers/notificationHandler');
+const { addNotification } = require('../Helpers/notificationHandler');
 require("dotenv").config();
 
 const getSabreUrl = () => {
@@ -2039,6 +2039,8 @@ module.exports = {
         where: { uuid: request.body.uuid },
       });
 
+      console.log(booking , request.body.uuid );
+
       if (!booking) {
         return response.status(404).json({
           status: false,
@@ -2149,9 +2151,9 @@ module.exports = {
         await FlightBooking.update({ status: 3 }, { where: { uuid: request.body.uuid } });
       }
 
-      // if (canceledCount > 0) {
-      //   await addNotification(booking.user_id, 'cancellation', { msg: "booking successfully cancellation", id: booking.id, uuid: booking.uuid });
-      // }
+      if (canceledCount > 0) {
+        await addNotification(booking.user_id, 'cancellation', { msg: "Flight Cancelled Successfully", id: booking.id, uuid: booking.uuid });
+      }
 
       return response.status(200).json({
         status: true,
@@ -2183,7 +2185,7 @@ module.exports = {
         });
       }
 
-      const { passengers, passengerCounts, flights, codeId } = request.body;
+      const { passengers, passengerCounts, flights, codeId , currencyCode } = request.body;
       const userId = request.user.id;
 
       // Preprocess static data (same for all bookings)
@@ -2299,6 +2301,7 @@ module.exports = {
             flightPricing: [
               {
                 qualifiers: {
+                  currencyPricing: currencyCode || "SAR",
                   passengersPricing: countList,
                 },
               },
@@ -2331,7 +2334,7 @@ module.exports = {
       });
 
       const bookingResults = await Promise.all(bookingPromises);
-
+      console.log(bookingResults);
       //return response.status(200).json({ data : bookingResults});
 
       // 1. Create master booking entry
@@ -2378,66 +2381,8 @@ module.exports = {
       //       booking_status: isBooked,
       //     });
 
-      //     // Store segments
-      //     await Promise.all(
-      //       r.flight.segments.map((segment) => {
-      //         return Segment.create({
-      //           flight_id: flightRecord.id,
-      //           departure_date: `${segment.departureDate} ${segment.departureTime}`,
-      //           arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
-      //           flight_number: segment.number,
-      //           flight_code: segment.code,
-      //           from_airport: segment.origin,
-      //           to_airport: segment.destination,
-      //           stops: segment.stops || 0,
-      //         });
-      //       })
-      //     );
-
-      //     return {
-      //       flight_index: idx,
-      //       flight_id: flightRecord.id,
-      //       booked: isBooked,
-      //       pnr: PNR,
-      //     };
-      //   })
-      // );
 
 
-
-      // // invoice code starts here
-      // // Generate PDF
-      //     const invoiceTemplate = path.join(__dirname, '../public/views/separate_invoice.ejs');
-      //     const pdfData = {
-      //       pnr: PNR,
-      //       totalBaseFare,
-      //       totalTaxAmount,
-      //       totalAmount,
-      //       passengers: result.booking.travelers,
-      //       flights: flightsDetail,
-      //     };
-      //     const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      //     const browser = await puppeteer.launch();
-      //     // const browser = await puppeteer.launch({
-      //     //                                   headless: true,
-      //     //                                   args: [
-      //     //                                     '--no-sandbox',
-      //     //                                     '--disable-setuid-sandbox',
-      //     //                                     '--disable-dev-shm-usage',
-      //     //                                     '--disable-accelerated-2d-canvas',
-      //     //                                     '--no-zygote',
-      //     //                                     '--single-process',
-      //     //                                     '--disable-gpu'
-      //     //                                   ]
-      //     //                                 });
-      //     const page = await browser.newPage();
-      //     await page.setContent(html, { waitUntil: "load" });
-      //     const fileName = `${moment().unix()}-${request.user.name}-${PNR}.pdf`;
-      //     const pdfPath = path.join(__dirname, `../public/uploads/invoices/${fileName}`);
-      //     await page.pdf({ path: pdfPath, format: "A4" });
-      //     await browser.close();
-
-      //     const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
 
       // 1. Create master booking entry
 
@@ -2544,7 +2489,7 @@ module.exports = {
             destination_country: locationHelper.locationDetail(r.flight.description.arrival_location).country,
             date: r.flight.description.departure_date,
             amount: flightTotalAmount,
-            currency: flightCurrency,
+            currency: currencyCode || "SAR",
             booking_status: isBooked,
             segments: [],
           };
@@ -2658,7 +2603,7 @@ module.exports = {
       });
       // invoice code ends here
 
-      // await addNotification(userId, 'booking', { msg: "booking successfully created", id: bookingGroup.id, uuid: bookingUuid });
+      await addNotification(userId, 'booking', { msg: "booking successfully created", id: bookingGroup.id, uuid: bookingUuid });
 
 
 
