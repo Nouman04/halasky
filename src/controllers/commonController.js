@@ -1,6 +1,7 @@
 const { Comment, Violation, User, Category, Promotion, CommunityActivity } = require('../database/models');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
 const { addNotification } = require('../Helpers/notificationHandler');
+const addAlert = require('../Helpers/alertHelper'); // Added Alert Helper
 const moment = require('moment');
 
 const { addCommentSchema,
@@ -397,7 +398,7 @@ module.exports = {
                     details: error.details.map((d) => d.message),
                 });
             }
-            await Promotion.create({
+            const promotion = await Promotion.create({
                 promotion_name: request.body.promotion_name,
                 applicable_service: request.body.applicable_service, // 'flight' , 'hotel' , 'both'
                 promotion_type: request.body.promotion_type, // 'Fixed' or 'percentage'
@@ -413,9 +414,20 @@ module.exports = {
                 created_by: request.user.id
             });
 
+            if(request.body.is_add_alert){
+                // Create Alert for new promotion
+                await addAlert('promotion', {
+                    url: `/promo/${promotion.id}`,
+                    id: promotion.id,
+                    headline: `New Promotion: ${promotion.promotion_name}`, 
+                }, promotion.applicable_to);
+            }
+            
+
             return response.status(200).json({
                 status: true,
                 message: 'Promotion created successfully',
+                is_add_alert: 1 // Added is_add_alert flag
             });
 
         } catch (error) {
@@ -466,9 +478,19 @@ module.exports = {
                 total_promo: request.body.total_promo,
             }, { where: { id: request.body.id } });
 
+            if(request.body.is_add_alert){
+                // Create Alert for updated promotion
+                await addAlert('promotion', {
+                    url: `/promo/${request.body.id}`,
+                    id: request.body.id,
+                    headline: `Promotion Updated: ${request.body.promotion_name}`
+                }, request.body.applicable_to);
+            }
+
             return response.status(200).json({
                 status: true,
                 message: 'Promotion updated successfully',
+                is_add_alert: 1 // Added is_add_alert flag
             });
 
         } catch (error) {

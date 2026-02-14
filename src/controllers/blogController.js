@@ -1,52 +1,53 @@
 const fs = require('fs');
 const path = require('path')
-const { Blog , Tag , Comment , Category} = require('../database/models');
+const { Blog, Tag, Comment, Category } = require('../database/models');
 const mutateHtmlContent = require('../Helpers/mutateHtmlContent');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
-const { blogAddSchema , blogEditSchema , blogDeleteSchema , blogListSchema } = require('../validations/blogValidation');
+const addAlert = require('../Helpers/alertHelper'); // Added Alert Helper
+const { blogAddSchema, blogEditSchema, blogDeleteSchema, blogListSchema } = require('../validations/blogValidation');
 
 module.exports = {
 
-    add : async (request , response ) =>{
-        try{
-        
-          const { error } = blogAddSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
+    add: async (request, response) => {
+        try {
+
+            const { error } = blogAddSchema.validate(request.body, { abortEarly: false });
+
+            if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
 
-            const blogImagesPath = path.join(__dirname,'..','public','uploads','blogs' );
-            let content = mutateHtmlContent(request.body.content , blogImagesPath , 'uploads/blogs');
-            
+            const blogImagesPath = path.join(__dirname, '..', 'public', 'uploads', 'blogs');
+            let content = mutateHtmlContent(request.body.content, blogImagesPath, 'uploads/blogs');
+
             let thumbnailFileName = request.file.filename;
             let categoryId = request.body.categoryId;
             let title = request.body.title;
-            let userId =request.user.id;
+            let userId = request.user.id;
             let isPublished = request.body.isPublished;
             let tags = request.body.tags;
             let blog = await Blog.create({
-                category_id :categoryId,
-                created_by : userId,
-                title : title,
-                image : thumbnailFileName,
-                is_published : isPublished,
-                description : content
+                category_id: categoryId,
+                created_by: userId,
+                title: title,
+                image: thumbnailFileName,
+                is_published: isPublished,
+                description: content
             })
 
             let tagList = tags.map(tag => {
                 return {
-                    tagable_type : 'Blog',
-                    tagable_id :  blog.id,
-                    title : tag
-                }    
+                    tagable_type: 'Blog',
+                    tagable_id: blog.id,
+                    title: tag
+                }
             })
 
-           Tag.bulkCreate(tagList);
+            Tag.bulkCreate(tagList);
 
             await LogActivityHandler(
                 request.user.id,
@@ -55,14 +56,26 @@ module.exports = {
                 'Add blog and detail', //information
             );
 
+
+            if(request.body.is_add_alert){
+                // Create Alert for new blog
+                await addAlert('blog', {
+                    url: `/blog/detail/${blog.id}`,
+                    id: blog.id,
+                    headline: `New Blog Added: ${title}`,
+                    
+                } , request.body.expiresAt);
+            }
+
             return response.status(200).json({
                 status: true,
                 message: 'Blog added successfully',
+                is_add_alert: 1 // Added is_add_alert flag
             })
 
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -71,52 +84,52 @@ module.exports = {
         }
     },
 
-    edit : async (request , response ) =>{
-        try{
-         const { error } = blogEditSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
+    edit: async (request, response) => {
+        try {
+            const { error } = blogEditSchema.validate(request.body, { abortEarly: false });
+
+            if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
 
-            const blogImagesPath = path.join(__dirname,'..','public','uploads','thumbnail' );
+            const blogImagesPath = path.join(__dirname, '..', 'public', 'uploads', 'thumbnail');
 
             let blogId = request.body.id;
-    
+
             await Tag.destroy({
-                where : {
-                    tagable_type : 'Blog',
-                    tagable_id : blogId
+                where: {
+                    tagable_type: 'Blog',
+                    tagable_id: blogId
                 }
             });
 
             let blogDetail = await Blog.findOne({
-                where : {
-                    id : blogId
+                where: {
+                    id: blogId
                 }
-             });
+            });
 
-            if(request.file){
-                if(fs.existsSync(`${blogImagesPath}/${blogDetail.image}`)){
+            if (request.file) {
+                if (fs.existsSync(`${blogImagesPath}/${blogDetail.image}`)) {
                     fs.unlinkSync(`${blogImagesPath}/${blogDetail.image}`);
                 }
             }
 
-            
-            let content = mutateHtmlContent(request.body.content , blogImagesPath);
-            
+
+            let content = mutateHtmlContent(request.body.content, blogImagesPath);
+
             let dataToUpdate = {
-                category_id : request.body.categoryId,
-                title : request.body.title,
-                is_published : request.body.isPublished,
-                description : content
+                category_id: request.body.categoryId,
+                title: request.body.title,
+                is_published: request.body.isPublished,
+                description: content
             }
 
-            if(request.file){
+            if (request.file) {
                 let thumbnailDetail = request.file.fieldname;
                 dataToUpdate.image = thumbnailDetail
             }
@@ -124,16 +137,16 @@ module.exports = {
             let tags = request.body.tags;
 
             await Blog.update(
-                dataToUpdate, 
-                { where :  {id : blogId }},
+                dataToUpdate,
+                { where: { id: blogId } },
             );
 
             let tagList = tags.map(tag => {
                 return {
-                    tagable_type : 'Blog',
-                    tagable_id :  blogId,
-                    title : tag
-                }    
+                    tagable_type: 'Blog',
+                    tagable_id: blogId,
+                    title: tag
+                }
             })
 
             await Tag.bulkCreate(tagList);
@@ -152,7 +165,7 @@ module.exports = {
 
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -161,43 +174,43 @@ module.exports = {
         }
     },
 
-    delete : async (request , response ) => {
-        try{
+    delete: async (request, response) => {
+        try {
             const { error } = blogDeleteSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
+
+            if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let blogId = request.body.id;
-            const blogImagesPath = path.join(__dirname,'..','public','uploads','thumbnail' );
+            const blogImagesPath = path.join(__dirname, '..', 'public', 'uploads', 'thumbnail');
 
             await Tag.destroy({
-                        where : {
-                            tagable_type : 'Blog',
-                            tagable_id : blogId
-                        }
+                where: {
+                    tagable_type: 'Blog',
+                    tagable_id: blogId
+                }
             });
 
             let blogDetail = await Blog.findOne({
-                where : {
-                    id : blogId
+                where: {
+                    id: blogId
                 }
-             });
+            });
 
 
-             if(blogDetail.image){
-                if(fs.existsSync(`${blogImagesPath}/${blogDetail.image}`)){
+            if (blogDetail.image) {
+                if (fs.existsSync(`${blogImagesPath}/${blogDetail.image}`)) {
                     fs.unlinkSync(`${blogImagesPath}/${blogDetail.image}`);
                 }
             }
 
             await Blog.destroy({
-                where : {
-                    id : blogId
+                where: {
+                    id: blogId
                 }
             });
 
@@ -209,12 +222,12 @@ module.exports = {
             );
 
             return response.status(200).json({
-                status : true,
-                message : 'blog deleted successfully'
+                status: true,
+                message: 'blog deleted successfully'
             });
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -223,57 +236,57 @@ module.exports = {
         }
     },
 
-    list : async (request , response) => {
-        try{
+    list: async (request, response) => {
+        try {
 
             const { error } = blogListSchema.validate(request.body, { abortEarly: false });
-        
-          if (error) {
+
+            if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
 
             let status = request.body.status;
 
             whereCondition = {}
-            if(status){
+            if (status) {
                 whereCondition.is_published = status;
             }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             const blogs = await Blog.findAll({
-                include : [
+                include: [
                     {
-                        model : Tag,
-                        required : false,
+                        model: Tag,
+                        required: false,
                         as: 'tags',
                     },
                     {
-                        model : Comment,
-                        required : false,
-                        as : 'comments'
+                        model: Comment,
+                        required: false,
+                        as: 'comments'
                     },
                     {
-                        model : Category,
-                        as : 'category'
+                        model: Category,
+                        as: 'category'
                     },
                 ],
-                where : whereCondition,
-                offset : skip,
+                where: whereCondition,
+                offset: skip,
                 limit: 10,
             });
 
-            const image =  `${process.env.APP_URL}/uploads/blogs`;
+            const image = `${process.env.APP_URL}/uploads/blogs`;
 
             return response.status(200).json({
-                status : true,
-                data : blogs,
+                status: true,
+                data: blogs,
                 image: image
             })
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -283,17 +296,17 @@ module.exports = {
     },
 
 
-    changeStatus :  async (request , response) => {
-        try{
+    changeStatus: async (request, response) => {
+        try {
             let blogId = request.body.blogId;
-            let status  = request.body.status;
+            let status = request.body.status;
             await Blog.update(
-                { 
-                        is_published : status
+                {
+                    is_published: status
                 },
-                { 
-                    where : {
-                        id : blogId
+                {
+                    where: {
+                        id: blogId
                     }
                 },
             )
@@ -311,7 +324,7 @@ module.exports = {
             })
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -320,24 +333,24 @@ module.exports = {
         }
     },
 
-    detail : async (request, response) =>{
-        try{
+    detail: async (request, response) => {
+        try {
             let blogId = request.body.blogId;
-            
+
             let blog = await Blog.findOne({
                 where: { id: blogId },
                 include: [
-                  {
-                    association: 'tags',
-                  },
-                  {
-                    association: 'comments',
-                  },
-                  {
-                    association: 'category',
-                  }
+                    {
+                        association: 'tags',
+                    },
+                    {
+                        association: 'comments',
+                    },
+                    {
+                        association: 'category',
+                    }
                 ]
-              });
+            });
 
 
             return response.status(200).json({
@@ -346,7 +359,7 @@ module.exports = {
             })
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',

@@ -23,6 +23,7 @@ const nonLimitorRoutes = require("./src/public/files/nonLimitorRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
 const userRoutes = require("./src/routes/userRoutes");
 const blogRoutes = require("./src/routes/blogRoutes");
+const alertRoutes = require("./src/routes/alertRoutes"); // Added Alert Routes
 const path = require('path');
 
 const cors = require("cors");
@@ -33,12 +34,11 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(limiter);
-app.use( (req , res , next ) => {
-    if(nonLimitorRoutes.includes(req.path))
-    {
-        return next();
-    }
-    limiter(req , res , next);
+app.use((req, res, next) => {
+  if (nonLimitorRoutes.includes(req.path)) {
+    return next();
+  }
+  limiter(req, res, next);
 })
 app.use(passport.initialize());
 app.use('/uploads', express.static(path.join(__dirname, 'src/public/uploads')));
@@ -48,17 +48,18 @@ const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
-    }
-  });
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 let socketConnectedUser = new Map();
-const chatRoutes = require("./src/routes/chatRoutes")(io , socketConnectedUser);
+const chatRoutes = require("./src/routes/chatRoutes")(io, socketConnectedUser);
 
 
 app.use("/user", userRoutes);
 app.use("/blog", blogRoutes);
+app.use("/alert", alertRoutes); // Mounted Alert Routes
 app.use("/faq", faqRoutes);
 app.use("/community-activity", activityRoutes);
 app.use("/query", customerQueryRoutes);
@@ -74,25 +75,25 @@ app.use("/payment", paymentRoutes);
 app.use("/test", testRoutes);
 
 
-io.on('connection' ,(socket)=>{
+io.on('connection', (socket) => {
 
-    socket.on('connectUser' , (user)=>{
-        let username = user.username;
-        let userId = user.id;
-        let socketId = socket.id;
-        socketConnectedUser.set( userId , { username , socketId} )
-        socketConnectedUser.set( socketId , userId);
-    })
+  socket.on('connectUser', (user) => {
+    let username = user.username;
+    let userId = user.id;
+    let socketId = socket.id;
+    socketConnectedUser.set(userId, { username, socketId })
+    socketConnectedUser.set(socketId, userId);
+  })
 
-    socket.on('disconnect' , ()=>{
-      
-      userId = socketConnectedUser.get(socket.id);   
-      socketConnectedUser.delete(socket.id)
-      socketConnectedUser.delete(userId)
-      console.log(`user disconnected successfully ${socket.id}`);
-    })
-    
-    console.log(`socket connection connected, connection id:${socket.id}`)
+  socket.on('disconnect', () => {
+
+    userId = socketConnectedUser.get(socket.id);
+    socketConnectedUser.delete(socket.id)
+    socketConnectedUser.delete(userId)
+    console.log(`user disconnected successfully ${socket.id}`);
+  })
+
+  console.log(`socket connection connected, connection id:${socket.id}`)
 })
 
 // app.listen( PORT , () => {
@@ -100,7 +101,6 @@ io.on('connection' ,(socket)=>{
 //     console.log(`App is listening at port: ${PORT}`)
 // })
 server.listen(PORT, () => {
-    cronJobs();
-    console.log(`App is listening at port: ${PORT}`);
-  });
-
+  cronJobs();
+  console.log(`App is listening at port: ${PORT}`);
+});
