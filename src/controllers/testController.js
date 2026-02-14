@@ -4,10 +4,17 @@ const ejs = require('ejs');
 const puppeteer = require('puppeteer');
 const transport = require('../config/mailConfig');
 const { v4: uuidv4 } = require('uuid');
+const { JsonHandler } = require('../database/models');
+const AppConst = require('../appConst');
+const { searchFlightSchema } = require('../validations/flightValidations');
 require("dotenv").config();
 
+const getSabreUrl = () => {
+    return process.env.NODE_ENV === 'production' ? process.env.SABRE_API_URL_PROD : process.env.SABRE_API_URL_DEV;
+}
+
 module.exports = {
-    flight : (request ,response)=>{
+    flight: (request, response) => {
         let flightDetail = {
             "status": true,
             "data": {
@@ -12686,35 +12693,35 @@ module.exports = {
         let itineraryGroups = flightDetail.data.groupedItineraryResponse.itineraryGroups;
         let legsInformation = flightDetail.data.groupedItineraryResponse.legDescs;
         let baggageDescs = flightDetail.data.groupedItineraryResponse.baggageAllowanceDescs;
-        let taxDescs= flightDetail.data.groupedItineraryResponse.taxDescs;
+        let taxDescs = flightDetail.data.groupedItineraryResponse.taxDescs;
         let taxSummaryDescs = flightDetail.data.groupedItineraryResponse.taxSummaryDescs;
         let scheduleDescs = flightDetail.data.groupedItineraryResponse.scheduleDescs;
         let fareComponentDescs = flightDetail.data.groupedItineraryResponse.fareComponentDescs;
         let obFeeDescs = flightDetail.data.groupedItineraryResponse.obFeeDescs;
-        let mappedLegs = Object.fromEntries(legsInformation.map(leg => [leg.id , leg]));
-        let mappedSchedule = Object.fromEntries(scheduleDescs.map(schedule => [schedule.id , schedule]));
-        let mappedBaggages = Object.fromEntries(baggageDescs.map(baggage => [baggage.id , baggage]));
-        let mappedTax = Object.fromEntries(taxDescs.map(tax => [tax.id , tax]));
-        let mappedTaxSummary = Object.fromEntries(taxSummaryDescs.map(taxSummary => [taxSummary.id , taxSummary]));
-        let mappedFareComponent = Object.fromEntries(fareComponentDescs.map(fareComponent => [fareComponent.id , fareComponent]));
-        let mappedObFees = Object.fromEntries(obFeeDescs.map(obFee => [obFee.id , obFee]));
-       let itineraryGroupDetail = [];
+        let mappedLegs = Object.fromEntries(legsInformation.map(leg => [leg.id, leg]));
+        let mappedSchedule = Object.fromEntries(scheduleDescs.map(schedule => [schedule.id, schedule]));
+        let mappedBaggages = Object.fromEntries(baggageDescs.map(baggage => [baggage.id, baggage]));
+        let mappedTax = Object.fromEntries(taxDescs.map(tax => [tax.id, tax]));
+        let mappedTaxSummary = Object.fromEntries(taxSummaryDescs.map(taxSummary => [taxSummary.id, taxSummary]));
+        let mappedFareComponent = Object.fromEntries(fareComponentDescs.map(fareComponent => [fareComponent.id, fareComponent]));
+        let mappedObFees = Object.fromEntries(obFeeDescs.map(obFee => [obFee.id, obFee]));
+        let itineraryGroupDetail = [];
 
-    //    console.log(itineraryGroups);
-    //     return;
-       itineraryGroups.forEach( group => {
+        //    console.log(itineraryGroups);
+        //     return;
+        itineraryGroups.forEach(group => {
 
             let groupDescription = group.groupDescription;
             let groupItineraries = group.itineraries;
-            
-            let itinerariesList = groupItineraries.map( gi => {
+
+            let itinerariesList = groupItineraries.map(gi => {
                 let priceSource = gi.pricingSource;
-                let legIds = gi.legs.map( leg => leg.ref);
-               
-                let legDetail = legIds.map( leg => {
+                let legIds = gi.legs.map(leg => leg.ref);
+
+                let legDetail = legIds.map(leg => {
                     let legInformation = {};
                     let legSchedule = mappedLegs[leg].schedules;
-                    let scheduleList = legSchedule.map( ls => {
+                    let scheduleList = legSchedule.map(ls => {
                         return mappedSchedule[ls.ref];
                     })
                     legInformation.id = leg;
@@ -12726,7 +12733,7 @@ module.exports = {
                 let priceInformationList = gi.pricingInformation;
                 let priceDetail = [];
 
-                priceInformationList.forEach( pi => {
+                priceInformationList.forEach(pi => {
                     let price = {};
                     price.priceSubSource = pi.pricingSubsource;
                     price.distributionModel = pi.distributionModel;
@@ -12734,10 +12741,10 @@ module.exports = {
                     price.lastTicketTime = pi.fare.lastTicketTime;
                     price.totalFareDetail = pi.fare.totalFare;
 
-                    
+
 
                     //passenger list code starts here
-                    price.passengerList = pi.fare.passengerInfoList.map( passenger => {
+                    price.passengerList = pi.fare.passengerInfoList.map(passenger => {
                         passengerDetail = {};
                         passengerDetail.type = passenger.passengerInfo.passengerType;
                         passengerDetail.total = passenger.passengerInfo.passengerNumber;
@@ -12747,35 +12754,35 @@ module.exports = {
 
 
                         // passenger fare components
-                        passengerDetail.FareComponents = passengerFareComponentList.map( pfc => {
-                        
+                        passengerDetail.FareComponents = passengerFareComponentList.map(pfc => {
+
                             let fareComponentDetail = mappedFareComponent[pfc.ref];
 
-                            return { 
-                                beginAirport : pfc.beginAirport, 
-                                endAirport : pfc.endAirport,
-                                segments : pfc.segments,
-                                fareComponentDetail :fareComponentDetail
+                            return {
+                                beginAirport: pfc.beginAirport,
+                                endAirport: pfc.endAirport,
+                                segments: pfc.segments,
+                                fareComponentDetail: fareComponentDetail
                             }
                         })
 
                         //passenger taxes
-                        passengerDetail.taxes = passenger.passengerInfo.taxes.map( tax => {
+                        passengerDetail.taxes = passenger.passengerInfo.taxes.map(tax => {
                             return mappedTax[tax.ref];
                         })
-                        
 
-                        passengerDetail.taxSummary = passenger.passengerInfo.taxSummaries.map( summary => {
+
+                        passengerDetail.taxSummary = passenger.passengerInfo.taxSummaries.map(summary => {
                             return mappedTaxSummary[summary.ref];
                         })
 
-                        
+
                         // console.log(passenger.passengerInfo.obFees);
-                        passengerDetail.obFees = passenger.passengerInfo.obFees?.map( of => {
+                        passengerDetail.obFees = passenger.passengerInfo.obFees?.map(of => {
                             return mappedObFees[of.ref];
                         })
 
-                        passengerDetail.baggageInformation = passenger.passengerInfo.baggageInformation.map( bi =>{
+                        passengerDetail.baggageInformation = passenger.passengerInfo.baggageInformation.map(bi => {
                             let baggageDetail = {};
                             baggageDetail.baggageProvision = bi.provisionType;
                             baggageDetail.airlineCode = bi.airlineCode;
@@ -12788,7 +12795,7 @@ module.exports = {
                         passengerDetail.currencyConversion = passenger.passengerInfo.currencyConversion;
 
                         passengerDetail.passengerTotalFare = passenger.passengerInfo.passengerTotalFare;
-                        
+
                         passengerDetail.currencyConversion = passenger.passengerInfo.currencyConversion;
 
 
@@ -12804,15 +12811,15 @@ module.exports = {
                 // console.log( priceDetail[0][0].fare.passengerInfoList[0].passengerInfo.taxes );
                 // // price.passengerList
                 // throw '';
-                return {priceSource : priceSource, legIds : legIds , legList : legDetail , passengerPriceDetail : priceDetail };
+                return { priceSource: priceSource, legIds: legIds, legList: legDetail, passengerPriceDetail: priceDetail };
             });
 
-            itineraryGroupDetail.push({ description : groupDescription , itinerariesList : itinerariesList });
-       });
+            itineraryGroupDetail.push({ description: groupDescription, itinerariesList: itinerariesList });
+        });
 
 
-    return response.status(200).json({data : itineraryGroupDetail});
-    //    console.log(itineraryGroupDetail);
+        return response.status(200).json({ data: itineraryGroupDetail });
+        //    console.log(itineraryGroupDetail);
 
         // let fares = flightDetail.data.groupedItineraryResponse.fareComponentDescs;
         // let lhFlights = flights.filter( flight => {
@@ -13823,16 +13830,16 @@ module.exports = {
 
 
     },
-    testSocketPage : (request ,response) =>{
-        
-        filePath = path.join(__dirname,'..','public', 'views' , 'index.html' );
+    testSocketPage: (request, response) => {
+
+        filePath = path.join(__dirname, '..', 'public', 'views', 'index.html');
         response.sendFile(filePath);
     },
-    createPDF : async (request , response)=> {
-        const invoiceTemplate =  path.join(__dirname, '../public/views/invoice.ejs');
+    createPDF: async (request, response) => {
+        const invoiceTemplate = path.join(__dirname, '../public/views/invoice.ejs');
         const data = {
-            username : "nouman",
-            email : "mnoumanb@gmail.com"
+            username: "nouman",
+            email: "mnoumanb@gmail.com"
         }
         const html = await ejs.renderFile(invoiceTemplate, data);
         const browser = await puppeteer.launch();
@@ -13842,18 +13849,18 @@ module.exports = {
         await page.pdf({ path: pdfPath, format: 'A4' });
         await browser.close();
 
-        return response.status(200).json({ status : true , data : invoiceTemplate});
+        return response.status(200).json({ status: true, data: invoiceTemplate });
     },
 
-     createHotelPDF : async (request , response)=> {
-        const invoiceTemplate =  path.join(__dirname, '../public/views/hotel-invoice.ejs');
-       const pdfData = {
-                pnr: "ABC123",
-                totalAmount: "2423342.22",
-                from: "2025-06-02",
-                to: "2025-06-05",
-                roomList: [
-                    {
+    createHotelPDF: async (request, response) => {
+        const invoiceTemplate = path.join(__dirname, '../public/views/hotel-invoice.ejs');
+        const pdfData = {
+            pnr: "ABC123",
+            totalAmount: "2423342.22",
+            from: "2025-06-02",
+            to: "2025-06-05",
+            roomList: [
+                {
                     guests: [
                         {
                             type: "ADT",
@@ -13876,21 +13883,21 @@ module.exports = {
                             age: 2
                         }
                     ]
-                    }
-                ],
-                paymentDetail: {
-                    guaranteeType: "GURANTEE",
-                    type: "CC",
-                    cardCode: "CA",
-                    firstName: "Jhon",
-                    lastName: "Doe",
-                    cardNumber: "5105105105105100",
-                    expiryMonth: 10,
-                    expiryYear: "2025"
-                },
-                hotelName: "Burj Al Arab",
-                hotelRoom: "LuxuryRoom"
-                };
+                }
+            ],
+            paymentDetail: {
+                guaranteeType: "GURANTEE",
+                type: "CC",
+                cardCode: "CA",
+                firstName: "Jhon",
+                lastName: "Doe",
+                cardNumber: "5105105105105100",
+                expiryMonth: 10,
+                expiryYear: "2025"
+            },
+            hotelName: "Burj Al Arab",
+            hotelRoom: "LuxuryRoom"
+        };
         const html = await ejs.renderFile(invoiceTemplate, pdfData);
         const browser = await puppeteer.launch();
         const page = await browser.newPage();
@@ -13901,33 +13908,173 @@ module.exports = {
 
         const pdfUrl = `${process.env.APP_URL}/uploads/invoices/test.pdf`;
         const mailOptions = {
-                          from: process.env.EMAIL_FROM,
-                          to: "hello@gmail.com",
-                          subject: `Hotel Booking Invoice - PNR ${pdfData.pnr}`,
-                          text: `Dear Customer,\n\nYour hotel booking has been confirmed. Please find the invoice attached.\n\nPNR: ${pdfData.pnr}\nCheck-in: ${pdfData.from}\nCheck-out: ${pdfData.to}\nTotal Amount: ${pdfData.amount}\n\nThank you for booking with us!\nBest regards,\nYour App Team`,
-                          attachments: [
-                            {
-                              filename: `test.pdf`,
-                              path: pdfPath,
-                              contentType: 'application/pdf'
-                            }
-                          ]
-                        };
+            from: process.env.EMAIL_FROM,
+            to: "hello@gmail.com",
+            subject: `Hotel Booking Invoice - PNR ${pdfData.pnr}`,
+            text: `Dear Customer,\n\nYour hotel booking has been confirmed. Please find the invoice attached.\n\nPNR: ${pdfData.pnr}\nCheck-in: ${pdfData.from}\nCheck-out: ${pdfData.to}\nTotal Amount: ${pdfData.amount}\n\nThank you for booking with us!\nBest regards,\nYour App Team`,
+            attachments: [
+                {
+                    filename: `test.pdf`,
+                    path: pdfPath,
+                    contentType: 'application/pdf'
+                }
+            ]
+        };
 
 
         transport.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            console.error('Error sending email:', error);
-          } else {
-            console.log('Email sent successfully:', info.response);
-          }
+            if (error) {
+                console.error('Error sending email:', error);
+            } else {
+                console.log('Email sent successfully:', info.response);
+            }
         });
 
-        return response.status(200).json({ status : true , data : pdfUrl});
+        return response.status(200).json({ status: true, data: pdfUrl });
     },
 
-    createUuid : async (request ,response) => {
+    createUuid: async (request, response) => {
         const uuid = uuidv4();
-         return response.status(200).json({ status : true , data : uuid});
+        return response.status(200).json({ status: true, data: uuid });
+    },
+
+    flightList: async (request, response) => {
+        const { error } = searchFlightSchema.validate(request.body, { abortEarly: false });
+
+        if (error) {
+            return response.status(400).json({
+                success: false,
+                message: "Validation failed",
+                details: error.details.map((d) => d.message),
+            });
+        }
+
+        const { destinationList, passengerList, travelClass, currencyCode } = request.body;
+
+        const travelJson = destinationList.map(detail => {
+            return {
+                "DepartureDateTime": detail.travelDate,
+                "OriginLocation": {
+                    "LocationCode": detail.DepartureAirport
+                },
+                "DestinationLocation": {
+                    "LocationCode": detail.ArrivalAirport
+                }
+            }
+        });
+
+        const passengerJson = passengerList.filter(passenger => {
+            return passenger.total > 0;
+        }).map(passenger => {
+            return {
+                "Code": passenger.type,
+                "Quantity": passenger.total
+            }
+        });
+
+        const tokenDetail = await JsonHandler.findOne({
+            where: { type: AppConst.sabreFlights }
+        });
+
+        const accessToken = typeof (tokenDetail.information) == "string" ? JSON.parse(tokenDetail.information).access_token : tokenDetail.information.access_token;
+
+        try {
+            let endpoint = `${getSabreUrl()}/v5/offers/shop`;
+
+            const myHeaders = new Headers();
+            myHeaders.append("Authorization", `Bearer ${accessToken}`);
+            myHeaders.append("Content-Type", "application/json");
+            myHeaders.append("Accept", "application/json");
+
+            const searchRequest = {
+                "OTA_AirLowFareSearchRQ": {
+                    "Version": "5",
+                    "POS": {
+                        "Source": [
+                            {
+                                "PseudoCityCode": "3GML",
+                                "RequestorID": {
+                                    "Type": "1",
+                                    "ID": "1",
+                                    "CompanyName": {
+                                        "Code": "TN"
+                                    }
+                                }
+                            }
+                        ]
+                    },
+                    "OriginDestinationInformation": travelJson,
+                    "TravelerInfoSummary": {
+                        PriceRequestInformation: {
+                            "CurrencyCode": currencyCode || "SAR"
+                        },
+                        "AirTravelerAvail": [
+                            {
+                                "PassengerTypeQuantity": passengerJson
+                            }
+                        ]
+                    },
+                    "TravelPreferences": {
+                        "CabinPref": [
+                            {
+                                "Cabin": travelClass,
+                                "PreferLevel": "Preferred"
+                            }
+                        ],
+                        "TPA_Extensions": {
+                            "DataSources": {
+                                "NDC": "Enable",
+                            },
+                            "PreferNDCSourceOnTie": {
+                                "Value": true
+                            }
+                        },
+                        "Baggage": {
+                            "Description": true,
+                            "RequestType": "A",
+                            "CarryOnInfo": true
+                        },
+                    },
+                    "TPA_Extensions": {
+                        "IntelliSellTransaction": {
+                            "RequestType": {
+                                "Name": "50ITINS"
+                            }
+                        },
+                        "RichContent": {
+                            "FlightAmenities": true,
+                        }
+                    },
+                }
+            }
+
+            const requestOptions = {
+                method: "POST",
+                headers: myHeaders,
+                body: JSON.stringify(searchRequest),
+                redirect: "follow"
+            };
+
+            fetch(endpoint, requestOptions)
+                .then((response) => response.json())
+                .then(async (result) => {
+                    return response.status(200).json(result);
+                })
+                .catch((error) => {
+                    console.error('🔥 ERROR:', error);
+                    return response.status(500).json({
+                        status: false,
+                        message: 'Something Went Wrong',
+                        error: error.message,
+                    });
+                });
+
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message,
+            });
+        }
     }
 }
