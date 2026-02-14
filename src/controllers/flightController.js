@@ -151,8 +151,8 @@ module.exports = {
             "TPA_Extensions": {
               "DataSources": {
                 "NDC": "Enable",
-                // "ATPCO": "Disable",
-                // "LCC": "Disable"
+                "ATPCO": "Enable",
+                "LCC": "Enable"
               },
               "PreferNDCSourceOnTie": {
                 "Value": true
@@ -413,7 +413,7 @@ module.exports = {
           //new code ends here
           minimumAmount = Math.min(...amounts);
           maximumAmount = Math.max(...amounts);
-          //return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
+          // return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
           const simplifiedItineraries = itineraryGroupDetail.map((group) => ({
             groupDescription: group.description,
             itineraries: group.itinerariesList,
@@ -2788,7 +2788,7 @@ function simplifyFlightResponse(itinerariesList) {
         };
       })
     );
-    console.log(itinerary.passengerPriceDetail[0].passengerList[0].baggageInformation);
+
     // Extract passenger and pricing details
     const passengers = itinerary.passengerPriceDetail[0].passengerList.map((passenger) => ({
       type: passenger.type === 'ADT' ? 'Adult' : passenger.type === 'C06' ? 'Child' : passenger.type,
@@ -2848,6 +2848,7 @@ function simplifyFlightResponse(itinerariesList) {
 
     // Extract total pricing
     const totalFare = {
+      priceType: itinerary.passengerPriceDetail[0].distributionModel ?? null,
       baseFare: `  ${convertToSAR(
         itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareAmount,
         itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareCurrency,
