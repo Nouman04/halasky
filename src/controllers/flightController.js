@@ -2546,6 +2546,11 @@ module.exports = {
         passengers: passengers,
         flights: allFlightsDetail,
         bookingId: bookingUuid,
+        invoiceNumber: bookingUuid,
+        dateIssued: moment().format('MMMM DD, YYYY'),
+        clientName: request.user.name,
+        clientEmail: request.user.email,
+        clientPhone: request.user.number || 'N/A'
       };
 
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
