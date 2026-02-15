@@ -2039,8 +2039,6 @@ module.exports = {
         where: { uuid: request.body.uuid },
       });
 
-      console.log(booking , request.body.uuid );
-
       if (!booking) {
         return response.status(404).json({
           status: false,
@@ -2185,7 +2183,7 @@ module.exports = {
         });
       }
 
-      const { passengers, passengerCounts, flights, codeId , currencyCode } = request.body;
+      const { passengers, passengerCounts, flights, codeId, currencyCode } = request.body;
       const userId = request.user.id;
 
       // Preprocess static data (same for all bookings)
@@ -2426,7 +2424,6 @@ module.exports = {
 
       // Collector for invoice building
       let allPNR = [];
-      let allFlightsDetail = [];
       let totalBaseFare = 0;
       let totalTaxAmount = 0;
       let totalAmount = 0;
@@ -2482,6 +2479,7 @@ module.exports = {
 
           // Prepare data for invoice
           let flightDetail = {
+            id: flightRecord.id, // For tracking
             pnr: PNR,
             origin: r.flight.description.departure_location,
             origin_country: locationHelper.locationDetail(r.flight.description.departure_location).country,
@@ -2494,45 +2492,44 @@ module.exports = {
             segments: [],
           };
 
-          // Store segments
-          await Promise.all(
-            r.flight.segments.map(async (segment) => {
-              await Segment.create({
-                flight_id: flightRecord.id,
-                departure_date: `${segment.departureDate} ${segment.departureTime}`,
-                arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
-                flight_number: segment.number,
-                flight_code: segment.code,
-                from_airport: segment.origin,
-                to_airport: segment.destination,
-                stops: segment.stops || 0,
-              });
+          // Store segments (sequentially within each flight processing to preserve order)
+          for (const segment of r.flight.segments) {
+            await Segment.create({
+              flight_id: flightRecord.id,
+              departure_date: `${segment.departureDate} ${segment.departureTime}`,
+              arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
+              flight_number: segment.number,
+              flight_code: segment.code,
+              from_airport: segment.origin,
+              to_airport: segment.destination,
+              stops: segment.stops || 0,
+            });
 
-              // Add segment to invoice info
-              flightDetail.segments.push({
-                flight_code: segment.code,
-                flight_number: segment.number,
-                from_airport: segment.origin,
-                to_airport: segment.destination,
-                departure_date: `${segment.departureDate} ${segment.departureTime}`,
-                arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
-              });
-
-
-            })
-          );
-
-          // Add this flight to invoice list
-          allFlightsDetail.push(flightDetail);
+            // Add segment to invoice info
+            flightDetail.segments.push({
+              flight_code: segment.code,
+              flight_number: segment.number,
+              from_airport: segment.origin,
+              to_airport: segment.destination,
+              departure_date: `${segment.departureDate} ${segment.departureTime}`,
+              arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
+            });
+          }
 
           return {
             flight_index: idx,
             flight_id: flightRecord.id,
             booked: isBooked,
             pnr: PNR,
+            flightDetail: flightDetail
           };
         })
       );
+
+      // Extract and sort flight details to fix the order issue
+      let allFlightsDetail = dbResults
+        .map(r => r.flightDetail)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
 
       //
       // -------- INVOICE (ONE FILE FOR ALL FLIGHTS) --------
