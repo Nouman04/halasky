@@ -10,7 +10,7 @@ const transport = require('../config/mailConfig');
 const { v4: uuidv4 } = require('uuid');
 const { searchAirportSchema, searchFlightSchema, alternateDateFlightSchema, availabilityFlightSchema, bookingFlightSchema, orderFulfillmentSchema } = require('../validations/flightValidations')
 const { writeFlightLog } = require('../Helpers/FlightLogWriter');
-// const { addNotification } = require('../Helpers/notificationHandler');
+const { addNotification } = require('../Helpers/notificationHandler');
 require("dotenv").config();
 
 const getSabreUrl = () => {
@@ -151,8 +151,8 @@ module.exports = {
             "TPA_Extensions": {
               "DataSources": {
                 "NDC": "Enable",
-                // "ATPCO": "Disable",
-                // "LCC": "Disable"
+                "ATPCO": "Enable",
+                "LCC": "Enable"
               },
               "PreferNDCSourceOnTie": {
                 "Value": true
@@ -413,7 +413,7 @@ module.exports = {
           //new code ends here
           minimumAmount = Math.min(...amounts);
           maximumAmount = Math.max(...amounts);
-          //return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
+          // return response.status(200).json(itineraryGroupDetail[0].itinerariesList[0])
           const simplifiedItineraries = itineraryGroupDetail.map((group) => ({
             groupDescription: group.description,
             itineraries: group.itinerariesList,
@@ -909,114 +909,114 @@ module.exports = {
   },
 
   orderFulfillment: async (request, response) => {
-  try {
+    try {
 
-    // const { error } = orderFulfillmentSchema.validate(request.body, { abortEarly: false });
+      // const { error } = orderFulfillmentSchema.validate(request.body, { abortEarly: false });
 
-    // if (error) {
-    //   return response.status(400).json({
-    //     success: false,
-    //     message: "Validation failed",
-    //     details: error.details.map(d => d.message),
-    //   });
-    // }
+      // if (error) {
+      //   return response.status(400).json({
+      //     success: false,
+      //     message: "Validation failed",
+      //     details: error.details.map(d => d.message),
+      //   });
+      // }
 
-    const { pnr } = request.body;
+      const { pnr } = request.body;
 
-    // const booking = await FlightBooking.findOne({ where: { pnr } });
+      // const booking = await FlightBooking.findOne({ where: { pnr } });
 
-    // if (!booking) {
-    //   return response.status(404).json({
-    //     success: false,
-    //     message: "Booking not found",
-    //   });
-    // }
+      // if (!booking) {
+      //   return response.status(404).json({
+      //     success: false,
+      //     message: "Booking not found",
+      //   });
+      // }
 
-    const tokenDetail = await JsonHandler.findOne({
-      where: { type: AppConst.sabreFlights }
-    });
-
-    const accessToken =
-      typeof tokenDetail.information === "string"
-        ? JSON.parse(tokenDetail.information).access_token
-        : tokenDetail.information.access_token;
-
-    // 🔹 Sabre endpoint
-    const endpoint = `${getSabreUrl()}/v1/trip/orders/fulfillFlightTickets`;
-
-    const myHeaders = new Headers();
-    myHeaders.append("Authorization", `Bearer ${accessToken}`);
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Accept", "application/json");
-
-    const payload = {
-      confirmationId: pnr,
-      fulfillments: [
-        {
-          payment: {
-            primaryFormOfPayment: 1
-          }
-        }
-      ],
-       designatePrinters: [
-        {
-          type: "TKT",
-          profileNumber: 1
-        },
-        {
-          type: "ITIN",
-          profileNumber: 1
-        },
-        {
-          type: "INV",
-          profileNumber: 1
-        }
-      ],
-      formsOfPayment: [
-        { type: "CASH" },
-        { type: "CHECK" }
-      ]
-    };
-
-    const requestOptions = {
-      method: "POST",
-      headers: myHeaders,
-      body: JSON.stringify(payload),
-      redirect: "follow"
-    };
-
-    fetch(endpoint, requestOptions)
-      .then(res => res.json())
-      .then(async (result) => {
-
-        if (result?.errors || result?.Error) {
-          return response.status(400).json({
-            success: false,
-            message: "Sabre ticketing failed",
-            error: result
-          });
-        }
-
-        booking.status = 2; // Ticketed
-        booking.ticketed_at = new Date();
-        booking.sabre_ticket_response = result;
-        await booking.save();
-
-        return response.status(200).json({
-          success: true,
-          message: "Ticket issued successfully",
-          data: result
-        });
+      const tokenDetail = await JsonHandler.findOne({
+        where: { type: AppConst.sabreFlights }
       });
 
-  } catch (error) {
-    return response.status(500).json({
-      success: false,
-      message: "Something Went Wrong",
-      error: error.message,
-    });
-  }
-},
+      const accessToken =
+        typeof tokenDetail.information === "string"
+          ? JSON.parse(tokenDetail.information).access_token
+          : tokenDetail.information.access_token;
+
+      // 🔹 Sabre endpoint
+      const endpoint = `${getSabreUrl()}/v1/trip/orders/fulfillFlightTickets`;
+
+      const myHeaders = new Headers();
+      myHeaders.append("Authorization", `Bearer ${accessToken}`);
+      myHeaders.append("Content-Type", "application/json");
+      myHeaders.append("Accept", "application/json");
+
+      const payload = {
+        confirmationId: pnr,
+        fulfillments: [
+          {
+            payment: {
+              primaryFormOfPayment: 1
+            }
+          }
+        ],
+        designatePrinters: [
+          {
+            type: "TKT",
+            profileNumber: 1
+          },
+          {
+            type: "ITIN",
+            profileNumber: 1
+          },
+          {
+            type: "INV",
+            profileNumber: 1
+          }
+        ],
+        formsOfPayment: [
+          { type: "CASH" },
+          { type: "CHECK" }
+        ]
+      };
+
+      const requestOptions = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(payload),
+        redirect: "follow"
+      };
+
+      fetch(endpoint, requestOptions)
+        .then(res => res.json())
+        .then(async (result) => {
+
+          if (result?.errors || result?.Error) {
+            return response.status(400).json({
+              success: false,
+              message: "Sabre ticketing failed",
+              error: result
+            });
+          }
+
+          booking.status = 2; // Ticketed
+          booking.ticketed_at = new Date();
+          booking.sabre_ticket_response = result;
+          await booking.save();
+
+          return response.status(200).json({
+            success: true,
+            message: "Ticket issued successfully",
+            data: result
+          });
+        });
+
+    } catch (error) {
+      return response.status(500).json({
+        success: false,
+        message: "Something Went Wrong",
+        error: error.message,
+      });
+    }
+  },
 
 
   userBookings: async (request, response) => {
@@ -2149,9 +2149,9 @@ module.exports = {
         await FlightBooking.update({ status: 3 }, { where: { uuid: request.body.uuid } });
       }
 
-      // if (canceledCount > 0) {
-      //   await addNotification(booking.user_id, 'cancellation', { msg: "booking successfully cancellation", id: booking.id, uuid: booking.uuid });
-      // }
+      if (canceledCount > 0) {
+        await addNotification(booking.user_id, 'cancellation', { msg: "Flight Cancelled Successfully", id: booking.id, uuid: booking.uuid });
+      }
 
       return response.status(200).json({
         status: true,
@@ -2183,7 +2183,7 @@ module.exports = {
         });
       }
 
-      const { passengers, passengerCounts, flights, codeId } = request.body;
+      const { passengers, passengerCounts, flights, codeId, currencyCode } = request.body;
       const userId = request.user.id;
 
       // Preprocess static data (same for all bookings)
@@ -2299,6 +2299,7 @@ module.exports = {
             flightPricing: [
               {
                 qualifiers: {
+                  currencyPricing: currencyCode || "SAR",
                   passengersPricing: countList,
                 },
               },
@@ -2331,7 +2332,7 @@ module.exports = {
       });
 
       const bookingResults = await Promise.all(bookingPromises);
-
+      console.log(bookingResults);
       //return response.status(200).json({ data : bookingResults});
 
       // 1. Create master booking entry
@@ -2378,66 +2379,8 @@ module.exports = {
       //       booking_status: isBooked,
       //     });
 
-      //     // Store segments
-      //     await Promise.all(
-      //       r.flight.segments.map((segment) => {
-      //         return Segment.create({
-      //           flight_id: flightRecord.id,
-      //           departure_date: `${segment.departureDate} ${segment.departureTime}`,
-      //           arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
-      //           flight_number: segment.number,
-      //           flight_code: segment.code,
-      //           from_airport: segment.origin,
-      //           to_airport: segment.destination,
-      //           stops: segment.stops || 0,
-      //         });
-      //       })
-      //     );
-
-      //     return {
-      //       flight_index: idx,
-      //       flight_id: flightRecord.id,
-      //       booked: isBooked,
-      //       pnr: PNR,
-      //     };
-      //   })
-      // );
 
 
-
-      // // invoice code starts here
-      // // Generate PDF
-      //     const invoiceTemplate = path.join(__dirname, '../public/views/separate_invoice.ejs');
-      //     const pdfData = {
-      //       pnr: PNR,
-      //       totalBaseFare,
-      //       totalTaxAmount,
-      //       totalAmount,
-      //       passengers: result.booking.travelers,
-      //       flights: flightsDetail,
-      //     };
-      //     const html = await ejs.renderFile(invoiceTemplate, pdfData);
-      //     const browser = await puppeteer.launch();
-      //     // const browser = await puppeteer.launch({
-      //     //                                   headless: true,
-      //     //                                   args: [
-      //     //                                     '--no-sandbox',
-      //     //                                     '--disable-setuid-sandbox',
-      //     //                                     '--disable-dev-shm-usage',
-      //     //                                     '--disable-accelerated-2d-canvas',
-      //     //                                     '--no-zygote',
-      //     //                                     '--single-process',
-      //     //                                     '--disable-gpu'
-      //     //                                   ]
-      //     //                                 });
-      //     const page = await browser.newPage();
-      //     await page.setContent(html, { waitUntil: "load" });
-      //     const fileName = `${moment().unix()}-${request.user.name}-${PNR}.pdf`;
-      //     const pdfPath = path.join(__dirname, `../public/uploads/invoices/${fileName}`);
-      //     await page.pdf({ path: pdfPath, format: "A4" });
-      //     await browser.close();
-
-      //     const pdfUrl = `${process.env.APP_URL}/uploads/invoices/${fileName}`;
 
       // 1. Create master booking entry
 
@@ -2481,7 +2424,6 @@ module.exports = {
 
       // Collector for invoice building
       let allPNR = [];
-      let allFlightsDetail = [];
       let totalBaseFare = 0;
       let totalTaxAmount = 0;
       let totalAmount = 0;
@@ -2498,11 +2440,13 @@ module.exports = {
           const flightBaseFare = parseFloat(fareInfo.subtotal || 0);
           const flightTaxAmount = parseFloat(fareInfo.taxes || 0);
           const flightTotalAmount = parseFloat(fareInfo.total || 0);
+          const flightCurrency = fareInfo.currency || 'SAR';
 
           // Add to invoice totals
           totalBaseFare += flightBaseFare;
           totalTaxAmount += flightTaxAmount;
           totalAmount += flightTotalAmount;
+          const currency = flightCurrency;
 
           if (PNR) allPNR.push(PNR);
 
@@ -2535,6 +2479,7 @@ module.exports = {
 
           // Prepare data for invoice
           let flightDetail = {
+            id: flightRecord.id, // For tracking
             pnr: PNR,
             origin: r.flight.description.departure_location,
             origin_country: locationHelper.locationDetail(r.flight.description.departure_location).country,
@@ -2542,49 +2487,49 @@ module.exports = {
             destination_country: locationHelper.locationDetail(r.flight.description.arrival_location).country,
             date: r.flight.description.departure_date,
             amount: flightTotalAmount,
+            currency: currencyCode || "SAR",
             booking_status: isBooked,
             segments: [],
           };
 
-          // Store segments
-          await Promise.all(
-            r.flight.segments.map(async (segment) => {
-              await Segment.create({
-                flight_id: flightRecord.id,
-                departure_date: `${segment.departureDate} ${segment.departureTime}`,
-                arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
-                flight_number: segment.number,
-                flight_code: segment.code,
-                from_airport: segment.origin,
-                to_airport: segment.destination,
-                stops: segment.stops || 0,
-              });
+          // Store segments (sequentially within each flight processing to preserve order)
+          for (const segment of r.flight.segments) {
+            await Segment.create({
+              flight_id: flightRecord.id,
+              departure_date: `${segment.departureDate} ${segment.departureTime}`,
+              arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
+              flight_number: segment.number,
+              flight_code: segment.code,
+              from_airport: segment.origin,
+              to_airport: segment.destination,
+              stops: segment.stops || 0,
+            });
 
-              // Add segment to invoice info
-              flightDetail.segments.push({
-                flight_code: segment.code,
-                flight_number: segment.number,
-                from_airport: segment.origin,
-                to_airport: segment.destination,
-                departure_date: `${segment.departureDate} ${segment.departureTime}`,
-                arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
-              });
-
-
-            })
-          );
-
-          // Add this flight to invoice list
-          allFlightsDetail.push(flightDetail);
+            // Add segment to invoice info
+            flightDetail.segments.push({
+              flight_code: segment.code,
+              flight_number: segment.number,
+              from_airport: segment.origin,
+              to_airport: segment.destination,
+              departure_date: `${segment.departureDate} ${segment.departureTime}`,
+              arrival_date: `${segment.arrivalDate} ${segment.arrivalTime}`,
+            });
+          }
 
           return {
             flight_index: idx,
             flight_id: flightRecord.id,
             booked: isBooked,
             pnr: PNR,
+            flightDetail: flightDetail
           };
         })
       );
+
+      // Extract and sort flight details to fix the order issue
+      let allFlightsDetail = dbResults
+        .map(r => r.flightDetail)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
 
       //
       // -------- INVOICE (ONE FILE FOR ALL FLIGHTS) --------
@@ -2597,9 +2542,15 @@ module.exports = {
         totalBaseFare,
         totalTaxAmount,
         totalAmount,
+        currency: allFlightsDetail.length > 0 ? allFlightsDetail[0].currency : 'SAR',
         passengers: passengers,
         flights: allFlightsDetail,
         bookingId: bookingUuid,
+        invoiceNumber: bookingUuid,
+        dateIssued: moment().format('MMMM DD, YYYY'),
+        clientName: request.user.name,
+        clientEmail: request.user.email,
+        clientPhone: request.user.number || 'N/A'
       };
 
       const html = await ejs.renderFile(invoiceTemplate, pdfData);
@@ -2654,7 +2605,7 @@ module.exports = {
       });
       // invoice code ends here
 
-      // await addNotification(userId, 'booking', { msg: "booking successfully created", id: bookingGroup.id, uuid: bookingUuid });
+      await addNotification(userId, 'booking', { msg: "booking successfully created", id: bookingGroup.id, uuid: bookingUuid });
 
 
 
@@ -2839,7 +2790,7 @@ function simplifyFlightResponse(itinerariesList) {
         };
       })
     );
-    console.log(itinerary.passengerPriceDetail[0].passengerList[0].baggageInformation);
+
     // Extract passenger and pricing details
     const passengers = itinerary.passengerPriceDetail[0].passengerList.map((passenger) => ({
       type: passenger.type === 'ADT' ? 'Adult' : passenger.type === 'C06' ? 'Child' : passenger.type,
@@ -2899,6 +2850,7 @@ function simplifyFlightResponse(itinerariesList) {
 
     // Extract total pricing
     const totalFare = {
+      priceType: itinerary.passengerPriceDetail[0].distributionModel ?? null,
       baseFare: `  ${convertToSAR(
         itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareAmount,
         itinerary.passengerPriceDetail[0].totalFareDetail?.baseFareCurrency,

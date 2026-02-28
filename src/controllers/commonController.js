@@ -1,45 +1,47 @@
-const {Comment , Violation , User, Category , Promotion}= require('../database/models');
+const { Comment, Violation, User, Category, Promotion, CommunityActivity } = require('../database/models');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
+const { addNotification } = require('../Helpers/notificationHandler');
+const addAlert = require('../Helpers/alertHelper'); // Added Alert Helper
 const moment = require('moment');
 
-const {  addCommentSchema, 
-                    updateCommentSchema, 
-                    deleteCommentSchema, 
-                    addViolationSchema, 
-                    updateViolationSchema, 
-                    listViolationSchema, 
-                    deleteViolationSchema,
-                    listCategoriesSchema,
-                    addPromotionCodeSchema,
-                    updatePromotionCodeSchema,
-                    getPromotionCodeSchema,
-                    deletePromotionCodeSchema
-                } = require('../validations/commonValidation')
+const { addCommentSchema,
+    updateCommentSchema,
+    deleteCommentSchema,
+    addViolationSchema,
+    updateViolationSchema,
+    listViolationSchema,
+    deleteViolationSchema,
+    listCategoriesSchema,
+    addPromotionCodeSchema,
+    updatePromotionCodeSchema,
+    getPromotionCodeSchema,
+    deletePromotionCodeSchema
+} = require('../validations/commonValidation')
 
 module.exports = {
 
-    addComment : async (request , response) => {
-        try{
+    addComment: async (request, response) => {
+        try {
             const { error } = addCommentSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
 
             let id = request.body.id;
             let userId = request.user.id;
-            let comment  = request.body.comment;
+            let comment = request.body.comment;
             let commentType = request.body.type
-            await Comment.create({
-                            commentable_id : id,
-                            commentable_type : commentType,
-                            comment: comment,
-                            added_by: userId 
-                        });
+            let createdComment = await Comment.create({
+                commentable_id: id,
+                commentable_type: commentType,
+                comment: comment,
+                added_by: userId
+            });
 
 
             await LogActivityHandler(
@@ -49,13 +51,20 @@ module.exports = {
                 `Add ${commentType} comment`, //information
             );
 
+            if (commentType === 'CommunityActivity') {
+                const activityDetail = await CommunityActivity.findOne({ where: { id: id } });
+                if (activityDetail && activityDetail.added_by !== userId) {
+                    await addNotification(activityDetail.added_by, 'comment', { msg: `${request.user.name} commented on your post`, comment_id: createdComment.id });
+                }
+            }
+
             return response.status(200).json({
                 status: true,
                 message: 'Comment added successfully',
             })
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -65,26 +74,26 @@ module.exports = {
     },
 
 
-    updateComment : async (request , response) => {
-        try{
+    updateComment: async (request, response) => {
+        try {
             const { error } = updateCommentSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
             let id = request.body.id;
-            let comment  = request.body.comment;
-            let commentDetail = await Comment.findOne({where : {id : id}});
+            let comment = request.body.comment;
+            let commentDetail = await Comment.findOne({ where: { id: id } });
             await Comment.update(
-                        {
-                            comment: comment,
-                        },
-                        { where : {id : id}}
-                    );
+                {
+                    comment: comment,
+                },
+                { where: { id: id } }
+            );
 
 
             await LogActivityHandler(
@@ -100,7 +109,7 @@ module.exports = {
             })
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -113,18 +122,18 @@ module.exports = {
     deleteComment: async (request, response) => {
         try {
             const { error } = deleteCommentSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
             const commentId = request.body.commentId;
 
             const commentDetail = Comment.findOne({
-                where : {id : commentId}
+                where: { id: commentId }
             });
             const commentType = commentDetail.commentable_type;
             await Comment.destroy({
@@ -139,12 +148,12 @@ module.exports = {
                 'Delete', //action
                 `delete ${commentType} comment`, //information
             );
-    
+
             return response.status(200).json({
                 status: true,
                 message: 'Comment deleted successfully',
             });
-    
+
         } catch (error) {
             return response.status(500).json({
                 status: false,
@@ -153,31 +162,31 @@ module.exports = {
             });
         }
     },
-    
 
-    addViolation : async (request , response ) =>{
-        try{
+
+    addViolation: async (request, response) => {
+        try {
             const { error } = addViolationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
             let personId = request.body.personId;
             let addedBy = request.user.id;
-            let violationableType  = request.body.type;
-            let  violationableId= request.body.id;
+            let violationableType = request.body.type;
+            let violationableId = request.body.id;
             let reason = request.body.reason;
             await Violation.create({
-                            violationable_id : violationableId,
-                            violationable_type : violationableType,
-                            reason: reason,
-                            added_by: addedBy,
-                            user_id : personId
-                        });
+                violationable_id: violationableId,
+                violationable_type: violationableType,
+                reason: reason,
+                added_by: addedBy,
+                user_id: personId
+            });
             await LogActivityHandler(
                 request.user.id,
                 'Violation', // title
@@ -191,7 +200,7 @@ module.exports = {
             })
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -200,31 +209,31 @@ module.exports = {
         }
     },
 
-    updateViolation : async (request , response ) =>{
-        try{
+    updateViolation: async (request, response) => {
+        try {
             const { error } = updateViolationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
             let reason = request.body.reason;
             let violationId = request.body.violationId;
             let violationDetail = await Violation.findOne({
-                where : {id : violationId}
+                where: { id: violationId }
             });
 
 
             await Violation.update({
-                            reason: reason,
-                        },
-                        {
-                            where : {id : violationId}
-                        } 
-                    );
+                reason: reason,
+            },
+                {
+                    where: { id: violationId }
+                }
+            );
 
             await LogActivityHandler(
                 request.user.id,
@@ -239,7 +248,7 @@ module.exports = {
             })
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -249,50 +258,50 @@ module.exports = {
     },
 
 
-    listViolation : async ( request , response ) => {
-        try{
+    listViolation: async (request, response) => {
+        try {
             const { error } = listViolationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
-           let skip = (parseInt(request.body.pageNo) - 1) * 10;
-           let userId = request.body.personId;
-           let addedBy = request.body.addedBy
-           let violationType = request.body.type;
 
-           let whereCondition = {};
-           if(userId){
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
+            let skip = (parseInt(request.body.pageNo) - 1) * 10;
+            let userId = request.body.personId;
+            let addedBy = request.body.addedBy
+            let violationType = request.body.type;
+
+            let whereCondition = {};
+            if (userId) {
                 whereCondition.user_id = userId;
-           }
+            }
 
-           if(addedBy){
+            if (addedBy) {
                 whereCondition.added_by = addedBy;
-           }
+            }
 
-           if(violationType){
+            if (violationType) {
                 whereCondition.violationable_type = violationType;
-           }
-            
-           let violations = await Violation.findAll({
-                    include : [
-                                {
-                                    model: User, 
-                                    as: 'addedBy', 
-                                },
-                                {
-                                    model: User, 
-                                    as: 'user', 
-                                },
-                            ],
-                            where : whereCondition,
-                            offset : skip,
-                            limit: 10,
-           })
+            }
+
+            let violations = await Violation.findAll({
+                include: [
+                    {
+                        model: User,
+                        as: 'addedBy',
+                    },
+                    {
+                        model: User,
+                        as: 'user',
+                    },
+                ],
+                where: whereCondition,
+                offset: skip,
+                limit: 10,
+            })
 
 
             return response.status(200).json({
@@ -301,7 +310,7 @@ module.exports = {
             })
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -313,18 +322,18 @@ module.exports = {
     deleteViolation: async (request, response) => {
         try {
             const { error } = deleteViolationSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
             const violationId = request.body.violationId;
-            
+
             const violationDetail = Violation.findOne({
-                where : {id : violationId}
+                where: { id: violationId }
             })
 
             console.log(violationDetail);
@@ -342,12 +351,12 @@ module.exports = {
                 'delete', //action
                 `delete ${violationableType} violation`, //information
             );
-    
+
             return response.status(200).json({
                 status: true,
                 message: 'Violation deleted successfully',
             });
-    
+
         } catch (error) {
             return response.status(500).json({
                 status: false,
@@ -356,18 +365,18 @@ module.exports = {
             });
         }
 
-        
+
     },
 
     categories: async (request, response) => {
         try {
             const categories = await Category.findAll();
-    
+
             return response.status(200).json({
                 status: true,
                 data: categories,
             });
-    
+
         } catch (error) {
             return response.status(500).json({
                 status: false,
@@ -378,20 +387,20 @@ module.exports = {
 
     },
 
-    addPromotionCode : async (request ,response ) => {
+    addPromotionCode: async (request, response) => {
         try {
             const { error } = addPromotionCodeSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
-            await Promotion.create({
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
+            const promotion = await Promotion.create({
                 promotion_name: request.body.promotion_name,
-                applicable_service : request.body.applicable_service, // 'flight' , 'hotel' , 'both'
+                applicable_service: request.body.applicable_service, // 'flight' , 'hotel' , 'both'
                 promotion_type: request.body.promotion_type, // 'Fixed' or 'percentage'
                 code: request.body.code,
                 percentage: request.body.percentage || null,
@@ -402,14 +411,25 @@ module.exports = {
                 amount: request.body.amount || null,
                 total_promo: request.body.total_promo,
                 used_promo: 0,
-                created_by : request.user.id
+                created_by: request.user.id
             });
+
+            if(request.body.is_add_alert){
+                // Create Alert for new promotion
+                await addAlert('promotion', {
+                    url: `/promo/${promotion.id}`,
+                    id: promotion.id,
+                    headline: `New Promotion: ${promotion.promotion_name}`, 
+                }, promotion.applicable_to);
+            }
+            
 
             return response.status(200).json({
                 status: true,
                 message: 'Promotion created successfully',
+                is_add_alert: 1 // Added is_add_alert flag
             });
-    
+
         } catch (error) {
             return response.status(500).json({
                 status: false,
@@ -420,17 +440,17 @@ module.exports = {
     },
 
 
-    updatePromotionCode : async (request ,response ) => {
+    updatePromotionCode: async (request, response) => {
         try {
             const { error } = updatePromotionCodeSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
             const currentPromotion = await Promotion.findByPk(request.body.id);
 
             if (
@@ -438,15 +458,15 @@ module.exports = {
                 currentPromotion.used_promo !== null &&
                 Number(request.body.total_promo) < currentPromotion.used_promo
             ) {
-            return response.status(400).json({
-                status: false,
-                message: `Total promo (${request.body.total_promo}) cannot be less than used promo (${currentPromotion.used_promo}).`,
-            });
+                return response.status(400).json({
+                    status: false,
+                    message: `Total promo (${request.body.total_promo}) cannot be less than used promo (${currentPromotion.used_promo}).`,
+                });
             }
 
             await Promotion.update({
                 promotion_name: request.body.promotion_name,
-                applicable_service : request.body.applicable_service, // 'flight' , 'hotel' , 'both'
+                applicable_service: request.body.applicable_service, // 'flight' , 'hotel' , 'both'
                 promotion_type: request.body.promotion_type, // 'Fixed' or 'percentage'
                 code: request.body.code,
                 percentage: request.body.percentage || null,
@@ -456,13 +476,23 @@ module.exports = {
                 condition: request.body.condition, // minimum or none
                 amount: request.body.amount || null,
                 total_promo: request.body.total_promo,
-            } , { where : {id : request.body.id}});
+            }, { where: { id: request.body.id } });
+
+            if(request.body.is_add_alert){
+                // Create Alert for updated promotion
+                await addAlert('promotion', {
+                    url: `/promo/${request.body.id}`,
+                    id: request.body.id,
+                    headline: `Promotion Updated: ${request.body.promotion_name}`
+                }, request.body.applicable_to);
+            }
 
             return response.status(200).json({
                 status: true,
                 message: 'Promotion updated successfully',
+                is_add_alert: 1 // Added is_add_alert flag
             });
-    
+
         } catch (error) {
             return response.status(500).json({
                 status: false,
@@ -472,19 +502,19 @@ module.exports = {
         }
     },
 
-    getPromotionCode : async (request , response ) => {
+    getPromotionCode: async (request, response) => {
         try {
             const { error } = getPromotionCodeSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
             const code = request.params.code;
-            const promotion = await Promotion.findOne({ where: { code : code } });
+            const promotion = await Promotion.findOne({ where: { code: code } });
 
             if (!promotion) {
                 return response.status(200).json({
@@ -493,22 +523,22 @@ module.exports = {
                 });
             }
 
-            
+
             const isExpiredByUsage =
                 promotion.total_promo !== null &&
                 promotion.used_promo !== null &&
                 promotion.used_promo >= promotion.total_promo;
 
-           const today = moment();
-           const isExpiredByDate =
+            const today = moment();
+            const isExpiredByDate =
                 !moment(promotion.applicable_from).isSameOrBefore(today, 'day') ||
                 !moment(promotion.applicable_to).isSameOrAfter(today, 'day');
 
 
             const isExpired = isExpiredByUsage || isExpiredByDate;
             promoStatus = isExpired ? 'expired' : 'active';
-     
-            if(promoStatus == 'expired'){
+
+            if (promoStatus == 'expired') {
                 return response.status(200).json({
                     status: true,
                     message: 'Promotion expired',
@@ -520,7 +550,7 @@ module.exports = {
                 });
             }
 
-    
+
         } catch (error) {
             return response.status(500).json({
                 status: false,
@@ -530,17 +560,17 @@ module.exports = {
         }
     },
 
-    deletePromoCode : async (request , response ) => {
+    deletePromoCode: async (request, response) => {
         try {
             const { error } = deletePromotionCodeSchema.validate(request.body, { abortEarly: false });
-                    
-                      if (error) {
-                            return response.status(400).json({
-                            success: false,
-                            message: "Validation failed",
-                            details: error.details.map((d) => d.message),
-                            });
-                        }
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
             const id = request.body.id;
             await Promotion.destroy({
                 where: {
@@ -548,13 +578,13 @@ module.exports = {
                 },
             });
 
-            
+
             return response.status(200).json({
                 status: true,
                 message: 'Promotion deleted successfully',
             });
 
-    
+
         } catch (error) {
             return response.status(500).json({
                 status: false,

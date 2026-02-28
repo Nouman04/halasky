@@ -5,4 +5,6 @@ src/database/config
 src/config/mailConfig.js
 src/jobs/token-job.js
 .env
+src/storage/cron-log.js
+src/public/response
 config.bat

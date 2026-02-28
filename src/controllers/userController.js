@@ -1,48 +1,48 @@
 const { Op } = require('sequelize');
-const { Role , User , UserRole , RecoveryRequest , Permission } = require('../database/models');
+const { Role, User, UserRole, RecoveryRequest, Permission, Notification } = require('../database/models');
 const bcrypt = require('bcrypt');
 const appConst = require('../appConst');
 const LogActivityHandler = require('../Helpers/logActivityHandler');
 const path = require('path');
 const {
-  listValidationSchema,
-  listUsersValidationSchema,
-  nonActiveUserValidationSchema,
-  searchUserValidationSchema,
-  updateAccountStatusValidationSchema,
-  updateAccountPasswordValidationSchema,
-  userAccountDetailValidationSchema,
-  getMembersValidationSchema,
-  getRoleMembersValidationSchema,
-  updateUserRoleValidationSchema,
-  addMemberValidationSchema,
-  userRecoveryRequestValidationSchema,
-  getRecoveryRequestsValidationSchema,
-  updateRecoveryRequestValidationSchema,
-  updateProfilePasswordValidationSchema,
-  updateProfileDetailValidationSchema,
+    listValidationSchema,
+    listUsersValidationSchema,
+    nonActiveUserValidationSchema,
+    searchUserValidationSchema,
+    updateAccountStatusValidationSchema,
+    updateAccountPasswordValidationSchema,
+    userAccountDetailValidationSchema,
+    getMembersValidationSchema,
+    getRoleMembersValidationSchema,
+    updateUserRoleValidationSchema,
+    addMemberValidationSchema,
+    userRecoveryRequestValidationSchema,
+    getRecoveryRequestsValidationSchema,
+    updateRecoveryRequestValidationSchema,
+    updateProfilePasswordValidationSchema,
+    updateProfileDetailValidationSchema,
 } = require('../validations/userValidation');
 require('dotenv').config();
 
 module.exports = {
 
-    getRoleslist : async (request, response) => {
+    getRoleslist: async (request, response) => {
         try {
-           
+
 
             let roles = await Role.findAll({
                 where: {
-                  title: {
-                    [Op.ne]: "user"
-                  }
+                    title: {
+                        [Op.ne]: "user"
+                    }
                 }
-              });
+            });
             return response.status(200).json({
                 status: true,
                 roles: roles
             })
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -51,33 +51,33 @@ module.exports = {
         }
     },
 
-    list : async (request , response) =>{
-        try{
-             const { error } = listValidationSchema.validate(request.body, { abortEarly: false });
-        
+    list: async (request, response) => {
+        try {
+            const { error } = listValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let status = request.body.status;
             let whereCondition = {};
-            if(status){
+            if (status) {
                 whereCondition.status = status
             }
             const activeUsers = await User.findAll({
-                include : {
-                    model : Role,
-                    where : {
-                        title : 'user'
+                include: {
+                    model: Role,
+                    where: {
+                        title: 'user'
                     },
-                    required : false
+                    required: false
                 },
-                where : whereCondition,
-                offset : skip,
+                where: whereCondition,
+                offset: skip,
                 limit: 10,
             });
 
@@ -88,7 +88,7 @@ module.exports = {
                 activeUsers: activeUsers
             })
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -100,86 +100,86 @@ module.exports = {
 
     listUsers: async (request, response) => {
         try {
-             const { error } = listUsersValidationSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = listUsersValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
-          let skip = (parseInt(request.body.pageNo) - 1) * 10;
-    
-          let users = await User.findAll({
-            attributes: ["id", "email", "name", "number", "status"],
-            include: [
-              {
-                model: Violation,
-                as: "violations",
-                attributes: ["id", "reason"],
-              },
-            ],
-            offset: skip,
-            limit: 10,
-          });
-    
-          let formattedUsers = users.map((user) => ({
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            number: user.number,
-            status: user.status,
-            violation_count: user.violations.length,
-            violations: user.violations.map((v) => v.reason),
-          }));
-    
-          return response.status(200).json({
-            status: true,
-            data: formattedUsers,
-          });
-        } catch (error) {
-          return response.status(500).json({
-            status: false,
-            message: "Something Went Wrong",
-            error: error.message,
-          });
-        }
-      },
+            let skip = (parseInt(request.body.pageNo) - 1) * 10;
 
-    nonActiveUser : async (request , response) =>{
-        try{
-             const { error } = nonActiveUserValidationSchema.validate(request.body, { abortEarly: false });
-        
+            let users = await User.findAll({
+                attributes: ["id", "email", "name", "number", "status"],
+                include: [
+                    {
+                        model: Violation,
+                        as: "violations",
+                        attributes: ["id", "reason"],
+                    },
+                ],
+                offset: skip,
+                limit: 10,
+            });
+
+            let formattedUsers = users.map((user) => ({
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                number: user.number,
+                status: user.status,
+                violation_count: user.violations.length,
+                violations: user.violations.map((v) => v.reason),
+            }));
+
+            return response.status(200).json({
+                status: true,
+                data: formattedUsers,
+            });
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: "Something Went Wrong",
+                error: error.message,
+            });
+        }
+    },
+
+    nonActiveUser: async (request, response) => {
+        try {
+            const { error } = nonActiveUserValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             const nonActiveUser = await User.findAll({
-                include : {
-                    model : Role,
-                    where : {
-                        title : 'user'
+                include: {
+                    model: Role,
+                    where: {
+                        title: 'user'
                     },
-                    required : false
+                    required: false
                 },
-                where : {
-                    status : 0
+                where: {
+                    status: 0
                 },
-                offset : skip,
+                offset: skip,
                 limit: 10,
             });
 
-            
+
             return response.status(200).json({
                 status: true,
                 nonActiveUser: nonActiveUser
             })
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -188,24 +188,24 @@ module.exports = {
         }
     },
 
-    searchUser : async (request , response) => {
-        try{
-             const { error } = searchUserValidationSchema.validate(request.body, { abortEarly: false });
-        
+    searchUser: async (request, response) => {
+        try {
+            const { error } = searchUserValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             const { searchQuery } = request.body;
 
             const searchedUsers = await User.findAll({
-                where : {
+                where: {
                     [Op.or]: [
-                        {name : {[Op.like] : `%${searchQuery}%`} },
-                        {email : {[Op.like] : `%${searchQuery}%`} }
+                        { name: { [Op.like]: `%${searchQuery}%` } },
+                        { email: { [Op.like]: `%${searchQuery}%` } }
                     ]
                 },
                 limit: 10,
@@ -214,9 +214,9 @@ module.exports = {
 
             return response.status(200).json({
                 status: true,
-                searchedUsers : searchedUsers
+                searchedUsers: searchedUsers
             })
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -225,21 +225,21 @@ module.exports = {
         }
     },
 
-    statusList : async (request , response) =>{
-        try{
-        
-           let statusList = [
-            {inactiveUser : appConst.inactiveUser},
-            {activeUser : appConst.activeUser},
-            {bannedUser : appConst.bannedUser}
-           ]
+    statusList: async (request, response) => {
+        try {
+
+            let statusList = [
+                { inactiveUser: appConst.inactiveUser },
+                { activeUser: appConst.activeUser },
+                { bannedUser: appConst.bannedUser }
+            ]
 
 
             return response.status(200).json({
                 status: true,
-                data : statusList
+                data: statusList
             })
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -248,32 +248,32 @@ module.exports = {
         }
     },
 
-    updateAccountStatus : async (request ,response) =>{
-        try{
-             const { error } = updateAccountStatusValidationSchema.validate(request.body, { abortEarly: false });
-        
+    updateAccountStatus: async (request, response) => {
+        try {
+            const { error } = updateAccountStatusValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
-            const { userId , status } = request.body;
+            const { userId, status } = request.body;
             console.log(status);
             console.log(userId);
             await User.update(
-                {status : status},
-                {where : {id : userId}}
+                { status: status },
+                { where: { id: userId } }
             );
 
-            
+
 
             return response.status(200).json({
                 status: true,
-                message : 'Account status updated successfully'
+                message: 'Account status updated successfully'
             })
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
@@ -282,247 +282,246 @@ module.exports = {
         }
     },
 
-    updateAccountPassword : async (request , response) =>{
+    updateAccountPassword: async (request, response) => {
         try {
-             const { error } = updateAccountPasswordValidationSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = updateAccountPasswordValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let userId = request.body.id;
             let password = request.body.password
-            let saltcount  = 10;
-            let hashedPassword = await bcrypt.hash( password , saltcount);
+            let saltcount = 10;
+            let hashedPassword = await bcrypt.hash(password, saltcount);
 
-            User.update( 
-                {password : hashedPassword}, 
-                { where : { id : userId } }
+            User.update(
+                { password: hashedPassword },
+                { where: { id: userId } }
             );
 
             await LogActivityHandler(
-                    request.body.userId,
-                    'User Password', // title
-                    'Update', //action
-                    'change user password', //information
+                request.body.userId,
+                'User Password', // title
+                'Update', //action
+                'change user password', //information
             );
-        
-            return response.status(200).json({
-                status : true,
-                message : "Password updated successfully"
-            });
-            
 
-        } catch (error){
+            return response.status(200).json({
+                status: true,
+                message: "Password updated successfully"
+            });
+
+
+        } catch (error) {
             return response.status(500).json({
                 status: false,
                 message: 'Something Went Wrong',
                 error: error.message
-            })  
+            })
         }
     },
 
 
-    userAccountDetail : async (request , response) =>{
-        try{
-             const { error } = userAccountDetailValidationSchema.validate(request.body, { abortEarly: false });
-        
+    userAccountDetail: async (request, response) => {
+        try {
+            const { error } = userAccountDetailValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             const userId = request.body.id;
             const user = await User.findOne({
-                where : { id : userId}
+                where: { id: userId }
             });
-            const imageUrl =  `${process.env.APP_URL}/uploads/image`;
-            
+            const imageUrl = `${process.env.APP_URL}/uploads/image`;
+
             return response.status(200).json({
-                status : true,
-                userDetail : user,
-                imageUrl : imageUrl
+                status: true,
+                userDetail: user,
+                imageUrl: imageUrl
             });
         } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
-            })
-        } 
-    }, 
-
-    getMembers : async (request , response) => {
-        try{
-             const { error } = getMembersValidationSchema.validate(request.body, { abortEarly: false });
-        
-            if (error) {
-                return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
-                });
-            }
-           let skip = (parseInt(request.body.pageNo) - 1) * 10;
-           let status = request.body.status;
-           let nemberList = await  User.findAll({
-                                            include : {
-                                                model : Role,
-                                                where : {
-                                                    title : {
-                                                        [Op.in] : ['admin' , 'support_staff']
-                                                    },
-                                                },
-                                                required : true
-                                            },
-                                            where : {
-                                                status : status
-                                            },
-                                            offset : skip,
-                                            limit : 10
-                                        });
-            return response.status(200).json({
-                status : true,
-                members : nemberList
-            });
-        } catch (error){
-            return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
     },
 
-    getRoleMembers : async (request , response )=> {
+    getMembers: async (request, response) => {
         try {
-             const { error } = getRoleMembersValidationSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = getMembersValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
-            let roleId  = request.body.roleId;
+            let status = request.body.status;
+            let nemberList = await User.findAll({
+                include: {
+                    model: Role,
+                    where: {
+                        title: {
+                            [Op.in]: ['admin', 'support_staff']
+                        },
+                    },
+                    required: true
+                },
+                where: {
+                    status: status
+                },
+                offset: skip,
+                limit: 10
+            });
+            return response.status(200).json({
+                status: true,
+                members: nemberList
+            });
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: error.message
+            })
+        }
+    },
+
+    getRoleMembers: async (request, response) => {
+        try {
+            const { error } = getRoleMembersValidationSchema.validate(request.body, { abortEarly: false });
+
+            if (error) {
+                return response.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
+                });
+            }
+            let skip = (parseInt(request.body.pageNo) - 1) * 10;
+            let roleId = request.body.roleId;
             let status = request.body.status;
             let members = await User.findAll({
-                where : {
-                    status : status
+                where: {
+                    status: status
                 },
-                include : {
-                    model : Role,
-                    where : {
-                        id : roleId
+                include: {
+                    model: Role,
+                    where: {
+                        id: roleId
                     },
-                    required : true 
+                    required: true
                 },
-                offset : skip,
-                limit : 10
+                offset: skip,
+                limit: 10
             });
 
             return response.status(200).json({
-                status : true,
-                members : members
+                status: true,
+                members: members
             })
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
     },
 
 
-    updateUserRole : async (request , response) => {
+    updateUserRole: async (request, response) => {
         try {
-             const { error } = updateUserRoleValidationSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = updateUserRoleValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let uId = request.body.uId;
             let rId = request.body.rId;
 
-            let userRole = await UserRole.findOne({ where : {user_id : uId}});
-            
-            if(userRole){
+            let userRole = await UserRole.findOne({ where: { user_id: uId } });
+
+            if (userRole) {
                 await UserRole.update(
-                    { role_id : rId },
-                    { where : { user_id : uId} }
+                    { role_id: rId },
+                    { where: { user_id: uId } }
                 );
             } else {
-                await UserRole.create({ role_id : rId  , user_id : uId});
+                await UserRole.create({ role_id: rId, user_id: uId });
             }
 
-          
+
             await LogActivityHandler(
                 request.body.uId,
                 'User role', // title
                 'Update', //action
                 'change user role', //information
             );
-            
+
             return response.status(200).json({
-                status : false,
-                message : 'User role updated successfully'
+                status: false,
+                message: 'User role updated successfully'
             })
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
     },
 
-    addMember : async ( request , response ) => {
+    addMember: async (request, response) => {
         try {
-             const { error } = addMemberValidationSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = addMemberValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let name = request.body.name;
             let email = request.body.email;
             let roleId = request.body.roleId;
-            
+
             let userCount = await User.count({
-                where : {
-                    email : email
+                where: {
+                    email: email
                 }
             });
 
-            if(userCount)
-            {
+            if (userCount) {
                 return response.status(200).json({
-                    status : false,
-                    message : 'User already exists with same email'
+                    status: false,
+                    message: 'User already exists with same email'
                 })
             } else {
                 let member = await User.create({
-                    status : 1,
-                    email : email,
-                    name : name
+                    status: 1,
+                    email: email,
+                    name: name
                 });
 
                 await UserRole.create({
-                    role_id : roleId,
-                    user_id : member.id
+                    role_id: roleId,
+                    user_id: member.id
                 })
 
                 await LogActivityHandler(
@@ -533,56 +532,56 @@ module.exports = {
                 );
 
                 return response.status(200).json({
-                    status : true,
-                    message : "Member created successfully"
+                    status: true,
+                    message: "Member created successfully"
                 });
 
             }
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
     },
 
 
-    userRecoveryRequest : async (request , response ) => {
+    userRecoveryRequest: async (request, response) => {
         try {
-             const { error } = userRecoveryRequestValidationSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = userRecoveryRequestValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let email = request.body.email;
             let user = await User.findOne({
-                            where: {
-                                email : email 
-                            }
-                        });
+                where: {
+                    email: email
+                }
+            });
 
 
-            if(!user){
+            if (!user) {
                 return response.status(200).json({
-                    status : false,
-                    message : 'No user exist with this email'
+                    status: false,
+                    message: 'No user exist with this email'
                 });
             }
 
-            if(user.status == 1){
+            if (user.status == 1) {
                 return response.status(200).json({
-                    status : false,
-                    message : 'User is already active'
+                    status: false,
+                    message: 'User is already active'
                 });
             }
 
             await RecoveryRequest.create({
-                user_id : user.id,
-                status : 0
+                user_id: user.id,
+                status: 0
             });
 
             await LogActivityHandler(
@@ -593,105 +592,105 @@ module.exports = {
             );
 
             return response.status(200).json({
-                status : true,
-                message : 'Recovery request added succesfully'
+                status: true,
+                message: 'Recovery request added succesfully'
             });
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
     },
 
-    getRecoveryRequests : async (request , response) =>{
-        try { 
-             const { error } = getRecoveryRequestsValidationSchema.validate(request.body, { abortEarly: false });
-        
+    getRecoveryRequests: async (request, response) => {
+        try {
+            const { error } = getRecoveryRequestsValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
-            }  
+            }
             let skip = (parseInt(request.body.pageNo) - 1) * 10;
             let requestStatus = request.body.status;
 
-            if(!requestStatus){
+            if (!requestStatus) {
                 requestStatus = appConst.requestPending;
             }
 
             //here start work
             let userRecoveryRequest = await User.findAll({
-                where : { status : 0 },
-                include : {
-                    model : RecoveryRequest,
-                    required : true,
-                    
+                where: { status: 0 },
+                include: {
+                    model: RecoveryRequest,
+                    required: true,
+
                 },
-                offset : skip,
-                limit : 10
+                offset: skip,
+                limit: 10
             })
 
             return response.status(200).json({
-                status : true,
-                data : userRecoveryRequest
+                status: true,
+                data: userRecoveryRequest
             });
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
 
     },
 
-    getRoles : async (request , response ) =>{
-        try {   
-            
+    getRoles: async (request, response) => {
+        try {
+
             let roles = await Role.findAll({
-                                include : {
-                                    model : Permission,
-                                },
-                            });
+                include: {
+                    model: Permission,
+                },
+            });
 
             return response.status(200).json({
-                status : true,
-                data : roles
-            });         
+                status: true,
+                data: roles
+            });
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
-        } 
+        }
     },
 
 
-    updateRecoveryRequest : async (request , response) => {
-        try {   
-             const { error } = updateRecoveryRequestValidationSchema.validate(request.body, { abortEarly: false });
-        
+    updateRecoveryRequest: async (request, response) => {
+        try {
+            const { error } = updateRecoveryRequestValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             let userId = request.body.uId;
-            let status  = request.body.status;
+            let status = request.body.status;
             RecoveryRequest.update(
-                { status : status},
-                { 
-                    where : {
-                        user_id : userId,
-                        status : appConst.recoveryPending
+                { status: status },
+                {
+                    where: {
+                        user_id: userId,
+                        status: appConst.recoveryPending
                     }
                 }
             );
@@ -705,48 +704,48 @@ module.exports = {
             );
 
             return response.status(200).json({
-                status : true,
-                data : 'Recovery request updated successfully'
-            });  
+                status: true,
+                data: 'Recovery request updated successfully'
+            });
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
-        } 
+        }
     },
 
 
-    updateProfilePassword : async ( request , response ) => {
+    updateProfilePassword: async (request, response) => {
         try {
-             const { error } = updateProfilePasswordValidationSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = updateProfilePasswordValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
-            const { previousPassword , password , confirmPassword } = request.body;
+            const { previousPassword, password, confirmPassword } = request.body;
             const userDetail = request.user;
-            let user = await User.findOne({ where : { id : userDetail.id}});
-            
+            let user = await User.findOne({ where: { id: userDetail.id } });
+
             const match = await bcrypt.compare(previousPassword, user.password);
 
             if (!match) {
-            return response
-                .status(200)
-                .json({ status: false, error: "Your password doesn't match" });
+                return response
+                    .status(200)
+                    .json({ status: false, error: "Your password doesn't match" });
             }
 
-            let saltcount  = 10;
-            let hashedPassword = await bcrypt.hash( password , saltcount);
+            let saltcount = 10;
+            let hashedPassword = await bcrypt.hash(password, saltcount);
 
             await User.update(
-                {password : hashedPassword},
-                {where : {id : userDetail.id} }
+                { password: hashedPassword },
+                { where: { id: userDetail.id } }
             )
 
 
@@ -754,31 +753,31 @@ module.exports = {
                 status: true,
                 message: 'Password Updated Successfully',
             })
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
     },
 
-    updateProfileDetail : async (request , response ) => {
+    updateProfileDetail: async (request, response) => {
         try {
-             const { error } = updateProfileDetailValidationSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = updateProfileDetailValidationSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
-            const { username , phone } = request.body;
+            const { username, phone } = request.body;
             const user = request.user;
 
             await User.update(
-                {name : username , number : phone},
-                {where : {id : user.id} }
+                { name: username, number: phone },
+                { where: { id: user.id } }
             )
 
 
@@ -788,30 +787,30 @@ module.exports = {
             })
 
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
     },
 
-    getRolePermission : async (request , response) => {
+    getRolePermission: async (request, response) => {
         try {
-             const { error } = update2faSchema.validate(request.body, { abortEarly: false });
-        
+            const { error } = update2faSchema.validate(request.body, { abortEarly: false });
+
             if (error) {
                 return response.status(400).json({
-                success: false,
-                message: "Validation failed",
-                details: error.details.map((d) => d.message),
+                    success: false,
+                    message: "Validation failed",
+                    details: error.details.map((d) => d.message),
                 });
             }
             const rolesWithPermissions = await Role.findAll({
                 include: [
                     {
-                    model: Permission,
-                    through: { attributes: [] },
+                        model: Permission,
+                        through: { attributes: [] },
                     },
                 ],
             });
@@ -821,17 +820,70 @@ module.exports = {
                 data: rolesWithPermissions,
             })
 
-        } catch (error){
+        } catch (error) {
             return response.status(500).json({
-                status : false,
-                message : error.message
+                status: false,
+                message: error.message
             })
         }
+    },
+
+
+    readNotification: async (request, response) => {
+        try {
+            const { id } = request.body;
+            if (!id) {
+                return response.status(400).json({
+                    status: false,
+                    message: 'Notification ID is required'
+                });
+            }
+
+            await Notification.update(
+                { reads_at: new Date() },
+                { where: { id: id } }
+            );
+
+            return response.status(200).json({
+                status: true,
+                message: 'Notification marked as read'
+            });
+
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
+    },
+
+    getUnreadNotifications: async (request, response) => {
+        try {
+            const userId = request.user.id;
+
+            const notifications = await Notification.findAll({
+                where: {
+                    user_id: userId,
+                    reads_at: null
+                },
+                order: [['created_at', 'DESC']]
+            });
+
+            return response.status(200).json({
+                status: true,
+                message: 'Unread notifications fetched successfully',
+                data: notifications
+            });
+
+        } catch (error) {
+            return response.status(500).json({
+                status: false,
+                message: 'Something Went Wrong',
+                error: error.message
+            });
+        }
     }
-
-
-     
-
 };
 
 
