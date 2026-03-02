@@ -24,7 +24,7 @@ jobs:
             git pull origin development
             npm install
             npm run db:migrate
-            pm2 restart halasky --update-env
+            pm2 restart halasky-backend-stage --update-env
           EOF
 
           
