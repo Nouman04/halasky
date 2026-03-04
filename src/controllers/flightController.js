@@ -255,7 +255,10 @@ module.exports = {
               let legDetail = legIds.map(leg => {
                 let legInformation = {};
                 let legSchedule = mappedLegs?.[leg]?.schedules || [];
-                let scheduleList = legSchedule.map(ls => mappedSchedule?.[ls.ref]);
+                let scheduleList = legSchedule.map(ls => ({
+                  ...mappedSchedule?.[ls.ref],
+                  departureDateAdjustment: ls.departureDateAdjustment
+                }));
                 legInformation.id = leg;
                 legInformation.schedule = scheduleList;
 
@@ -1183,7 +1186,10 @@ module.exports = {
           itineraryGroups.forEach(group => {
             group.itineraries.forEach(itinerary => {
               const legDetails = (itinerary.legs || []).map(leg => {
-                const schedulesList = (legs[leg.ref]?.schedules || []).map(s => schedules[s.ref]);
+                const schedulesList = (legs[leg.ref]?.schedules || []).map(s => ({
+                  ...schedules[s.ref],
+                  departureDateAdjustment: s.departureDateAdjustment
+                }));
                 return {
                   legId: leg.ref,
                   schedules: schedulesList,
@@ -1394,9 +1400,10 @@ module.exports = {
               let legDetail = legIds.map(leg => {
                 let legInformation = {};
                 let legSchedule = mappedLegs[leg].schedules;
-                let scheduleList = legSchedule.map(ls => {
-                  return mappedSchedule[ls.ref];
-                })
+                let scheduleList = legSchedule.map(ls => ({
+                  ...mappedSchedule[ls.ref],
+                  departureDateAdjustment: ls.departureDateAdjustment
+                }))
                 legInformation.id = leg;
                 legInformation.schedule = scheduleList;
 
@@ -2767,12 +2774,14 @@ function simplifyFlightResponse(itinerariesList) {
             city: schedule.departure.city,
             country: schedule.departure.country,
             time: schedule.departure.time,
+            ...(schedule.departureDateAdjustment !== undefined && { addDays: schedule.departureDateAdjustment })
           },
           arrival: {
             airport: schedule.arrival.airport,
             city: schedule.arrival.city,
             country: schedule.arrival.country,
             time: schedule.arrival.time,
+            ...(schedule.departureDateAdjustment !== undefined && { addDays: schedule.departureDateAdjustment })
           },
           duration: `${Math.floor(schedule.elapsedTime / 60)}h ${schedule.elapsedTime % 60}m`,
           distance: `${schedule.totalMilesFlown} miles`,
@@ -2915,7 +2924,8 @@ function simplifyALTFlightResponse(itineraryGroupDetail, groupDescription = null
           departureCountry: item.departure.country,
           departureTime: item.departure.time.split("+")[0],
           arrivalCountry: item.arrival.country, // Fixed to use arrival.country
-          arrivalTime: item.arrival.time.split("+")[0]
+          arrivalTime: item.arrival.time.split("+")[0],
+          ...(item.departureDateAdjustment !== undefined && { addDays: item.departureDateAdjustment })
         });
       });
 
