@@ -8,3 +8,4 @@ src/jobs/token-job.js
 src/storage/cron-log.js
 src/public/response
 config.bat
+src/storage/token-job.js
