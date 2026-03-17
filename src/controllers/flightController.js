@@ -641,8 +641,8 @@ module.exports = {
 
       let passengerList = passengers.map((passenger, index) => {
         return {
-          "GivenName": passenger.firstname,
-          "Surname": passenger.lastname,
+          "GivenName": passenger.firstname ? passenger.firstname.trim().replace(/\s+/g, ' ') : '',
+          "Surname": passenger.lastname ? passenger.lastname.trim().replace(/\s+/g, ' ') : '',
           "PassengerType": passenger.type,
         }
       })
@@ -1603,8 +1603,8 @@ module.exports = {
       // Map passengers to traveler list
       let travelerList = passengers.map((passenger) => {
         let traveler = {
-          givenName: passenger.firstname,
-          surname: passenger.lastname,
+          givenName: passenger.firstname ? passenger.firstname.trim().replace(/\s+/g, ' ') : '',
+          surname: passenger.lastname ? passenger.lastname.trim().replace(/\s+/g, ' ') : '',
           birthDate: passenger.birthDate,
           passengerCode: passenger.type,
         };
@@ -1618,15 +1618,15 @@ module.exports = {
               expiryDate: passenger.expiryDate,
               issuingCountryCode: passenger.issuingCountryCode || "PK",
               residenceCountryCode: passenger.residenceCountryCode || "PK",
-              givenName: passenger.firstname,
-              surname: passenger.lastname,
+              givenName: passenger.firstname ? passenger.firstname.trim().replace(/\s+/g, ' ') : '',
+              surname: passenger.lastname ? passenger.lastname.trim().replace(/\s+/g, ' ') : '',
               birthDate: passenger.birthDate,
               gender: passenger.gender || "MALE",
             },
             {
               documentType: "SECURE_FLIGHT_PASSENGER_DATA",
-              givenName: passenger.firstname,
-              surname: passenger.lastname,
+              givenName: passenger.firstname ? passenger.firstname.trim().replace(/\s+/g, ' ') : '',
+              surname: passenger.lastname ? passenger.lastname.trim().replace(/\s+/g, ' ') : '',
               birthDate: passenger.birthDate,
               gender: passenger.gender || "MALE",
             },
@@ -2209,11 +2209,10 @@ module.exports = {
 
       const endpoint = `${getSabreUrl()}/v1/trip/orders/createBooking`;
 
-      // // Map passengers once (used for every flight booking)
       const travelerList = passengers.map((passenger) => {
         let traveler = {
-          givenName: passenger.firstname,
-          surname: passenger.lastname,
+          givenName: passenger.firstname ? passenger.firstname.trim().replace(/\s+/g, ' ') : '',
+          surname: passenger.lastname ? passenger.lastname.trim().replace(/\s+/g, ' ') : '',
           birthDate: passenger.birthDate,
           passengerCode: passenger.type,
         };
@@ -2226,15 +2225,15 @@ module.exports = {
               expiryDate: passenger.expiryDate,
               issuingCountryCode: passenger.issuingCountryCode || "PK",
               residenceCountryCode: passenger.residenceCountryCode || "PK",
-              givenName: passenger.firstname,
-              surname: passenger.lastname,
+              givenName: passenger.firstname ? passenger.firstname.trim().replace(/\s+/g, ' ') : '',
+              surname: passenger.lastname ? passenger.lastname.trim().replace(/\s+/g, ' ') : '',
               birthDate: passenger.birthDate,
               gender: passenger.gender || "MALE",
             },
             {
               documentType: "SECURE_FLIGHT_PASSENGER_DATA",
-              givenName: passenger.firstname,
-              surname: passenger.lastname,
+              givenName: passenger.firstname ? passenger.firstname.trim().replace(/\s+/g, ' ') : '',
+              surname: passenger.lastname ? passenger.lastname.trim().replace(/\s+/g, ' ') : '',
               birthDate: passenger.birthDate,
               gender: passenger.gender || "MALE",
             },
