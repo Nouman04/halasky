@@ -53,6 +53,7 @@ module.exports = (sequelize, DataTypes) => {
     Flight.belongsTo(models.FlightBooking, { foreignKey: 'booking_id' });
     Flight.hasMany(models.Segment, { foreignKey: 'flight_id', as : 'segments' });
     Flight.hasOne(models.FlightLog, { foreignKey: 'flight_id', as: 'log',});
+    Flight.hasOne(models.BookingPolicy, { foreignKey: 'flight_id', as: 'policy',});
   };
 
   return Flight;

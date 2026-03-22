@@ -1,4 +1,4 @@
-const { JsonHandler, FlightBooking, Flight, Segment, Passenger, User, Promotion, FlightLog } = require('../database/models');
+const { JsonHandler, FlightBooking, Flight, Segment, Passenger, User, Promotion, FlightLog, BookingPolicy } = require('../database/models');
 const AppConst = require('../appConst');
 const airports = require('../public/files/locations.json');
 const locationHelper = require('../Helpers/LocationHelper');
@@ -1920,11 +1920,17 @@ module.exports = {
         return response.status(200).json({ status: false, data: result });
       }
     } catch (error) {
-      console.error("Booking Error:", error);
+      console.error("🔥 Booking Error Detail:", {
+        message: error.message,
+        stack: error.stack,
+        userId: request.user?.id,
+        body: request.body
+      });
       return response.status(500).json({
         status: false,
-        message: "Something Went Wrong",
+        message: "Something Went Wrong during booking process",
         error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   },
@@ -2469,6 +2475,28 @@ module.exports = {
             booking_status: isBooked,
           });
 
+          // Store Booking Policy for this flight
+          console.log(isBooked, r.result?.booking);
+          // try {
+          if (isBooked && r.result?.booking) {
+            const fareRules = r.result.booking.fareRules || [];
+            const fareOffers = r.result.booking.fareOffers || [];
+
+            const isRefundable = Array.isArray(fareRules) ? fareRules.some(rule => rule?.isRefundable === true) : false;
+            const isChangeable = Array.isArray(fareRules) ? fareRules.some(rule => rule?.isChangeable === true) : false;
+
+            await BookingPolicy.create({
+              flight_id: flightRecord.id,
+              is_refundable: isRefundable,
+              is_changeable: isChangeable,
+              policy_detail: fareRules,
+              baggage_detail: fareOffers,
+            });
+          }
+          // } catch (policyError) {
+          //   console.error(`🔥 Policy Creation Error for Flight ${flightRecord.id}:`, policyError);
+          // }
+
           const logPath = await writeFlightLog({
             flightId: flightRecord.id,
             type: "booking",
@@ -2658,11 +2686,17 @@ module.exports = {
         bookings: bookingResults,
       });
     } catch (error) {
-      console.error("Booking Error:", error);
+      console.error("🔥 Booking Error Detail:", {
+        message: error.message,
+        stack: error.stack,
+        userId: request.user?.id,
+        body: request.body
+      });
       return response.status(500).json({
         status: false,
-        message: "Something Went Wrong",
+        message: "Something Went Wrong during booking process",
         error: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   },
