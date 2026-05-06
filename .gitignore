@@ -9,3 +9,4 @@ src/storage/cron-log.js
 src/public/response
 config.bat
 src/storage/token-job.js
+src/storage/app/firebase/firebase_credentials.json

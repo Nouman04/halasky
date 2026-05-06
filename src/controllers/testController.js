@@ -1,9 +1,11 @@
 const { response } = require("express");
 const path = require('path')
 const ejs = require('ejs');
+const https = require('https');
 const puppeteer = require('puppeteer');
 const transport = require('../config/mailConfig');
 const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 require("dotenv").config();
 
 module.exports = {
@@ -13828,6 +13830,120 @@ module.exports = {
         filePath = path.join(__dirname,'..','public', 'views' , 'index.html' );
         response.sendFile(filePath);
     },
+    geideaPaymentPage : (request ,response) =>{
+        filePath = path.join(__dirname,'..','public', 'views' , 'geidea-payment.html' );
+        response.sendFile(filePath);
+    },
+
+    createGeideaSession: async (request, response) => {
+    try {
+        const { amount, currency } = request.body;
+
+        const publicKey   = process.env.GEIDEA_PUBLIC_KEY;
+        const apiPassword = process.env.GEIDEA_PASSWORD;
+
+        console.log('[Geidea] Public Key:', publicKey);
+
+        // Regional endpoints:
+        //   KSA  → https://api.ksamerchant.geidea.net
+        //   Egypt→ https://api.merchant.geidea.net
+        //   UAE  → https://api.geidea.ae
+        // Set GEIDEA_API_BASE_URL in .env to match where your account is registered
+        // const baseUrl = process.env.GEIDEA_API_BASE_URL || 'https://shaggy-lake-79.webhook.cool';
+        const baseUrl = process.env.GEIDEA_API_BASE_URL || 'https://api.merchant.geidea.net';
+        
+        // Unified API path for session creation across all regions
+        const pathName = '/payment-intent/api/v2/direct/session';
+        
+        const url = `${baseUrl}${pathName}`;
+        console.log('[Geidea] Using endpoint:', url);
+
+        const auth = Buffer.from(`${publicKey}:${apiPassword}`).toString('base64');
+
+        // Set regional defaults
+        const isUAE = baseUrl.includes('api.geidea.ae');
+        const defaultCurrency = isUAE ? 'AED' : 'SAR';
+        const finalCurrency   = currency || defaultCurrency;
+
+        // ✅ Both timestamp and merchantReferenceId are required for signature
+        const timestamp           = new Date().toISOString();
+        const merchantReferenceId = uuidv4(); // your unique order/reference ID
+
+        // ✅ Generate mandatory signature
+        const signature = generateGeideaSignature({
+            publicKey,
+            apiPassword,
+            amount: parseFloat(amount || 100),
+            currency: finalCurrency,
+            merchantReferenceId,
+            timestamp,
+        });
+
+        const body = {
+            amount: parseFloat(parseFloat(amount || 100).toFixed(2)), // Ensure 2 decimal places if possible in JSON
+            currency: finalCurrency,
+            timestamp,
+            merchantReferenceId,
+            signature,
+            callbackUrl: `https://shaggy-lake-79.webhook.cool/test/geidea/callback`,
+            returnUrl: `https://shaggy-lake-79.webhook.cool/test/geidea/return`,
+        };
+
+        const res = await fetch(url, {
+            method : 'POST',
+            headers: {
+                'Authorization': `Basic ${auth}`,
+                'Content-Type' : 'application/json',
+                'Accept'       : 'application/json',
+            },
+            body: JSON.stringify(body),
+        });
+
+        const rawText = await res.text();
+        console.log('[Geidea] HTTP Status:', res.status);
+        console.log('[Geidea] Raw Response:', rawText);
+
+        let data = {};
+        try { data = JSON.parse(rawText); } catch (_) { /* empty or non-JSON body */ }
+
+        // Surface Geidea errors clearly in your logs
+        if (!res.ok) {
+            console.error('[Geidea] Session creation failed — status:', res.status, '| body:', rawText);
+            return response.status(res.status).json({
+                status  : false,
+                message : data?.responseMessage || data?.message || `HTTP ${res.status}`,
+                detail  : data,
+            });
+        }
+
+        // Return full Geidea response so all fields are visible
+        return response.json({
+            status             : true,
+            merchantReferenceId,
+            httpStatus         : res.status,
+            rawText,           // exact string Geidea returned
+            data,              // parsed JSON (empty if parse failed)
+            sessionId          : data.session?.id || data.sessionId, // accommodate possible field differences
+            gatewayDecisionUrl : data.gatewayDecisionUrl,
+        });
+
+    } catch (error) {
+        console.error('[Geidea] FULL ERROR:', error);
+        return response.status(500).json({
+            status : false,
+            message: error.message,
+        });
+    }
+},
+    geideaCallback: (request, response) => {
+        console.log('--- Geidea Callback Received ---');
+        console.log('Query Params:', request.query);
+        console.log('Body:', request.body);
+        console.log('---------------------------------');
+        
+        // Geidea expects a successful response
+        return response.status(200).send('OK');
+    },
     createPDF : async (request , response)=> {
         const invoiceTemplate =  path.join(__dirname, '../public/views/invoice.ejs');
         const data = {
@@ -13930,4 +14046,14 @@ module.exports = {
         const uuid = uuidv4();
          return response.status(200).json({ status : true , data : uuid});
     }
+}
+
+function generateGeideaSignature({ publicKey, apiPassword, amount, currency, merchantReferenceId, timestamp }) {
+    const amountStr = parseFloat(amount).toFixed(2);
+    const dataToSign = `${publicKey}${amountStr}${currency}${merchantReferenceId}${timestamp}`;
+
+    return crypto
+        .createHmac('sha256', apiPassword)
+        .update(dataToSign)
+        .digest('base64');
 }

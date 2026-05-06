@@ -1,0 +1,751 @@
+{
+  "flight_id": 257,
+  "type": "booking",
+  "payload": {
+    "targetPcc": "3GML",
+    "receivedFrom": "Wakanow",
+    "asynchronousUpdateWaitTime": 1000,
+    "agency": {
+      "address": {
+        "city": "Sabre",
+        "stateProvince": "Lagos",
+        "postalCode": "Sabre",
+        "countryCode": "NG",
+        "name": "Wakanow"
+      },
+      "ticketingPolicy": "TODAY"
+    },
+    "contactInfo": {
+      "emails": [
+        "issac@wakanow.com"
+      ],
+      "phones": [
+        "00966-123456789"
+      ]
+    },
+    "errorHandlingPolicy": [
+      "HALT_ON_ERROR",
+      "HALT_ON_INVALID_MINIMUM_CONNECTING_TIME_ERROR"
+    ],
+    "flightDetails": {
+      "haltOnFlightStatusCodes": [
+        "NO",
+        "NN",
+        "US",
+        "UN",
+        "UU",
+        "LL",
+        "HL"
+      ],
+      "flights": [
+        {
+          "flightNumber": "20",
+          "airlineCode": "EK",
+          "fromAirportCode": "MAN",
+          "toAirportCode": "DXB",
+          "departureDate": "2026-03-14",
+          "departureTime": "20:40",
+          "bookingClass": "Y",
+          "flightStatusCode": "NN",
+          "isMarriageGroup": false
+        },
+        {
+          "flightNumber": "612",
+          "airlineCode": "EK",
+          "fromAirportCode": "DXB",
+          "toAirportCode": "ISB",
+          "departureDate": "2026-03-16",
+          "departureTime": "03:10",
+          "bookingClass": "Y",
+          "flightStatusCode": "NN",
+          "isMarriageGroup": false
+        }
+      ],
+      "flightPricing": [
+        {
+          "qualifiers": {
+            "currencyPricing": "PKR",
+            "passengersPricing": [
+              {
+                "passengerCode": "ADT",
+                "numberOfpassengers": 1
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "travelers": [
+      {
+        "givenName": "Issac",
+        "surname": "Newton",
+        "birthDate": "1990-01-01",
+        "passengerCode": "ADT",
+        "identityDocuments": [
+          {
+            "documentNumber": "PK123456789",
+            "documentType": "PASSPORT",
+            "expiryDate": "2027-12-25",
+            "issuingCountryCode": "PK",
+            "residenceCountryCode": "PK",
+            "givenName": "Issac",
+            "surname": "Newton",
+            "birthDate": "1990-01-01",
+            "gender": "MALE"
+          },
+          {
+            "documentType": "SECURE_FLIGHT_PASSENGER_DATA",
+            "givenName": "Issac",
+            "surname": "Newton",
+            "birthDate": "1990-01-01",
+            "gender": "MALE"
+          }
+        ],
+        "emails": [
+          "issac@wakanow.com"
+        ],
+        "phones": [
+          {
+            "number": "00966-123456789"
+          }
+        ]
+      }
+    ],
+    "payment": {
+      "formsOfPayment": [
+        {
+          "type": "CASH"
+        }
+      ]
+    },
+    "remarks": [
+      {
+        "type": "GENERAL",
+        "alphaCode": "T",
+        "text": "GeneratedFromItinerary_14"
+      },
+      {
+        "type": "INVOICE",
+        "text": "22db6bc8-3f4c-40af-b92a-ec597d9661df"
+      }
+    ]
+  },
+  "response": {
+    "timestamp": "2026-03-08T16:54:30",
+    "confirmationId": "TTKRSU",
+    "booking": {
+      "bookingId": "TTKRSU",
+      "startDate": "2026-03-14",
+      "endDate": "2026-03-16",
+      "isCancelable": true,
+      "isTicketed": false,
+      "creationDetails": {
+        "creationUserSine": "AWS",
+        "creationDate": "2026-03-08",
+        "creationTime": "11:54",
+        "userWorkPcc": "3GML",
+        "userHomePcc": "3GML",
+        "primeHostId": "1S",
+        "lastUpdateDate": "2026-03-08",
+        "lastUpdateTime": "11:54",
+        "numberOfUpdates": 1
+      },
+      "contactInfo": {
+        "emails": [
+          "ISSAC@WAKANOW.COM"
+        ],
+        "phones": [
+          "00966-123456789",
+          "00966-123456789-1.1"
+        ]
+      },
+      "travelers": [
+        {
+          "givenName": "ISSAC",
+          "surname": "NEWTON",
+          "type": "ADULT",
+          "passengerCode": "ADT",
+          "nameAssociationId": "1",
+          "emails": [
+            "ISSAC@WAKANOW.COM"
+          ],
+          "phones": [
+            {
+              "number": "00966-123456789"
+            }
+          ],
+          "identityDocuments": [
+            {
+              "documentNumber": "PK123456789",
+              "documentType": "PASSPORT",
+              "passportType": "Passport",
+              "expiryDate": "2027-12-25",
+              "issuingCountryCode": "PK",
+              "residenceCountryCode": "PK",
+              "givenName": "ISSAC",
+              "surname": "NEWTON",
+              "birthDate": "1990-01-01",
+              "gender": "MALE",
+              "isPrimaryDocumentHolder": false,
+              "itemId": "e3ba27a008b41cea54db6830842d8738af971150531c66cdb9e02a74ec37ff1652a4dbe1d85a39f6477f3d5f47e09c294442154bc5f97ae00bfeb710d88b959c"
+            },
+            {
+              "documentType": "SECURE_FLIGHT_PASSENGER_DATA",
+              "givenName": "ISSAC",
+              "surname": "NEWTON",
+              "birthDate": "1990-01-01",
+              "gender": "MALE",
+              "itemId": "293a256a4cc6500b120fa7009cefa95720e9b09f89ab06bb45bff2ac643c1918ae0a5d3630d7efa9697300bbf52321bd3d4ecc68b627692dd50cba01ce0b80ae"
+            }
+          ]
+        }
+      ],
+      "flights": [
+        {
+          "itemId": "15",
+          "confirmationId": "DCEK",
+          "sourceType": "ATPCO",
+          "flightNumber": 20,
+          "airlineCode": "EK",
+          "airlineName": "EMIRATES",
+          "operatingFlightNumber": 20,
+          "operatingAirlineCode": "EK",
+          "operatingAirlineName": "EMIRATES",
+          "fromAirportCode": "MAN",
+          "toAirportCode": "DXB",
+          "departureDate": "2026-03-14",
+          "departureTime": "20:40:00",
+          "departureTerminalName": "TERMINAL 2",
+          "departureGate": "2",
+          "arrivalDate": "2026-03-15",
+          "arrivalTime": "07:55:00",
+          "arrivalTerminalName": "TERMINAL 3",
+          "arrivalGate": "3",
+          "numberOfSeats": 1,
+          "cabinTypeName": "ECONOMY",
+          "cabinTypeCode": "Y",
+          "aircraftTypeCode": "388",
+          "aircraftTypeName": "AIRBUS INDUSTRIE A380-800",
+          "bookingClass": "Y",
+          "meals": [
+            {
+              "code": "M",
+              "description": "Meal"
+            }
+          ],
+          "flightStatusCode": "HK",
+          "flightStatusName": "Confirmed",
+          "durationInMinutes": 480,
+          "distanceInMiles": 3518,
+          "travelerIndices": [
+            1
+          ],
+          "identityDocuments": [
+            {
+              "itemId": "e3ba27a008b41cea54db6830842d8738af971150531c66cdb9e02a74ec37ff1652a4dbe1d85a39f6477f3d5f47e09c294442154bc5f97ae00bfeb710d88b959c",
+              "status": "Confirmed"
+            },
+            {
+              "itemId": "293a256a4cc6500b120fa7009cefa95720e9b09f89ab06bb45bff2ac643c1918ae0a5d3630d7efa9697300bbf52321bd3d4ecc68b627692dd50cba01ce0b80ae",
+              "status": "Confirmed"
+            }
+          ]
+        },
+        {
+          "itemId": "16",
+          "confirmationId": "DCEK",
+          "sourceType": "ATPCO",
+          "flightNumber": 612,
+          "airlineCode": "EK",
+          "airlineName": "EMIRATES",
+          "operatingFlightNumber": 612,
+          "operatingAirlineCode": "EK",
+          "operatingAirlineName": "EMIRATES",
+          "fromAirportCode": "DXB",
+          "toAirportCode": "ISB",
+          "departureDate": "2026-03-16",
+          "departureTime": "03:10:00",
+          "departureTerminalName": "TERMINAL 3",
+          "departureGate": "3",
+          "arrivalDate": "2026-03-16",
+          "arrivalTime": "07:15:00",
+          "numberOfSeats": 1,
+          "cabinTypeName": "ECONOMY",
+          "cabinTypeCode": "Y",
+          "aircraftTypeCode": "77W",
+          "aircraftTypeName": "BOEING 777-300ER",
+          "bookingClass": "Y",
+          "meals": [
+            {
+              "code": "M",
+              "description": "Meal"
+            }
+          ],
+          "flightStatusCode": "HK",
+          "flightStatusName": "Confirmed",
+          "durationInMinutes": 185,
+          "distanceInMiles": 1196,
+          "travelerIndices": [
+            1
+          ],
+          "identityDocuments": [
+            {
+              "itemId": "e3ba27a008b41cea54db6830842d8738af971150531c66cdb9e02a74ec37ff1652a4dbe1d85a39f6477f3d5f47e09c294442154bc5f97ae00bfeb710d88b959c",
+              "status": "Confirmed"
+            },
+            {
+              "itemId": "293a256a4cc6500b120fa7009cefa95720e9b09f89ab06bb45bff2ac643c1918ae0a5d3630d7efa9697300bbf52321bd3d4ecc68b627692dd50cba01ce0b80ae",
+              "status": "Confirmed"
+            }
+          ]
+        }
+      ],
+      "journeys": [
+        {
+          "firstAirportCode": "MAN",
+          "departureDate": "2026-03-14",
+          "departureTime": "20:40",
+          "lastAirportCode": "ISB",
+          "numberOfFlights": 2
+        }
+      ],
+      "fareRules": [
+        {
+          "originAirportCode": "MAN",
+          "destinationAirportCode": "ISB",
+          "owningAirlineCode": "EK",
+          "passengerCode": "ADT",
+          "isRefundable": true,
+          "refundPenalties": [
+            {
+              "applicability": "BEFORE_DEPARTURE",
+              "conditionsApply": true,
+              "penalty": {
+                "amount": "0.0",
+                "currencyCode": "SAR"
+              },
+              "hasNoShowCost": true,
+              "noShowPenalty": {
+                "amount": "1691.00",
+                "currencyCode": "SAR"
+              }
+            },
+            {
+              "applicability": "AFTER_DEPARTURE",
+              "conditionsApply": true,
+              "penalty": {
+                "amount": "0.0",
+                "currencyCode": "SAR"
+              },
+              "hasNoShowCost": true,
+              "noShowPenalty": {
+                "amount": "1691.00",
+                "currencyCode": "SAR"
+              }
+            }
+          ],
+          "isChangeable": true,
+          "exchangePenalties": [
+            {
+              "applicability": "BEFORE_DEPARTURE",
+              "conditionsApply": true,
+              "penalty": {
+                "amount": "0.0",
+                "currencyCode": "SAR"
+              },
+              "hasNoShowCost": true,
+              "noShowPenalty": {
+                "amount": "1127.00",
+                "currencyCode": "SAR"
+              }
+            },
+            {
+              "applicability": "AFTER_DEPARTURE",
+              "conditionsApply": true,
+              "penalty": {
+                "amount": "0.0",
+                "currencyCode": "SAR"
+              },
+              "hasNoShowCost": true,
+              "noShowPenalty": {
+                "amount": "1127.00",
+                "currencyCode": "SAR"
+              }
+            }
+          ]
+        }
+      ],
+      "fareOffers": [
+        {
+          "travelerIndices": [
+            1
+          ],
+          "flights": [
+            {
+              "itemId": "15"
+            },
+            {
+              "itemId": "16"
+            }
+          ],
+          "cabinBaggageAllowance": {
+            "maximumPieces": 1,
+            "baggagePieces": [
+              {
+                "maximumSizeInInches": 45,
+                "maximumSizeInCentimeters": 115,
+                "maximumWeightInPounds": 15,
+                "maximumWeightInKilograms": 7,
+                "numberOfPieces": 1
+              }
+            ]
+          },
+          "checkedBaggageAllowance": {
+            "totalWeightInKilograms": 35
+          },
+          "checkedBaggageCharges": [
+            {
+              "numberOfPieces": 1,
+              "specialItemDescription": "WEIGHT SYSTEM CHARGE",
+              "fee": {
+                "amount": "25.00",
+                "currencyCode": "USD"
+              }
+            },
+            {
+              "numberOfPieces": 1,
+              "specialItemDescription": "SPORTING EQUIPMENT",
+              "fee": {
+                "amount": "100.00",
+                "currencyCode": "USD"
+              }
+            },
+            {
+              "maximumSizeInInches": 29,
+              "maximumSizeInCentimeters": 74,
+              "numberOfPieces": 1,
+              "specialItemDescription": "TELEVISION OVER 29 LI 74LCM",
+              "fee": {
+                "amount": "75.00",
+                "currencyCode": "USD"
+              }
+            }
+          ]
+        }
+      ],
+      "fares": [
+        {
+          "creationDetails": {
+            "creationUserSine": "AWS",
+            "creationDate": "2026-03-08",
+            "creationTime": "11:54",
+            "userWorkPcc": "3GML",
+            "userHomePcc": "3GML"
+          },
+          "airlineCode": "EK",
+          "fareCalculationLine": "MAN EK X/DXB Q27.27EK ISB1404.84NUC1432.11END ROE0.733176",
+          "isNegotiatedFare": false,
+          "fareConstruction": [
+            {
+              "fareBasisCode": "YLOWFGB1",
+              "baseRate": {
+                "amount": "1404.84",
+                "currencyCode": "NUC"
+              },
+              "brandFareCode": "ECOFLXPLUS",
+              "brandFareName": "ECO FLEXPLUS",
+              "brandProgramCode": "CFFEK",
+              "brandProgramName": "OTA BRANDING 1",
+              "isCurrentItinerary": true,
+              "checkedBaggageAllowance": {
+                "totalWeightInKilograms": 35
+              }
+            }
+          ],
+          "taxBreakdown": [
+            {
+              "taxCode": "YQ",
+              "taxAmount": {
+                "amount": "48625",
+                "currencyCode": "PKR"
+              }
+            },
+            {
+              "taxCode": "YR",
+              "taxAmount": {
+                "amount": "2803",
+                "currencyCode": "PKR"
+              }
+            },
+            {
+              "taxCode": "GB",
+              "taxAmount": {
+                "amount": "33664",
+                "currencyCode": "PKR"
+              }
+            },
+            {
+              "taxCode": "UB",
+              "taxAmount": {
+                "amount": "9377",
+                "currencyCode": "PKR"
+              }
+            },
+            {
+              "taxCode": "ZR",
+              "taxAmount": {
+                "amount": "382",
+                "currencyCode": "PKR"
+              }
+            },
+            {
+              "taxCode": "F6",
+              "taxAmount": {
+                "amount": "3435",
+                "currencyCode": "PKR"
+              }
+            }
+          ],
+          "totals": {
+            "subtotal": "392740",
+            "taxes": "98286",
+            "total": "491026",
+            "currencyCode": "PKR"
+          },
+          "originalTotalValues": {
+            "total": "1050.00",
+            "currencyCode": "GBP"
+          },
+          "pricingTypeCode": "S",
+          "pricingTypeName": "System",
+          "pricingStatusCode": "A",
+          "pricingStatusName": "Active",
+          "hasValidPricing": true,
+          "requestedTravelerType": "ADT",
+          "pricedTravelerType": "ADT",
+          "recordTypeCode": "PQ",
+          "recordTypeName": "Price Quote",
+          "recordId": "1"
+        }
+      ],
+      "remarks": [
+        {
+          "type": "GENERAL",
+          "text": "GENERATEDFROMITINERARY14"
+        },
+        {
+          "type": "INVOICE",
+          "text": "22DB6BC8-3F4C-40AF-B92A-EC597D9661DF"
+        },
+        {
+          "type": "FORM_OF_PAYMENT",
+          "text": "CA"
+        }
+      ],
+      "allSegments": [
+        {
+          "id": "15",
+          "type": "FLIGHT",
+          "text": "20",
+          "vendorCode": "EK",
+          "startDate": "2026-03-14",
+          "startTime": "20:40:00",
+          "startLocationCode": "MAN",
+          "endDate": "2026-03-15",
+          "endTime": "07:55:00",
+          "endLocationCode": "DXB"
+        },
+        {
+          "id": "16",
+          "type": "FLIGHT",
+          "text": "612",
+          "vendorCode": "EK",
+          "startDate": "2026-03-16",
+          "startTime": "03:10:00",
+          "startLocationCode": "DXB",
+          "endDate": "2026-03-16",
+          "endTime": "07:15:00",
+          "endLocationCode": "ISB"
+        }
+      ],
+      "payments": {
+        "flightTotals": [
+          {
+            "subtotal": "392740",
+            "taxes": "98286",
+            "total": "491026",
+            "currencyCode": "PKR"
+          }
+        ],
+        "formsOfPayment": [
+          {
+            "type": "CASH",
+            "useType": "Unknown",
+            "tripType": "Unknown",
+            "useTypes": [
+              "Unknown"
+            ],
+            "tripTypes": [
+              "Unknown"
+            ]
+          }
+        ]
+      },
+      "specialServices": [
+        {
+          "travelerIndices": [
+            1
+          ],
+          "code": "DOCS",
+          "name": "API-Passenger Travel Document",
+          "message": "/P/PK/PK123456789/PK/01JAN1990/M/25DEC2027/NEWTON/ISSAC",
+          "statusCode": "HK",
+          "statusName": "Confirmed"
+        },
+        {
+          "travelerIndices": [
+            1
+          ],
+          "code": "DOCS",
+          "name": "API-Passenger Travel Document",
+          "message": "/DB/01JAN1990/M/NEWTON/ISSAC",
+          "statusCode": "HK",
+          "statusName": "Confirmed"
+        }
+      ]
+    },
+    "request": {
+      "errorHandlingPolicy": [
+        "HALT_ON_ERROR",
+        "HALT_ON_INVALID_MINIMUM_CONNECTING_TIME_ERROR"
+      ],
+      "targetPcc": "3GML",
+      "receivedFrom": "Wakanow",
+      "asynchronousUpdateWaitTime": 1000,
+      "agency": {
+        "address": {
+          "city": "Sabre",
+          "stateProvince": "Lagos",
+          "postalCode": "Sabre",
+          "countryCode": "NG",
+          "name": "Wakanow"
+        },
+        "ticketingPolicy": "TODAY"
+      },
+      "flightDetails": {
+        "flights": [
+          {
+            "flightNumber": 20,
+            "airlineCode": "EK",
+            "fromAirportCode": "MAN",
+            "toAirportCode": "DXB",
+            "departureDate": "2026-03-14",
+            "departureTime": "20:40",
+            "bookingClass": "Y",
+            "isMarriageGroup": false,
+            "flightStatusCode": "NN"
+          },
+          {
+            "flightNumber": 612,
+            "airlineCode": "EK",
+            "fromAirportCode": "DXB",
+            "toAirportCode": "ISB",
+            "departureDate": "2026-03-16",
+            "departureTime": "03:10",
+            "bookingClass": "Y",
+            "isMarriageGroup": false,
+            "flightStatusCode": "NN"
+          }
+        ],
+        "flightPricing": [
+          {
+            "qualifiers": {
+              "currencyPricing": "PKR",
+              "priceWithTaxes": true,
+              "passengersPricing": [
+                {
+                  "passengerCode": "ADT",
+                  "numberOfpassengers": 1
+                }
+              ]
+            }
+          }
+        ],
+        "haltOnFlightStatusCodes": [
+          "NO",
+          "NN",
+          "US",
+          "UN",
+          "UU",
+          "LL",
+          "HL"
+        ]
+      },
+      "travelers": [
+        {
+          "givenName": "Issac",
+          "surname": "Newton",
+          "birthDate": "1990-01-01",
+          "passengerCode": "ADT",
+          "identityDocuments": [
+            {
+              "documentNumber": "PK123456789",
+              "documentType": "PASSPORT",
+              "expiryDate": "2027-12-25",
+              "issuingCountryCode": "PK",
+              "residenceCountryCode": "PK",
+              "givenName": "Issac",
+              "surname": "Newton",
+              "birthDate": "1990-01-01",
+              "gender": "MALE"
+            },
+            {
+              "documentType": "SECURE_FLIGHT_PASSENGER_DATA",
+              "givenName": "Issac",
+              "surname": "Newton",
+              "birthDate": "1990-01-01",
+              "gender": "MALE"
+            }
+          ],
+          "emails": [
+            "issac@wakanow.com"
+          ],
+          "phones": [
+            {
+              "number": "00966-123456789"
+            }
+          ]
+        }
+      ],
+      "contactInfo": {
+        "emails": [
+          "issac@wakanow.com"
+        ],
+        "phones": [
+          "00966-123456789"
+        ]
+      },
+      "payment": {
+        "formsOfPayment": [
+          {
+            "type": "CASH",
+            "useType": "Unknown",
+            "tripType": "Unknown"
+          }
+        ]
+      },
+      "remarks": [
+        {
+          "type": "GENERAL",
+          "alphaCode": "T",
+          "text": "GeneratedFromItinerary_14"
+        },
+        {
+          "type": "INVOICE",
+          "text": "22db6bc8-3f4c-40af-b92a-ec597d9661df"
+        }
+      ]
+    }
+  },
+  "created_at": "2026-03-08T16:54:28.847Z"
+}
