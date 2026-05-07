@@ -4,8 +4,8 @@ src/database/config
 .github/workflows/main.yml
 src/config/mailConfig.js
 src/jobs/token-job.js
-.env
 src/storage/cron-log.js
 src/public/response
 config.bat
 src/storage/token-job.js
+src/storage/app/firebase/firebase_credentials.json
