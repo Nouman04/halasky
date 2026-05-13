@@ -12,5 +12,11 @@ router.get('/create-uuid' , TestController.createUuid);
 router.get('/geidea-payment', TestController.geideaPaymentPage);
 router.post('/geidea/create-session', TestController.createGeideaSession);
 router.post('/geidea/callback', TestController.geideaCallback);
+router.get('/test-payment-gateway', TestController.testPaymentGatewayPage);
+
+// New: auto-session checkout page + session API + direct pay
+router.get('/geidea-checkout', TestController.geideaCheckoutPage);
+router.get('/geidea/get-session', TestController.getGeideaSession);
+router.post('/geidea/pay', TestController.geideaDirectPay);
 
 module.exports = router;

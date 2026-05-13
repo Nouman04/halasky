@@ -13830,8 +13830,98 @@ module.exports = {
         filePath = path.join(__dirname,'..','public', 'views' , 'index.html' );
         response.sendFile(filePath);
     },
+
+    // ─── New: auto-session checkout page ─────────────────────────────────
+    geideaCheckoutPage : (request, response) => {
+        const filePath = path.join(__dirname, '..', 'public', 'views', 'geidea-checkout.html');
+        response.sendFile(filePath);
+    },
+
+    // ─── New: GET endpoint — creates session server-side, returns sessionId ──
+    getGeideaSession: async (request, response) => {
+        try {
+            const publicKey   = process.env.GEIDEA_PUBLIC_KEY;
+            const apiPassword = process.env.GEIDEA_PASSWORD;
+            const baseUrl     = process.env.GEIDEA_API_BASE_URL || 'https://api.merchant.geidea.net';
+            const pathName    = '/payment-intent/api/v2/direct/session';
+            const url         = `${baseUrl}${pathName}`;
+
+            const auth     = Buffer.from(`${publicKey}:${apiPassword}`).toString('base64');
+            const isUAE    = baseUrl.includes('api.geidea.ae');
+            const currency = isUAE ? 'AED' : 'SAR';
+            const amount   = 100; // fixed amount
+
+            const timestamp           = new Date().toISOString();
+            const merchantReferenceId = uuidv4();
+
+            const signature = generateGeideaSignature({
+                publicKey,
+                apiPassword,
+                amount,
+                currency,
+                merchantReferenceId,
+                timestamp,
+            });
+
+            const body = {
+                amount: parseFloat(amount.toFixed(2)),
+                currency,
+                timestamp,
+                merchantReferenceId,
+                signature,
+                callbackUrl: `https://shaggy-lake-79.webhook.cool/test/geidea/callback`,
+                returnUrl:   `https://shaggy-lake-79.webhook.cool/test/geidea/return`,
+            };
+
+            console.log('[Geidea][getSession] Calling:', url);
+
+            const res     = await fetch(url, {
+                method : 'POST',
+                headers: {
+                    'Authorization': `Basic ${auth}`,
+                    'Content-Type' : 'application/json',
+                    'Accept'       : 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            const rawText = await res.text();
+            console.log('[Geidea][getSession] Status:', res.status, '| Body:', rawText);
+
+            let data = {};
+            try { data = JSON.parse(rawText); } catch (_) {}
+
+            if (!res.ok) {
+                return response.status(res.status).json({
+                    status  : false,
+                    message : data?.responseMessage || data?.message || `HTTP ${res.status}`,
+                });
+            }
+
+            const sessionId = data.session?.id || data.sessionId || null;
+            console.log('[Geidea][getSession] Session ID:', sessionId);
+
+            return response.json({
+                status    : true,
+                sessionId,
+                merchantReferenceId,
+                currency,
+                amount,
+            });
+
+        } catch (error) {
+            console.error('[Geidea][getSession] ERROR:', error);
+            return response.status(500).json({ status: false, message: error.message });
+        }
+    },
+
     geideaPaymentPage : (request ,response) =>{
         filePath = path.join(__dirname,'..','public', 'views' , 'geidea-payment.html' );
+        response.sendFile(filePath);
+    },
+
+    testPaymentGatewayPage : (request, response ) => {
+        filePath = path.join(__dirname,'..','public', 'views' , 'test-payment-page.html' );
         response.sendFile(filePath);
     },
 
@@ -13943,6 +14033,90 @@ module.exports = {
         
         // Geidea expects a successful response
         return response.status(200).send('OK');
+    },
+
+    // ─── New: Direct card payment using session ID ─────────────────────────
+    geideaDirectPay: async (request, response) => {
+        try {
+            const { sessionId, cardNumber, expiryMonth, expiryYear, cvv } = request.body;
+
+            if (!sessionId || !cardNumber || !expiryMonth || !expiryYear || !cvv) {
+                return response.status(400).json({
+                    status : false,
+                    message: 'sessionId, cardNumber, expiryMonth, expiryYear and cvv are required.',
+                });
+            }
+            
+            const publicKey   = process.env.GEIDEA_PUBLIC_KEY;
+            const apiPassword = process.env.GEIDEA_PASSWORD;
+            const baseUrl     = process.env.GEIDEA_API_BASE_URL || 'https://api.merchant.geidea.net';
+            const url         = `${baseUrl}/pgw/api/v2/direct/pay`;
+
+            const auth = Buffer.from(`${publicKey}:${apiPassword}`).toString('base64');
+
+            const body = {
+                sessionId,
+                cardDetails: {
+                    cardNumber  : cardNumber.replace(/\s/g, ''),
+                    expiryMonth : String(expiryMonth),   // "01" – "12"
+                    expiryYear  : String(expiryYear),    // "2026"
+                    cvv,
+                },
+            };
+
+            console.log('[Geidea][pay] Endpoint:', url);
+            console.log('[Geidea][pay] Session:', sessionId);
+
+            const res = await fetch(url, {
+                method : 'POST',
+                headers: {
+                    'Authorization': `Basic ${auth}`,
+                    'Content-Type' : 'application/json',
+                    'Accept'       : 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            const rawText = await res.text();
+            console.log('[Geidea][pay] HTTP Status:', res.status);
+            console.log('[Geidea][pay] Raw Response:', rawText);
+
+            let data = {};
+            try { data = JSON.parse(rawText); } catch (_) {}
+
+            if (!res.ok) {
+                console.error('[Geidea][pay] Failed — status:', res.status, '| body:', rawText);
+                console.log(res);
+                return response.status(res.status).json({
+                    status  : false,
+                    message : data?.responseMessage || data?.message || `HTTP ${res.status}`,
+                    detail  : data,
+                });
+            }
+
+            const paymentSucceeded =
+                data.responseCode === '000' ||
+                data.status === 'Success'   ||
+                (data.order && data.order.status === 'Success');
+
+            return response.json({
+                status             : paymentSucceeded,
+                sessionId          : data.session?.id   || sessionId,
+                orderId            : data.order?.id     || data.orderId,
+                paymentStatus      : data.order?.status || data.status,
+                responseMessage    : data.responseMessage,
+                responseCode       : data.responseCode,
+                amount             : data.order?.amount || data.amount,
+                currency           : data.order?.currency || data.currency,
+                merchantReferenceId: data.order?.merchantReferenceId || data.merchantReferenceId,
+                detailCode         : data.detailedResponseCode,
+                rawText,           // full Geidea response for debugging
+            });
+
+        } catch (error) {
+            console.error('[Geidea][pay] FULL ERROR:', error);
+            return response.status(500).json({ status: false, message: error.message });
+        }
     },
     createPDF : async (request , response)=> {
         const invoiceTemplate =  path.join(__dirname, '../public/views/invoice.ejs');
