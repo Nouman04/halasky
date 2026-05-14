@@ -14038,7 +14038,7 @@ module.exports = {
     // ─── New: Direct card payment using session ID ─────────────────────────
     geideaDirectPay: async (request, response) => {
         try {
-            const { sessionId, cardNumber, expiryMonth, expiryYear, cvv } = request.body;
+            const { sessionId, cardNumber, expiryMonth, expiryYear, cvv, cardholderName } = request.body;
 
             if (!sessionId || !cardNumber || !expiryMonth || !expiryYear || !cvv) {
                 return response.status(400).json({
@@ -14046,26 +14046,34 @@ module.exports = {
                     message: 'sessionId, cardNumber, expiryMonth, expiryYear and cvv are required.',
                 });
             }
-            
+
             const publicKey   = process.env.GEIDEA_PUBLIC_KEY;
             const apiPassword = process.env.GEIDEA_PASSWORD;
             const baseUrl     = process.env.GEIDEA_API_BASE_URL || 'https://api.merchant.geidea.net';
+            
+            // Use /pgw path which is the standard Payment Gateway path
             const url         = `${baseUrl}/pgw/api/v2/direct/pay`;
 
             const auth = Buffer.from(`${publicKey}:${apiPassword}`).toString('base64');
 
+            // Align with Geidea documentation to avoid 'Missing Token Id' error
             const body = {
                 sessionId,
-                cardDetails: {
-                    cardNumber  : cardNumber.replace(/\s/g, ''),
-                    expiryMonth : String(expiryMonth),   // "01" – "12"
-                    expiryYear  : String(expiryYear),    // "2026"
-                    cvv,
+                paymentMethod: {
+                    cardholderName: cardholderName || 'Customer',
+                    cardNumber: cardNumber.replace(/\s/g, ''),
+                    cvv: cvv,
+                    expiryDate: {
+                        month: String(expiryMonth).padStart(2, '0'),
+                        year: String(expiryYear).slice(-2) // Use 2-digit year (e.g., '26')
+                    }
                 },
+                source: 'DirectAPI',
+                paymentOperation: 'Pay'
             };
 
             console.log('[Geidea][pay] Endpoint:', url);
-            console.log('[Geidea][pay] Session:', sessionId);
+            console.log('[Geidea][pay] Payload:', JSON.stringify(body, null, 2));
 
             const res = await fetch(url, {
                 method : 'POST',
@@ -14086,7 +14094,6 @@ module.exports = {
 
             if (!res.ok) {
                 console.error('[Geidea][pay] Failed — status:', res.status, '| body:', rawText);
-                console.log(res);
                 return response.status(res.status).json({
                     status  : false,
                     message : data?.responseMessage || data?.message || `HTTP ${res.status}`,
