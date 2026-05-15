@@ -48,3 +48,9 @@
 [2026-04-30T05:19:14.344Z] Authentication Token Updated
 [2026-05-06T13:21:36.503Z] Authentication Token Updated
 [2026-05-06T13:21:36.832Z] Authentication Token Updated
+[2026-05-14T11:00:00.189Z] Cron Error: Error: Sabre access token not found in JsonHandler
+    at CronJob.<anonymous> (D:\halasky\src\jobs\cancel-booking-job.js:30:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[2026-05-15T11:00:00.204Z] Cron Error: Error: Sabre access token not found in JsonHandler
+    at CronJob.<anonymous> (D:\halasky\src\jobs\cancel-booking-job.js:30:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)

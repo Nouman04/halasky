@@ -370,6 +370,8 @@
     <!-- Payment Result Card -->
     <div id="result-card"></div>
 
+    <div id="iframe-container"></div>
+
     <!-- Security note -->
     <div class="security-footer">
         <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l6 2.67V11c0 3.71-2.56 7.18-6 8.19C8.56 18.18 6 14.71 6 11V7.67L12 5z"/></svg>
@@ -467,82 +469,262 @@
         }
     }
 
-    // ─── Pay button click — direct API payment ────────────
-    document.getElementById('pay-btn').addEventListener('click', async () => {
-        if (!currentSessionId) {
-            setStatus('Session not ready. Please wait…', 'error');
+ document.getElementById('pay-btn').addEventListener('click', async () => {
+    if (!currentSessionId) {
+        setStatus('Session not ready. Please wait…', 'error');
+        return;
+    }
+
+    const rawCard   = document.getElementById('card-number').value.replace(/\s/g, '');
+    const expiryVal = document.getElementById('expiry').value.replace(/\s/g, '');
+    const rawCvc    = document.getElementById('cvc').value.trim();
+
+    if (rawCard.length < 13) { setStatus('Please enter a valid card number.', 'error'); return; }
+    const expiryDigits = expiryVal.replace('/', '');
+    if (expiryDigits.length < 4) { setStatus('Please enter a valid expiry date (MM/YY).', 'error'); return; }
+    if (rawCvc.length < 3) { setStatus('Please enter a valid CVC.', 'error'); return; }
+
+    const expiryMonth = expiryDigits.substring(0, 2);
+    const expiryYear  = '20' + expiryDigits.substring(2, 4);
+
+    // ✅ Store card data globally so processPay() can access it
+    window._paymentData = { rawCard, rawCvc, expiryMonth, expiryYear };
+
+    setPayBtn(true);
+    setStatus('Starting 3DS authentication…', '');
+
+    try {
+        // ── STEP 1: Initiate Authentication ──────────────────────────────
+        const initiateRes = await fetch('/test/geidea/initiate/authentication', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId:  currentSessionId,
+                cardNumber: rawCard,
+                expiryMonth,
+                expiryYear,
+                cvv:        rawCvc
+            }),
+        });
+
+        const initiateData = await initiateRes.json();
+        console.log('[Geidea] Initiate response:', initiateData);
+
+        if (initiateData.responseCode !== '000') {
+            showResult('error', [['Reason', initiateData.responseMessage || 'Initiate failed']]);
+            setPayBtn(false);
             return;
         }
 
-        const rawCard   = document.getElementById('card-number').value.replace(/\s/g, '');
-        const expiryVal = document.getElementById('expiry').value.replace(/\s/g, '');
-        const rawCvc    = document.getElementById('cvc').value.trim();
-
-        // ── Validation ────────────────────────────────────
-        if (rawCard.length < 13) {
-            setStatus('Please enter a valid card number.', 'error'); return;
-        }
-        const expiryDigits = expiryVal.replace('/', '');
-        if (expiryDigits.length < 4) {
-            setStatus('Please enter a valid expiry date (MM/YY).', 'error'); return;
-        }
-        if (rawCvc.length < 3) {
-            setStatus('Please enter a valid CVC.', 'error'); return;
+        // ── STEP 2: Silent 3DS method iframe ──────────────────────────────
+        if (initiateData.redirectHtml) {
+            setStatus('Running 3DS device check…', '');
+            await run3dsMethodFrame(initiateData.redirectHtml);
         }
 
-        // Parse expiry → expiryMonth, expiryYear
-        const expiryMonth = expiryDigits.substring(0, 2);
-        const expiryYear  = '20' + expiryDigits.substring(2, 4); // e.g. 26 → 2026
+        // ── STEP 3: Authenticate Payer ────────────────────────────────────
+        setStatus('Authenticating payer…', '');
 
-        // ── UI: processing state ──────────────────────────
-        setPayBtn(true);
-        setStatus('Processing payment…', '');
-        document.getElementById('result-card').style.display = 'none';
+        const authRes = await fetch('/test/geidea/authenticate/payer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId:      currentSessionId,
+                orderId:        initiateData.orderId,
+                threeDSecureId: initiateData.threeDSecureId,
+                cardNumber:     rawCard,
+                expiryMonth,
+                expiryYear,
+                cvv:            rawCvc,
+                cardholderName: 'Ahmed'
+            }),
+        });
 
-        try {
-            console.log('[Geidea] Submitting payment for session:', currentSessionId);
+        const authData = await authRes.json();
+        console.log('[Geidea] Authenticate Payer response:', authData);
 
-            const res  = await fetch('/test/geidea/pay', {
-                method : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body   : JSON.stringify({
-                    sessionId   : currentSessionId,
-                    cardNumber  : rawCard,
-                    expiryMonth,
-                    expiryYear,
-                    cvv         : rawCvc,
-                }),
-            });
-
-            const data = await res.json();
-            console.log('[Geidea] Pay response:', data);
-
-            if (data.status) {
-                setStatus('', '');
-                showResult('success', [
-                    ['Session ID',    data.sessionId],
-                    ['Order ID',      data.orderId],
-                    ['Status',        data.paymentStatus || data.responseMessage],
-                    ['Amount',        data.amount ? `${data.amount} ${data.currency}` : 'SAR 100.00'],
-                    ['Reference',     data.merchantReferenceId],
-                ]);
-            } else {
-                setStatus('', '');
-                showResult('error', [
-                    ['Reason',    data.message || data.responseMessage || 'Payment declined'],
-                    ['Session',   currentSessionId],
-                    ['Detail',    data.detailCode || data.detail || ''],
-                ]);
-                // Re-enable button so user can retry
-                setPayBtn(false);
+        // ── STEP 4: Handle Authenticate Payer result ──────────────────────
+        if (authData.gatewayDecision === 'ContinueToPay') {
+            console.log(11111);
+            // No OTP needed — go straight to Pay
+            setStatus('Proceeding to payment…', '');
+            try {
+                console.log('calling processPay');
+                await processPay(authData.orderId, authData.threeDSecureId);
+                console.log('processPay finished');
+            } catch (e) {
+                console.error('processPay failed:', e);
             }
 
-        } catch (err) {
-            console.error('[Geidea] Pay error:', err);
-            setStatus('Network error: ' + err.message, 'error');
+        }  else {
+            showResult('error', [['Reason', authData.responseMessage || '3DS rejected']]);
             setPayBtn(false);
         }
+
+    } catch (err) {
+        console.error('[Geidea] Error:', err);
+        setStatus('Network error: ' + err.message, 'error');
+        setPayBtn(false);
+    }
+});
+
+
+// ── Final Pay step ────────────────────────────────────────────────────────────
+async function processPay(orderId, threeDSecureId) {
+    // ✅ Card data stored earlier in window._paymentData
+    console.log('inside processPay, paymentData:');
+    const { rawCard, rawCvc, expiryMonth, expiryYear } = window._paymentData;
+
+    try {
+        setStatus('Processing payment…', '');
+        const payRes = await fetch('/test/geidea/direct/pay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId:      currentSessionId,
+                orderId,
+                threeDSecureId,
+                cardNumber:     rawCard,
+                expiryMonth,
+                expiryYear,
+                cvv:            rawCvc,
+                cardholderName: 'Ahmed'
+            }),
+        });
+
+        const payData = await payRes.json();
+        console.log('[Geidea] Pay response:', payData);
+
+        if (payData.responseCode === '000') {
+            showResult('success', [
+                ['Order ID',  payData.orderId  || orderId],
+                ['Status',    'Payment Successful'],
+                ['Amount',    payData.amount   || ''],
+                ['Currency',  payData.currency || ''],
+            ]);
+        } else {
+            showResult('error', [
+                ['Reason', payData.responseMessage         || 'Payment failed'],
+                ['Code',   payData.responseCode            || ''],
+                ['Detail', payData.detailedResponseMessage || ''],
+            ]);
+            setPayBtn(false);
+        }
+
+    } catch (err) {
+        console.error('[Geidea] Pay error:', err);
+        setStatus('Payment error: ' + err.message, 'error');
+        setPayBtn(false);
+    }
+}
+
+// ── OTP Challenge: show in a modal overlay ────────────────────────────────────
+function showOtpChallenge(html, orderId, threeDSecureId) {
+    return new Promise((resolve) => {
+
+        // Create a full-screen modal
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+        `;
+
+        const box = document.createElement('div');
+        box.style.cssText = `
+            background: white; border-radius: 12px;
+            width: 420px; height: 520px; overflow: hidden; position: relative;
+        `;
+
+        // Render OTP HTML inside an iframe (sandboxed)
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'width:100%; height:100%; border:none;';
+        iframe.srcdoc = html;  // ← render the OTP page inside iframe safely
+
+        box.appendChild(iframe);
+        modal.appendChild(box);
+        document.body.appendChild(modal);
+
+        // Poll your backend for OTP completion
+        // Geidea posts back to your callback URL — your backend should expose
+        // a status endpoint like GET /test/geidea/otp-status?orderId=xxx
+        const poll = setInterval(async () => {
+            try {
+                const statusRes = await fetch(`/test/geidea/otp-status?orderId=${orderId}`);
+                const statusData = await statusRes.json();
+
+                if (statusData.completed) {
+                    clearInterval(poll);
+                    document.body.removeChild(modal);
+                    resolve(statusData);
+                }
+            } catch (e) {
+                // keep polling
+            }
+        }, 2000); // check every 2 seconds
     });
+}
+
+
+// ── Final Pay step ────────────────────────────────────────────────────────────
+// async function processPay(orderId, threeDSecureId) {
+//     const payRes = await fetch('/test/geidea/pay', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ orderId, threeDSecureId }),
+//     });
+
+//     const payData = await payRes.json();
+//     console.log('[Geidea] Pay response:', payData);
+
+//     if (payData.responseCode === '000') {
+//         showResult('success', [
+//             ['Order ID',     orderId],
+//             ['Status',       'Payment Successful'],
+//             ['Amount',       payData.amount || 'N/A'],
+//         ]);
+//     } else {
+//         showResult('error', [
+//             ['Reason',  payData.responseMessage || 'Payment failed'],
+//             ['Code',    payData.responseCode],
+//         ]);
+//         setPayBtn(false);
+//     }
+// }
+
+// Runs the silent 3DS method frame using a Blob URL
+function run3dsMethodFrame(html) {
+    return new Promise((resolve) => {
+
+        // 1. Turn the HTML string into a real page via Blob
+        const blob = new Blob([html], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+
+        // 2. Create a hidden iframe pointing to the blob
+        const iframe = document.createElement('iframe');
+        iframe.style.cssText = 'position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; border:none;';
+        iframe.src = blobUrl;
+
+        // 3. Resolve after 10 seconds (3DS method has no callback)
+        iframe.onload = () => {
+            console.log('[3DS] Method frame loaded');
+            setTimeout(() => {
+                URL.revokeObjectURL(blobUrl); // cleanup
+                document.body.removeChild(iframe);
+                resolve();
+            }, 10000); // wait 10s for ACS to complete
+        };
+
+        iframe.onerror = () => {
+            console.warn('[3DS] Method frame error, continuing anyway');
+            URL.revokeObjectURL(blobUrl);
+            document.body.removeChild(iframe);
+            resolve(); // always continue even on error
+        };
+
+        document.body.appendChild(iframe);
+    });
+}
 
     // ─── Kick off on DOM ready ────────────────────────────
     document.addEventListener('DOMContentLoaded', initSession);
